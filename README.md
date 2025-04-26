@@ -101,7 +101,7 @@ It will help us to calculate how many running workspaces there are at any one ti
 
 **How will this affect me?**
 
-For everyday usage of Gitpod, it doesn’t have any effect at all. The script only captures the following data:
+Everyday usage of Gitpod, it doesn’t have any effect at all. The script only captures the following data:
 
 - An ID that is randomly generated each time the workspace is started.
 - The current date and time
