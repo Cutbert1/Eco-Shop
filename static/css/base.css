@@ -17,7 +17,7 @@ body {
     justify-content: center;
     height: 1.5rem;
     width: 1.5rem;
-    color: #518655;
+    color: #518622;
 }
 
 .logo-font {
@@ -50,7 +50,7 @@ body {
 }
 
 .text-black {
-    color: #518622;
+    color: #000;
     font-weight: 500;
 }
 
@@ -59,8 +59,16 @@ body {
     font-weight: 500;
 }
 
+.ech {
+    color: #518622;
+}
+
 .border-black {
     border: 1px solid black !important;
+}
+
+.bg-black {
+    background: #000 !important;
 }
 
 /* -------------------------------- Media Queries */
