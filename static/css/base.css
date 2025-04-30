@@ -68,9 +68,23 @@ body {
 }
 
 .bg-black {
-    background: #000 !important;
+    background: #518622 !important;
 }
 
+.dropdown-icon {
+    margin-left: 5px;
+    font-size: 0.8em; 
+    vertical-align: middle;
+}
+.overlay {
+    position: fixed;
+    background: azure;
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    z-index: -1; 
+}
 /* -------------------------------- Media Queries */
 
 /* Slightly larger container on xl screens */
@@ -92,5 +106,16 @@ body {
 
     .header-container {
         padding-top: 164px;
+    }
+}
+
+/*  Moble navbar collapse */
+@media (max-width: 991px) {
+    .header-container {
+        padding-top: 116;
+    }
+
+    body {
+        height: calc(100vh - 116px);
     }
 }
