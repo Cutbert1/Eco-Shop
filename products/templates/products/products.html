@@ -24,7 +24,7 @@
                 <div class="row mt-1 mb-2">
                     <div class="col-12 col-md-6 my-auto order-md-last d-flex justify-content-center justify-content-md-end">
                         <div class="sort-select-wrapper w-60">
-                            <select id="sort-selector" class="custom-select  text-muted custom-select-sm rounded-0 border border-{% if current_sorting != 'None_None' %}info{% else %}black{% endif %}">
+                            <select id="sort-selector" class="form-select form-select-sm text-muted rounded border-2" aria-label="Sort products">
                                 <option value="reset" {% if current_sorting == 'None_None' %}selected{% endif %}>Sort by...</option>
                                 <option value="price_asc" {% if current_sorting == 'price_asc' %}selected{% endif %}>Price (low to high)</option>
                                 <option value="price_desc" {% if current_sorting == 'price_desc' %}selected{% endif %}>Price (high to low)</option>
@@ -38,7 +38,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-md-6 order-md-first">
-                        <p class="text-muted mt-3 text-center text-md-left">
+                        <p class="text-secondary mt-3 text-center text-md-start lh-sm">
                             {% if search_term or current_categories or current_sorting != 'None_None' %}
                                 <span class="small"><a class="text-decoration-none" href="{% url 'products' %}">At Peace with Nature Products Home</a> | </span>
                             {% endif %}
@@ -54,21 +54,21 @@
                                 <img class="card-img-top img-fluid" src="{{ product.product_image.url }}" alt="{{ product.name }}">
                             </a>
                             <div class="card-body pb-0">
-                                <p class="mb-0">{{ product.name}}</p>
+                                <p class="mb-0">{{ product.name }}</p>
                             </div>
-                            <div class="card-footer bg-white pt-0 border-0 text-left">
+                            <div class="card-footer bg-white pt-0 border-0 text-start">
                                 <div class="row">
                                     <div class="col">
-                                        <p class="lead mb-0 text-left fw-bold">${{ product.price }}</p>
+                                        <p class="lead mb-0 text-start fw-bold">${{ product.price }}</p>
                                         {% if product.category %}
                                         <p class="text-muted small mt-1 mb-0">
                                             <a href="{% url 'products' %}?category={{ product.category.name }}" class="text-decoration-none">
-                                                <i class="fa-solid fa-tags"></i>{{ product.category.friendly_name }}
+                                                <i class="fas fa-tags me-1"></i>{{ product.category.friendly_name }}
                                             </a>
                                         </p>
                                         {% endif %}
                                         {% if product.rating %}
-                                            <small class="text-muted"><i class="fa-solid fa-star"></i>{{ product.rating }} / 10</small>
+                                            <small class="text-muted"><i class="fas fa-star me-1"></i>{{ product.rating }} / 10</small>
                                         {% else %}
                                             <small class="text-muted">No Rating</small>
                                         {% endif %}
@@ -102,4 +102,58 @@
             </div>
         </div>
     </div>
+    <button class="scroll-to-top-button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+    </button>
+{% endblock %}
+
+{% block postloadjs %}
+    {{ block.super }}
+    <script type="text/javascript">
+		document.querySelector('.scroll-to-top-button').addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+    window.addEventListener('scroll', () => {
+        const button = document.querySelector('.scroll-to-top-button');
+        if (window.pageYOffset > 300) {
+            button.style.display = 'flex';
+        } else {
+            button.style.display = 'none';
+        }
+    });
+	</script>
+    
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#sort-selector').change(handleSortChange);
+        });
+     
+        function handleSortChange() {
+            const selector = $(this);
+            const currentUrl = new URL(window.location);
+            const selectedValue = selector.val();
+     
+            updateUrlParameters(currentUrl, selectedValue);
+            history.pushState({}, '', currentUrl);
+            $(document).trigger('sortingChanged');
+            window.location.href = currentUrl;
+        }
+     
+        function updateUrlParameters(url, value) {
+            if (value !== "reset") {
+                const [sort, direction] = value.split("_");
+                url.searchParams.set("sort", sort);
+                url.searchParams.set("direction", direction);
+            } else {
+                url.searchParams.delete("sort");
+                url.searchParams.delete("direction");
+            }
+        }
+    </script>
 {% endblock %}
