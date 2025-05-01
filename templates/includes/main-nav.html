@@ -5,9 +5,9 @@
                 All PRODUCTS<span class="dropdown-icon">&#9662;</span>
             </a>
             <div class="dropdown-menu border-0" aria-labelledby="all-products-link">
-                <a href="" class="dropdown-item">By Price</a>
-                <a href="" class="dropdown-item ">By Rating</a>
-                <a href="" class="dropdown-item ">By Category</a>
+                <a href="{% url 'products' %}?sort=price&direction=asc" class="dropdown-item">By Price</a>
+                <a href="{% url 'products' %}?sort=rating&direction=desc" class="dropdown-item ">By Rating</a>
+                <a href="{% url 'products' %}?sort=category&direction=asc" class="dropdown-item ">By Category</a>
                 <a href="{% url 'products' %}" class="dropdown-item">All Products</a>
             </div>
         </li>
@@ -17,13 +17,13 @@
                 SKINCARE<span class="dropdown-icon">&#9662;</span>
             </a>
             <div class="dropdown-menu border-0" aria-labelledby="skincare-link">
-                <a href="" class="dropdown-item">Moisturisers</a>
-                <a href="" class="dropdown-item">Deodorants</a>
-                <a href="" class="dropdown-item">Facial Care</a>
-                <a href="" class="dropdown-item">Body Scrubs</a>
-                <a href="" class="dropdown-item">Shaving</a>
-                <a href="" class="dropdown-item">Sun Cream</a>
-                <a href="" class="dropdown-item">All Skincare</a>
+                <a href="{% url 'products' %}?category=moisturisers" class="dropdown-item">Moisturisers</a>
+                <a href="{% url 'products' %}?category=deodorants" class="dropdown-item">Deodorants</a>
+                <a href="{% url 'products' %}?category=facial_care" class="dropdown-item">Facial Care</a>
+                <a href="{% url 'products' %}?category=body_scrubs" class="dropdown-item">Body Scrubs</a>
+                <a href="{% url 'products' %}?category=shaving" class="dropdown-item">Shaving</a>
+                <a href="{% url 'products' %}?category=sun_cream" class="dropdown-item">Sun Cream</a>
+                <a href="{% url 'products' %}?category=moisturisers,deodorants,facial_care,body_scrubs,shaving,sun_cream" class="dropdown-item">All Skincare</a>
             </div>
         </li>
 
@@ -32,12 +32,12 @@
                 HAIRCARE<span class="dropdown-icon">&#9662;</span>
             </a>
             <div class="dropdown-menu border-0" aria-labelledby="haircare-link">
-                <a href="" class="dropdown-item">Shampoo</a>
-                <a href="" class="dropdown-item">Conditioners</a>
-                <a href="" class="dropdown-item">Hair Styling</a>
-                <a href="" class="dropdown-item">Men's Hiar Care</a>
-                <a href="" class="dropdown-item">Brushes &amp; Combs</a>
-                <a href="" class="dropdown-item">All Haircare</a>
+                <a href="{% url 'products' %}?category=shampoo" class="dropdown-item">Shampoo</a>
+                <a href="{% url 'products' %}?category=conditioners" class="dropdown-item">Conditioners</a>
+                <a href="{% url 'products' %}?category=hair_styling" class="dropdown-item">Hair Styling</a>
+                <a href="{% url 'products' %}?category=men's_hair_care" class="dropdown-item">Men's Hiar Care</a>
+                <a href="{% url 'products' %}?category=brushes_combs" class="dropdown-item">Brushes &amp; Combs</a>
+                <a href="{% url 'products' %}?category=shampoo,conditioners,hair_styling,men's_hair_care,brushes_combs" class="dropdown-item">All Haircare</a>
             </div>
         </li>
 
@@ -46,13 +46,13 @@
                 MAKEUP<span class="dropdown-icon">&#9662;</span>
             </a>
             <div class="dropdown-menu border-0" aria-labelledby="makeup-link">
-                <a href="" class="dropdown-item">Complexion</a>
-                <a href="" class="dropdown-item">Cheeks</a>
-                <a href="" class="dropdown-item">Nails</a>
-                <a href="" class="dropdown-item">Eyes</a>
-                <a href="" class="dropdown-item">Lips</a>
-                <a href="" class="dropdown-item">Glitters</a>
-                <a href="" class="dropdown-item">All Haircare</a>
+                <a href="{% url 'products' %}?category=complexion" class="dropdown-item">Complexion</a>
+                <a href="{% url 'products' %}?category=cheeks" class="dropdown-item">Cheeks</a>
+                <a href="{% url 'products' %}?category=nails" class="dropdown-item">Nails</a>
+                <a href="{% url 'products' %}?category=eyes" class="dropdown-item">Eyes</a>
+                <a href="{% url 'products' %}?category=lips" class="dropdown-item">Lips</a>
+                <a href="{% url 'products' %}?category=glitters" class="dropdown-item">Glitters</a>
+                <a href="{% url 'products' %}?category=complexion,cheeks,nails,eyes,lips,glitters" class="dropdown-item">All Haircare</a>
             </div>
         </li>
 
@@ -61,12 +61,12 @@
                 BATHROOM<span class="dropdown-icon">&#9662;</span>
             </a>
             <div class="dropdown-menu border-0" aria-labelledby="bathroom-link">
-                <a href="" class="dropdown-item">Dental Care</a>
-                <a href="" class="dropdown-item">Soap Bars</a>
-                <a href="" class="dropdown-item">Mouth Wash</a>
-                <a href="" class="dropdown-item">Liquid Soap</a>
-                <a href="" class="dropdown-item">Sponges</a>
-                <a href="" class="dropdown-item">All Bathroom</a>
+                <a href="{% url 'products' %}?category=dental_care" class="dropdown-item">Dental Care</a>
+                <a href="{% url 'products' %}?category=soap_bars" class="dropdown-item">Soap Bars</a>
+                <a href="{% url 'products' %}?category=mouth_wash" class="dropdown-item">Mouth Wash</a>
+                <a href="{% url 'products' %}?category=liquid_soap" class="dropdown-item">Liquid Soap</a>
+                <a href="{% url 'products' %}?category=sponges" class="dropdown-item">Sponges</a>
+                <a href="{% url 'products' %}?category=dental_care,soap_bars,mouth_wash,liquid_soap,sponges" class="dropdown-item">All Bathroom</a>
             </div>
         </li>
 
@@ -75,11 +75,11 @@
                 KITCHEN<span class="dropdown-icon">&#9662;</span>
             </a>
             <div class="dropdown-menu border-0" aria-labelledby="kitchen-link">
-                <a href="" class="dropdown-item">Food Storage</a>
-                <a href="" class="dropdown-item">Wax Wraps</a>
-                <a href="" class="dropdown-item">Kitchen Essentials</a>
-                <a href="" class="dropdown-item">Kitchen Cleaning</a>
-                <a href="" class="dropdown-item">All Kitchen</a>
+                <a href="{% url 'products' %}?category=food_storage" class="dropdown-item">Food Storage</a>
+                <a href="{% url 'products' %}?category=wax_wraps" class="dropdown-item">Wax Wraps</a>
+                <a href="{% url 'products' %}?category=kitchen_essentials" class="dropdown-item">Kitchen Essentials</a>
+                <a href="{% url 'products' %}?category=kitchen_cleaning" class="dropdown-item">Kitchen Cleaning</a>
+                <a href="{% url 'products' %}?category=food_storage,wax_wraps,kitchen_essentials,kitchen_cleaning" class="dropdown-item">All Kitchen</a>
             </div>
         </li>
 
@@ -88,10 +88,10 @@
                 SPECIAL OFFERS<span class="dropdown-icon">&#9662;</span>
             </a>
             <div class="dropdown-menu border-0" aria-labelledby="specials-link">
-                <a href="" class="dropdown-item">New Products</a>
-                <a href="" class="dropdown-item">Deals</a>
-                <a href="" class="dropdown-item">Clearance</a>
-                <a href="" class="dropdown-item">All Specials</a>
+                <a href="{% url 'products' %}?category=new_products" class="dropdown-item">New Products</a>
+                <a href="{% url 'products' %}?category=deals" class="dropdown-item">Deals</a>
+                <a href="{% url 'products' %}?category=clearance" class="dropdown-item">Clearance</a>
+                <a href="{% url 'products' %}?category=deals,clearance" class="dropdown-item">Special Offers</a>
             </div>
         </li>
     </ul>
