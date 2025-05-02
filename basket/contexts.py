@@ -1,5 +1,8 @@
+from django.shortcuts import get_object_or_404
 from decimal import Decimal
 from django.conf import settings
+
+from products.models import Product
 
 
 def calculate_delivery(total):
@@ -12,24 +15,38 @@ def calculate_delivery(total):
     return delivery, free_delivery_delta
 
 
-def get_basket_context(basket_items, total, product_count):
-    delivery, free_delivery_delta = calculate_delivery(total)
-    grand_total = delivery + total
-
-    return {
-        'basket_items': basket_items,
-        'product_count': product_count,
-        'delivery': delivery,
-        'total': total,
-        'free_delivery_threshold': settings.FREE_DELIVERY_THRESHOLD,
-        'free_delivery_delta': free_delivery_delta,
-        'grand_total': grand_total,
-    }
-
-
-def basket_contents(request):
-    basket_items = []
+def get_basket_items(basket):
+    items = []
     total = 0
     product_count = 0
 
-    return get_basket_context(basket_items, total, product_count)
+    for item_id, quantity in basket.items():
+        product = get_object_or_404(Product, pk=item_id)
+        total += quantity * product.price
+        product_count += quantity
+        items.append({
+            'item_id': item_id,
+            'quantity': quantity,
+            'product': product,
+        })
+
+    return items, total, product_count
+
+
+def basket_contents(request):
+    basket = request.session.get('basket', {})
+    basket_items, total, product_count = get_basket_items(basket)
+    delivery, free_delivery_delta = calculate_delivery(total)
+    grand_total = delivery + total
+
+    context = {
+        'basket_items': basket_items,
+        'total': total,
+        'product_count': product_count,
+        'delivery': delivery,
+        'free_delivery_delta': free_delivery_delta,
+        'free_delivery_threshold': settings.FREE_DELIVERY_THRESHOLD,
+        'grand_total': grand_total,
+    }
+
+    return context

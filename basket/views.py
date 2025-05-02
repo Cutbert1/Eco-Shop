@@ -19,7 +19,6 @@ def add_item_to_basket(request, item_id):
     update_basket(basket, item_id, quantity)
 
     request.session['basket'] = basket
-    log_basket(basket)
     return redirect(redirect_url)
 
 
@@ -33,8 +32,3 @@ def get_basket_from_session(request):
 
 def update_basket(basket, item_id, quantity):
     basket[item_id] = basket.get(item_id, 0) + quantity
-
-
-def log_basket(basket):
-    """Log the current state of the basket for debugging purposes."""
-    print(basket)
