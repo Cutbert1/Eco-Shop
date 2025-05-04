@@ -47,7 +47,30 @@
                                 <p class="mb-0">${{ item.product.price }}</p>
                             </td>
                             <td class="py-3 w-25">
-                                <p class="mb-0">{{ item.quantity }}</p>
+                                <form class="form update-form" method="POST" action="" id="updateForm">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <div class="input-group">
+                                            <button class="btn btn-outline-secondary btn-sm decrement-qty" 
+                                                data-item_id="{{ item.item_id }}" id="decrement-qty_{{ item.item_id }}" type="button">
+                                                <i class="fas fa-minus fa-sm"></i>
+                                            </button>
+                                            <input class="form-control form-control-sm qty_input text-center" type="number"
+                                                name="quantity" value="{{ item.quantity }}" min="1" max="99"
+                                                data-item_id="{{ item.item_id }}"
+                                                id="id_qty_{{ item.item_id }}">
+                                            <button class="btn btn-outline-secondary btn-sm increment-qty"
+                                                data-item_id="{{ item.item_id }}" id="increment-qty_{{ item.item_id }}" type="button">
+                                                <i class="fas fa-plus fa-sm"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <button type="button" class="btn btn-sm btn-info update-link" id="updateButton">Update</button>
+                                        <a class="btn btn-sm btn-danger remove-item" id="remove_{{ item.item_id }}">Remove</a>
+                                    </div>
+                                </form>
+                                
                             </td>
                             <td class="py-3">
                                 <p class="mb-0">{{ item.product.price }}</p>
@@ -102,3 +125,46 @@
     </div>
 </div>
 {% endblock %}
+
+{% block postloadjs %}
+{{ block.super }}
+{% include 'basket/includes/quantity_script.html' %}
+{% endblock %}
+     
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateButton = document.getElementById('updateButton');
+            const updateForm = document.getElementById('updateForm');
+             
+            updateButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                updateForm.submit();
+            });
+        });
+
+        $(document).ready(function() {
+            $('.remove-item').click(function(e) {
+                e.preventDefault();
+                var itemId = this.id.split('_')[1];
+ 
+        // Send AJAX request to remove item
+                $.ajax({
+                    url: `/basket/remove/${itemId}`, // Replace with your actual URL
+                    type: 'POST',
+                    data: {
+                        'item_id': itemId,
+                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            // Reload the page
+                            location.reload();
+                        }
+                    },    
+                });
+           });
+        });
+</script>   
+

@@ -1,0 +1,66 @@
+<script type="text/javascript">
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all increment and decrement buttons
+        const incrementBtns = document.querySelectorAll('.increment-qty');
+        const decrementBtns = document.querySelectorAll('.decrement-qty');
+ 
+        // Add click event listeners to increment buttons
+        incrementBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-item_id');
+                const qtyInput = document.getElementById(`id_qty_${itemId}`);
+                let currentValue = parseInt(qtyInput.value);
+                if (currentValue < 99) {
+                    qtyInput.value = currentValue + 1;
+                }
+            });
+        });
+ 
+        // Add click event listeners to decrement buttons
+        decrementBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-item_id');
+                const qtyInput = document.getElementById(`id_qty_${itemId}`);
+                let currentValue = parseInt(qtyInput.value);
+                if (currentValue > 1) {
+                    qtyInput.value = currentValue - 1;
+                }
+            });
+        });
+    });
+        // Submit quatity updated form
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateButton = document.getElementById('updateButton');
+            const updateForm = document.getElementById('updateForm');
+             
+            updateButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                updateForm.submit();
+            });
+        });
+
+        // Remove item and reload page
+        $(document).ready(function() {
+            $('.remove-item').click(function(e) {
+                e.preventDefault();
+                var itemId = this.id.split('remove_')[1];
+ 
+        // Send AJAX request to remove item
+                $.ajax({
+                    url: `/basket/remove/${itemId}`, // Replace with your actual URL
+                    type: 'POST',
+                    data: {
+                        'item_id': itemId,
+                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            // Reload the page
+                            location.reload();
+                        }
+                    },    
+                });
+           });
+        });  
+</script>
