@@ -41,26 +41,31 @@
         });
 
         // Remove item and reload page
-        $(document).ready(function() {
-            $('.remove-item').click(function(e) {
+       $(document).ready(function() {
+           $('.remove-item').click(function(e) {
                 e.preventDefault();
                 var itemId = this.id.split('remove_')[1];
  
         // Send AJAX request to remove item
-                $.ajax({
-                    url: `/basket/remove/${itemId}`, // Replace with your actual URL
-                    type: 'POST',
-                    data: {
-                        'item_id': itemId,
-                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
-                    },
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            // Reload the page
-                            location.reload();
-                        }
-                    },    
-                });
-           });
-        });  
+        $.ajax({
+            url: `/basket/remove/${itemId}/`,
+            type: 'POST',
+            data: {
+                'item_id': itemId,
+                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                if (response.message === 'Item removed successfully') {
+                    
+                    location.reload();
+                } else {
+                    console.error('Error removing item:', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', status, error);
+            }
+        });
+    });
+});
 </script>

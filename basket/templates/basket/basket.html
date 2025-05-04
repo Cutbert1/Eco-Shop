@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-
 {% load static %}
+{% load basket_tools %}
 
 {% block page_header %}
     <div class="container header-container">
@@ -47,7 +47,7 @@
                                 <p class="mb-0">${{ item.product.price }}</p>
                             </td>
                             <td class="py-3 w-25">
-                                <form class="form update-form" method="POST" action="" id="updateForm">
+                                <form class="form update-form" method="POST" action="{% url 'update_basket_quantity' item.item_id %}" id="updateForm">
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         <div class="input-group">
@@ -73,7 +73,7 @@
                                 
                             </td>
                             <td class="py-3">
-                                <p class="mb-0">{{ item.product.price }}</p>
+                                <p class="mb-0">${{ item.product.price | calc_subtotal:item.quantity }}</p>
                             </td>
                         </tr>
                     {% endfor %}
@@ -131,40 +131,4 @@
 {% include 'basket/includes/quantity_script.html' %}
 {% endblock %}
      
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const updateButton = document.getElementById('updateButton');
-            const updateForm = document.getElementById('updateForm');
-             
-            updateButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                updateForm.submit();
-            });
-        });
-
-        $(document).ready(function() {
-            $('.remove-item').click(function(e) {
-                e.preventDefault();
-                var itemId = this.id.split('_')[1];
- 
-        // Send AJAX request to remove item
-                $.ajax({
-                    url: `/basket/remove/${itemId}`, // Replace with your actual URL
-                    type: 'POST',
-                    data: {
-                        'item_id': itemId,
-                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
-                    },
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            // Reload the page
-                            location.reload();
-                        }
-                    },    
-                });
-           });
-        });
-</script>   
 
