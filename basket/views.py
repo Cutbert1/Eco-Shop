@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect, reverse
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.contrib import messages
+
+from products.models import Product
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,6 +19,8 @@ def view_basket(request):
 def add_item_to_basket(request, item_id):
     """Add a specific quantity of an item to the shopping basket."""
 
+    product = Product.objects.get(pk=item_id)
+
     quantity = get_quantity_from_request(request)
     redirect_url = request.POST.get('redirect_url')
     basket = get_basket_from_session(request)
@@ -23,6 +28,7 @@ def add_item_to_basket(request, item_id):
     update_basket(basket, item_id, quantity)
 
     request.session['basket'] = basket
+    messages.success(request, f'Added {product.name} to your basket')
     return redirect(redirect_url)
 
 
@@ -41,6 +47,8 @@ def update_basket(basket, item_id, quantity):
 def update_basket_quantity(request, item_id):
     """ Update quantity of individual product in a user's basket """
 
+    product = Product.objects.get(pk=item_id)
+
     quantity = int(request.POST.get('quantity', 0))
     basket = request.session.get('basket', {})
 
@@ -50,12 +58,16 @@ def update_basket_quantity(request, item_id):
         basket.pop(item_id, None)
 
     request.session['basket'] = basket
+    messages.success(request, f'{product.name} : quantity updated to {basket[item_id]}')  # noqa
     return redirect(reverse('view_basket'))
 
 
 @require_POST
 def remove_from_basket(request, item_id):
     """ Remove the item from the shopping basket """
+
+    product = Product.objects.get(pk=item_id)
+
     try:
         basket = request.session.get('basket', {})
 
@@ -65,6 +77,7 @@ def remove_from_basket(request, item_id):
         if item_id in basket:
             basket.pop(item_id)
             request.session['basket'] = basket
+            messages.success(request, f'Removed {product.name} from basket')
             return JsonResponse({
                 'message': 'Item removed successfully'
                 }, status=200)
@@ -73,7 +86,8 @@ def remove_from_basket(request, item_id):
                 'error': 'Item not found in basket'}, status=404
                 )
 
-    except Exception as e: ## noqa
+    except Exception as e:
+        messages.error(request, f'Error removing item: {e}')
         return JsonResponse({
             'error': 'An error occurred while removing the item'
             }, status=500)

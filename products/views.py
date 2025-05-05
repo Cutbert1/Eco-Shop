@@ -39,7 +39,7 @@ def fetch_all_products(request):
 
     if search_query:
         if not search_query:
-            messages.error(request, "There was no search parameter")
+            messages.error(request, "There was no search criteria")
             return redirect(reverse('product'))
         products = filter_products_by_query(products, search_query)
 

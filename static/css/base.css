@@ -139,6 +139,20 @@ body {
     width: 24px;
     height: 24px;
 }
+
+/* ------------------------------- bootstrap toasts */
+
+.message-container {
+    position: fixed;
+    top: 72px;
+    right: 15px;
+    z-index: 99999999999;
+}
+
+.custom-toast {
+    overflow: visible;
+}
+
 /* -------------------------------- Media Queries */
 
 /* Slightly larger container on xl screens */

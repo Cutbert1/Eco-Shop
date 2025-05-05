@@ -1,0 +1,48 @@
+<div class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
+    <div class="toast-header bg-success"> 
+        <strong class="me-auto text-white">Success!</strong>
+        <small class="text-white">Thank you</small>
+        <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body bg-white">
+        <div class="row">
+            <div class="col">
+                {{ message }}
+                <hr class="mt-2 mb-3">
+            </div>
+        </div>
+        {% if grand_total %}
+            <h6 class="logo-font bg-light text-dark p-2 rounded-3 mb-3">Your Basket ({{ product_count }}) items</h6>
+            <div>
+                {% for item in basket_items %}
+                <div class="row align-items-center mb-2">
+                    <div class="col-3">
+                        <img class="img-fluid rounded" src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}">
+                    </div>
+                    <div class="col-9">
+                        <h6 class="mb-0">{{ item.product.name }}</h6>
+                        <p class="mb-0 small text-muted">Qty: {{ item.quantity }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="row mt-3">
+                <div class="col">
+                    <p class="fw-bold mb-2 text-dark">
+                        Total{% if free_delivery_delta > 0 %} (Exc. delivery){% endif %}: 
+                        <span class="float-end">${{ total|floatformat:2 }}</span>
+                    </p>
+                    {% if free_delivery_delta > 0 %}
+                        <div class="alert alert-warning p-2 text-center mb-3">
+                            Spend <strong>${{ free_delivery_delta }}</strong> more to get free next day delivery!
+                        </div>
+                    {% endif %}
+                    <a href="{% url 'view_basket' %}" class="btn btn-dark w-100">
+                        <span class="text-uppercase">Secure Checkout</span>
+                        <i class="fas fa-lock ms-2 icon"></i>
+                    </a>
+                </div>
+            </div>
+        {% endif %}  
+    </div>
+</div>
