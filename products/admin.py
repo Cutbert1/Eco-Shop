@@ -17,6 +17,9 @@ class ProductAdmin(admin.ModelAdmin):
     )
     ordering = ('-created_on',)
 
+    list_filter = ('category', 'rating', 'created_on')
+    search_fields = ('name', 'sku', 'category__name')
+
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = (

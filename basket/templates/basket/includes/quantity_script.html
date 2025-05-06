@@ -29,15 +29,17 @@
             });
         });
     });
-        // Submit quatity updated form
+        // Submit quantity updated form
         document.addEventListener('DOMContentLoaded', function() {
-            const updateButton = document.getElementById('updateButton');
-            const updateForm = document.getElementById('updateForm');
-             
-            updateButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                updateForm.submit();
-            });
+            const updateButtons = document.querySelectorAll('.update-link');
+            const updateForms = document.querySelectorAll('.update-form');
+ 
+            updateButtons.forEach((button, index) => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    updateForms[index].submit();
+                });
+           });
         });
 
         // Remove item and reload page
