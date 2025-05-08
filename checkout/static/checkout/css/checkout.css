@@ -1,5 +1,5 @@
 
-/* CSS is from strip documentation */
+/* CSS is from stripe documentation */
 .StripeElement,
 .stripe-style-input {
   box-sizing: border-box;
@@ -26,4 +26,8 @@
 
 .stripe-style-input::placeholder {
     color: #aab7c4;
+}
+
+.invalid-icon {
+        color: #c40d20;
 }
