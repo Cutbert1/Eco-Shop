@@ -4,6 +4,7 @@
  
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'checkout/css/checkout.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
  
 {% block page_header %}
@@ -21,9 +22,9 @@
     <div class="container">
         <div class="row">
             <div class="col-12 col-lg-6 order-lg-last mb-5">
-                <div class="card shadow-sm">
+                <div class="card shadow-lg rounded-3">
                     <div class="card-body">
-                        <h3 class="card-title mb-4">Order Summary ({{ product_count }})</h3>
+                        <h3 class="card-title mb-4">Order Summary <span class="badge bg-primary rounded-pill">{{ product_count }}</span></h3>
                         <div class="row">
                             <div class="col-7 offset-2">
                                 <p class="text-muted small">Item</p>
@@ -33,10 +34,10 @@
                             </div>
                         </div>
                         {% for item in basket_items %}
-                            <div class="row mb-3">
+                            <div class="row mb-3 align-items-center">
                                 <div class="col-2">
                                     <a href="{% url 'product_detail' item.product.id %}">
-                                        <img class="img-fluid rounded" src="{{ item.product.product_image.url }}" alt="{{ product.name }}">
+                                        <img class="img-fluid rounded-3" src="{{ item.product.product_image.url }}" alt="{{ product.name }}">
                                     </a>
                                 </div>
                                 <div class="col-7">
@@ -65,7 +66,7 @@
                 </div>
             </div>
             <div class="col-12 col-lg-6">
-                <div class="card shadow-sm">
+                <div class="card shadow-lg rounded-3">
                     <div class="card-body">
                         <h3 class="card-title mb-4">Billing Details</h3>
                         <form action="{% url 'checkout' %}" method="POST" id="payment-form">
@@ -103,18 +104,18 @@
                                 <!-- Used to display form errors -->
                                 <div class="mb-3 text-danger" id="card-errors" role="alert"></div>
                             </fieldset>
-                            <div class="d-grid gap-2">
-                                <a href="{% url 'view_basket' %}" class="btn btn-outline-secondary text-uppercase rounded-0 btn-md btn-outline-dark ">
+                            <div class="d-grid gap-3">
+                                <a href="{% url 'view_basket' %}" class="btn btn-outline-secondary text-uppercase rounded-0">
                                     <i class="fas fa-chevron-left me-2"></i>Update Basket
                                 </a>
-                                <button id="submit-button" class="btn btn-primary btn-dark text-uppercase rounded-0 btn-md">
+                                <button id="submit-button" class="btn btn-primary text-uppercase rounded-0 btn-dark">
                                     Complete Order <i class="fas fa-lock ms-2"></i>
                                 </button>
                             </div>
-                            <p class="small text-danger mt-3">
-                                <i class="fa-solid fa-circle-exclamation me-2"></i>
+                            <div class="alert alert-info mt-3 text-danger" role="alert">
+                                <i class="fa-solid fa-circle-info me-2"></i>
                                 Your card will be charged <strong>${{ grand_total|floatformat:2 }}</strong>
-                            </p>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -122,6 +123,7 @@
         </div>
     </div>
 {% endblock %}
+
 
 {% block postloadjs %}
     {{ block.super }}
