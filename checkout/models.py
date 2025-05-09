@@ -36,7 +36,7 @@ class Order(models.Model):
     def _generate_order_number(self):
         return uuid.uuid4().hex.upper()
 
-    def update_totals(self):
+    def update_total(self):
         self.order_total = self.calculate_order_total()
         self.delivery_cost = self.calculate_delivery_cost()
         self.grand_total = self.order_total + self.delivery_cost
