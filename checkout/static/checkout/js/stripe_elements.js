@@ -64,6 +64,7 @@ form.addEventListener('submit', async function(ev) {
         } else if (result.paymentIntent.status === 'succeeded') {
             form.submit();
         }
+
     } catch (error) {
         console.error('Payment processing error:', error);
         displayError('An unexpected error occurred. Please try again.');
