@@ -4,7 +4,7 @@ var clientSecret = $('#id_client_secret').text().slice(1, -1);
 var stripe = Stripe(stripePublickey);
 var elements = stripe.elements();
 
-/* CSS is from stripe documentation */
+/* Core CSS is from stripe documentation */
 var style = {
     base: {
         color: '#000',
@@ -55,8 +55,29 @@ form.addEventListener('submit', async function(ev) {
     try {
         disableForm();
  
+        const billingDetails = getBillingDetails();
+        const shippingDetails = getShippingDetails();
+ 
+        // Fix: Use jQuery's prop() instead of attr() for checkbox state
+        var saveInfo = $('#id-save-info').prop('checked');
+        // From using {% csrf_token %} in the form
+        var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+        var postData = {
+            'csrfmiddlewaretoken': csrfToken,
+            'client_secret': clientSecret,
+            'save_info': saveInfo,
+        };
+        var url = '/checkout/store_checkout_info/';
+ 
+        // Fix: Complete the AJAX post request
+        await $.post(url, postData);
+ 
         const result = await stripe.confirmCardPayment(clientSecret, {
-            payment_method: { card }
+            payment_method: { 
+                card: card,
+                billing_details: billingDetails
+            },
+            shipping: shippingDetails
         });
  
         if (result.error) {
@@ -64,7 +85,7 @@ form.addEventListener('submit', async function(ev) {
         } else if (result.paymentIntent.status === 'succeeded') {
             form.submit();
         }
-
+ 
     } catch (error) {
         console.error('Payment processing error:', error);
         displayError('An unexpected error occurred. Please try again.');
@@ -72,6 +93,35 @@ form.addEventListener('submit', async function(ev) {
         enableForm();
     }
 });
+ 
+function getBillingDetails() {
+    return {
+        name: form.customer_name.value.trim(),
+        email: form.email.value.trim(),
+        phone: form.phone_number.value.trim(),
+        address: {
+            address: form.address.value.trim(),
+            city: form.city.value.trim(),
+            county: form.county.value.trim(),
+            postal_code: form.postcode.value.trim(),
+            country: form.country.value.trim(),
+        }
+    };
+}
+ 
+function getShippingDetails() {
+    return {
+        name: form.name.value.trim(),
+        phone: form.phone_number.value.trim(),
+        address: {
+            address: form.address.value.trim(),
+            city: form.city.value.trim(),
+            county: form.county.value.trim(),
+            postal_code: form.postcode.value.trim(),
+            country: form.country.value.trim(),
+        }
+    };
+}
  
 function disableForm() {
     card.update({ disabled: true });

@@ -22,6 +22,9 @@ class WebhookHandler:
         """
         Handle the payment_intent.succeeded webhook event from Stripe.
         """
+        payment_intent = event.data.object
+        print(payment_intent)
+
         return self._create_response(event)
 
     def handle_payment_intent_payment_failed(self, event):

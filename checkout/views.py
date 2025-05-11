@@ -1,6 +1,7 @@
-from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.shortcuts import render, HttpResponse, redirect, reverse, get_object_or_404  # noqa
 from django.conf import settings
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 
 from products.models import Product
 from .forms import OrderForm, Order
@@ -8,8 +9,41 @@ from basket.contexts import basket_contents
 from .models import OrderLineItem
 
 import stripe
+import json
 
 # Create your views here.
+
+
+@require_POST
+def store_checkout_info(request):
+    def _extract_payment_intent_id(client_secret):
+        return client_secret.split('_secret')[0]
+
+    def _update_payment_intent_metadata(payment_intent_id, request):
+        metadata = {
+            'basket': json.dumps(request.session.get('basket', {})),
+            'save_info': request.POST.get('save_info'),
+            'username': request.user,
+        }
+        stripe.PaymentIntent.modify(payment_intent_id, metadata=metadata)
+
+    def _handle_error(request, error_message):
+        messages.error(request, 'Unsuccessful payment processing. \
+                       Try again later.')
+        return HttpResponse(content=error_message, status=400)
+
+    client_secret = request.POST.get('client_secret')
+    if not client_secret:
+        return _handle_error(request, 'Client secret is missing.')
+
+    payment_intent_id = _extract_payment_intent_id(client_secret)
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    try:
+        _update_payment_intent_metadata(payment_intent_id, request)
+        return HttpResponse(status=200)
+    except Exception as e:
+        return _handle_error(request, str(e))
 
 
 def checkout(request):
