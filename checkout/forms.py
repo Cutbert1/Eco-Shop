@@ -27,7 +27,7 @@ class OrderForm(forms.ModelForm):
             'city': 'City',
             'postcode': 'Postal Code',
             'zipcode': 'Zip Code',
-            'county': 'County',
+            'county': 'County or State',
             'country': 'Country',
         }
 

@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Sum
 from django.conf import settings
 from django.core.validators import MinValueValidator
+from django_countries.fields import CountryField
 
 from products.models import Product
 
@@ -20,7 +21,9 @@ class Order(models.Model):
     county = models.CharField(max_length=100, null=True, blank=True)
     postcode = models.CharField(max_length=20, blank=True, null=True)
     zipcode = models.CharField(max_length=20, blank=True, null=True)
-    country = models.CharField(max_length=100, blank=False, null=False)
+    country = CountryField(
+        blank_label='Country *', blank=False, null=False
+        )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     delivery_cost = models.DecimalField(
