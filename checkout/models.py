@@ -7,12 +7,17 @@ from django.core.validators import MinValueValidator
 from django_countries.fields import CountryField
 
 from products.models import Product
+from profiles.models import AccountProfile
 
 # Create your models here.
 
 
 class Order(models.Model):
     order_number = models.CharField(max_length=50, unique=True, editable=False)
+    account_profile = models.ForeignKey(
+        AccountProfile, on_delete=models.SET_NULL,
+        blank=True, null=True, related_name='orders'
+        )
     customer_name = models.CharField(max_length=255)
     email = models.EmailField(blank=False, null=False)
     address = models.CharField(max_length=255, blank=False, null=False)
