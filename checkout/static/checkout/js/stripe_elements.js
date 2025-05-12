@@ -58,7 +58,7 @@ form.addEventListener('submit', async function(ev) {
         const billingDetails = getBillingDetails();
         const shippingDetails = getShippingDetails();
  
-        // Fix: Use jQuery's prop() instead of attr() for checkbox state
+        // Use jQuery's prop() instead of attr() for checkbox state
         var saveInfo = $('#id-save-info').prop('checked');
         // From using {% csrf_token %} in the form
         var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
@@ -69,7 +69,7 @@ form.addEventListener('submit', async function(ev) {
         };
         var url = '/checkout/store_checkout_info/';
  
-        // Fix: Complete the AJAX post request
+        // Complete the AJAX post request
         await $.post(url, postData);
  
         const result = await stripe.confirmCardPayment(clientSecret, {
@@ -95,33 +95,38 @@ form.addEventListener('submit', async function(ev) {
 });
  
 function getBillingDetails() {
+    
     return {
         name: form.customer_name.value.trim(),
         email: form.email.value.trim(),
         phone: form.phone_number.value.trim(),
         address: {
-            address: form.address.value.trim(),
+            line1: form.address.value.trim(),
             city: form.city.value.trim(),
-            county: form.county.value.trim(),
             postal_code: form.postcode.value.trim(),
             country: form.country.value.trim(),
-        }
+            state: form.county.value.trim()
+        },
+        
     };
 }
  
 function getShippingDetails() {
+    
     return {
-        name: form.name.value.trim(),
+        name: form.customer_name.value.trim(),
         phone: form.phone_number.value.trim(),
         address: {
-            address: form.address.value.trim(),
+            line1: form.address.value.trim(),
             city: form.city.value.trim(),
-            county: form.county.value.trim(),
             postal_code: form.postcode.value.trim(),
             country: form.country.value.trim(),
-        }
+            state: form.county.value.trim()
+        },
     };
+    
 }
+
  
 function disableForm() {
     card.update({ disabled: true });

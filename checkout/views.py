@@ -56,6 +56,11 @@ def checkout(request):
 
         if order_form.is_valid():
             order = order_form.save(commit=False)
+            payment_intent_id = request.POST.get(
+                'client_secret').split('-secret')[0]
+            order.stripe_payment_intent_id = payment_intent_id
+            order.existing_basket = json.dumps(basket)
+            order.save()
 
             # Set up Stripe payment intent
             stripe.api_key = stripe_secret_key
@@ -67,7 +72,7 @@ def checkout(request):
                     amount=stripe_total,
                     currency=settings.STRIPE_CURRENCY,
                 )
-                order.stripe_pid = payment_intent.id
+                order.stripe_payment_intent_id = payment_intent.id
                 order.save()
             except stripe.error.StripeError as e:
                 messages.error(
