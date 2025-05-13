@@ -23,7 +23,7 @@ class OrderForm(forms.ModelForm):
             'customer_name': 'Customer Name',
             'email': 'Email Address',
             'phone_number': 'Phone Number',
-            'address': 'Address',
+            'address': 'Street Address',
             'city': 'City',
             'postcode': 'Postal Code',
             'zipcode': 'Zip Code',

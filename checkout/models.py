@@ -5,6 +5,7 @@ from django.db.models import Sum
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django_countries.fields import CountryField
+from phonenumber_field.modelfields import PhoneNumberField
 
 from products.models import Product
 from profiles.models import AccountProfile
@@ -21,13 +22,15 @@ class Order(models.Model):
     customer_name = models.CharField(max_length=255)
     email = models.EmailField(blank=False, null=False)
     address = models.CharField(max_length=255, blank=False, null=False)
-    phone_number = models.CharField(max_length=24, null=False, blank=False)
+    phone_number = PhoneNumberField(
+        null=True, blank=True, help_text="Enter phone number with country code"
+        )
     city = models.CharField(max_length=100, null=False, blank=False)
     county = models.CharField(max_length=100, null=True, blank=True)
     postcode = models.CharField(max_length=20, blank=True, null=True)
     zipcode = models.CharField(max_length=20, blank=True, null=True)
     country = CountryField(
-        blank_label='Country *', blank=False, null=False
+        blank_label='Select Country *', blank=False, null=False
         )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

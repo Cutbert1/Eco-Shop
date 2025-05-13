@@ -18,11 +18,11 @@ class AccountProfile(models.Model):
     primary_phone_number = PhoneNumberField(
         null=True, blank=True, help_text="Enter phone number with country code"
         )
-    primary_postcode = models.CharField(max_length=24, null=True, blank=True)
-    primary_zipcode = models.CharField(max_length=24, null=True, blank=True)
     primary_address = models.TextField(max_length=255, null=True, blank=True)
     primary_city = models.CharField(max_length=100, null=True, blank=True)
     primary_county = models.CharField(max_length=100, null=True, blank=True)
+    primary_postcode = models.CharField(max_length=24, null=True, blank=True)
+    primary_zipcode = models.CharField(max_length=24, null=True, blank=True)
     primary_country = CountryField(
         blank_label='Select Country', null=True, blank=True
         )

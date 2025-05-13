@@ -1,12 +1,22 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+
+from .models import AccountProfile
+from .forms import AccountProfileForm
 
 # Create your views here.
 
 
 def profile(request):
     """ Display the user's profile. """
+    profile = get_object_or_404(AccountProfile, user=request.user)
+
+    form = AccountProfileForm(instance=profile)
+    orders = profile.orders.all()
 
     template = 'profiles/profile.html'
-    context = {}
+    context = {
+        'form': form,
+        'orders': orders,
+    }
 
     return render(request, template, context)
