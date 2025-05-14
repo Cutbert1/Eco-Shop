@@ -19,8 +19,8 @@ class OrderAdmin(admin.ModelAdmin):
     )
 
     fields = (
-        'customer_name', 'order_number', 'created_at', 'email',
-        'phone_number', 'address', 'city', 'postcode', 'zipcode',
+        'customer_name', 'order_number', 'account_profile', 'created_at',
+        'email', 'phone_number', 'address', 'city', 'postcode', 'zipcode',
         'county', 'country', 'delivery_cost',
         'order_total', 'grand_total', 'existing_basket',
         'stripe_payment_intent_id'

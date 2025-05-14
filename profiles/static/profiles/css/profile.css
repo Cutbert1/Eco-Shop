@@ -1,3 +1,13 @@
+#id_primary_country,
+#id_primary_country option:not(:first-child) {
+    color: #000;
+}
+
 #profile-update-form input::placeholder {
     color: #aab7c4;
+}
+
+.order-record {
+    max-height: 416px; /* height of profile form + submit button */
+    overflow-y: auto;
 }

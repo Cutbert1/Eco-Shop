@@ -11,7 +11,7 @@
                 <hr class="mt-2 mb-3">
             </div>
         </div>
-        {% if grand_total %}
+        {% if grand_total and not profile_page %}
             <h6 class="logo-font bg-light text-dark p-2 rounded-3 mb-3">Your Basket ({{ product_count }}) items</h6>
             <div>
                 {% for item in basket_items %}
