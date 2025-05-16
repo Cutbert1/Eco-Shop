@@ -169,7 +169,6 @@ def checkout(request):
                     'city': profile.primary_city,
                     'county': profile.primary_county,
                     'postcode': profile.primary_postcode,
-                    'zipcode': profile.primary_zipcode,
                     'country': profile.primary_country,
                 })
             except AccountProfile.DoesNotExist:
@@ -186,7 +185,6 @@ def checkout(request):
             'city': request.POST['city'],
             'county': request.POST['county'],
             'postcode': request.POST['postcode'],
-            'zipcode': request.POST['zipcode'],
             'country': request.POST['country'],
         }
 
@@ -222,7 +220,6 @@ def checkout_complete(request, order_number):
             'primary_city': order.city,
             'primary_county': order.county,
             'primary_postcode': order.postcode,
-            'primary_zipcode': order.zipcode,
             'primary_country': order.country,
         }
         account_profile_form = AccountProfileForm(

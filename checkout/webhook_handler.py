@@ -1,6 +1,11 @@
 from django.http import HttpResponse
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+
 from .models import Order, OrderLineItem
 from products.models import Product
+from profiles.models import AccountProfile
 
 import stripe
 import json
@@ -12,7 +17,7 @@ class WebhookHandler:
     Handles Stripe webhooks and processes various event types.
     """
 
-    MAX_ATTEMPTS = 4
+    MAX_ATTEMPTS = 5
     SLEEP_DURATION = 1
 
     def __init__(self, request):
@@ -20,6 +25,27 @@ class WebhookHandler:
         Initialize the WebhookHandler with the incoming request.
         """
         self.request = request
+
+    def _send_confirmation_email(self, order):
+        """Send the user a confirmation email"""
+        cust_email = order.email
+        subject = render_to_string(
+            'checkout/confirmation_emails/confirmation_email_subject.txt',
+            {'order': order})
+        body = render_to_string(
+            'checkout/confirmation_emails/confirmation_email_body.txt',
+            {'order': order,
+             'contact_email': settings.DEFAULT_FROM_EMAIL,
+             'order_total': order.order_total,
+             'delivery_cost': order.delivery_cost
+             })
+
+        send_mail(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [cust_email]
+        )
 
     def handle_event(self, event):
         """
@@ -31,23 +57,44 @@ class WebhookHandler:
         """
         Handle the payment_intent.succeeded webhook event from Stripe.
         """
+        # Get the payment intent from Stripe
         payment_intent = event.data.object
-        order_data = self._extract_order_data(payment_intent)
-        stripe_charge = self._retrieve_stripe_charge(  # noqa
+        save_info = self._get_save_info(payment_intent)
+        stripe_charge = self._retrieve_stripe_charge(
             payment_intent.latest_charge
-            )
+        )
 
-        if self._order_exists(order_data):
+        # Get the basket metadata
+        basket = self._get_basket(payment_intent)
+
+        # Get the billing and shipping details
+        order_data = self._extract_order_data(payment_intent, stripe_charge)
+
+        # Attempt to get the order object (if it exists), trying 5 times
+        order = self._get_order(order_data)
+
+        if order:
+            # If the order exists, verify the order in the database
             return self._handle_existing_order(event)
+        else:
+            # If it doesn't exist, create the order in the database
+            try:
+                order = self._create_order(order_data, basket)
+                if not order:
+                    return self._create_error_response(
+                        event, "Failed to create order."
+                    )
+                self._create_order_line_items(order, basket)
 
-        order = self._create_order(order_data, payment_intent.metadata.basket)
-        if not order:
-            return self._create_error_response(
-                event, "Failed to create order."
+                # Update profile information if save_info was checked
+                self._update_profile(payment_intent, save_info, order_data)
+
+                return self._create_response(event)
+            except Exception as e:
+                # When creating the order, include an exception catch to throw a 500  # noqa
+                return self._create_error_response(
+                    event, f"Error creating order: {str(e)}"
                 )
-
-        self._create_order_line_items(order, order_data.basket)
-        return self._create_response(event)
 
     def handle_payment_intent_payment_failed(self, event):
         """
@@ -55,24 +102,53 @@ class WebhookHandler:
         """
         return self._create_response(event)
 
-    def _extract_order_data(self, payment_intent):
+    def _get_save_info(self, payment_intent):
         """
-        Extract order data from the payment intent.
+        Safely get the save_info value from payment_intent metadata.
         """
-        billing_details = payment_intent.latest_charge.billing_details
+        try:
+            return payment_intent.metadata.save_info
+        except AttributeError:
+            # If save_info is not present in metadata, return a default value
+            return False
+
+    def _get_basket(self, payment_intent):
+        """
+        Safely get the basket value from payment_intent metadata.
+        """
+        try:
+            return payment_intent.metadata.basket
+        except AttributeError:
+            # If basket is not present in metadata, return an empty string or handle accordingly  # noqa
+            return ""
+
+    def _extract_order_data(self, payment_intent, charge):
+        """
+        Extract order data from the payment intent and charge.
+        """
+        billing_details = charge.billing_details
+        shipping = payment_intent.shipping
+
+        # Calculate delivery cost and order total
+        grand_total = round(charge.amount / 100, 2)
+        temp_order = Order(order_total=grand_total)
+        delivery_cost = temp_order.calculate_delivery_cost()
+        order_total = grand_total - delivery_cost
+
         return {
             'customer_name': billing_details.name,
             'email': billing_details.email,
             'phone_number': billing_details.phone,
-            'address': self._sanitize_address(payment_intent.shipping.address),
-            'city': payment_intent.shipping.city,
-            'county': payment_intent.shipping.county,
-            'postcode': payment_intent.shipping.postal_code,
-            'zipcode': payment_intent.shipping.zipcode,
-            'country': payment_intent.shipping.country,
-            'grand_total': round(payment_intent.latest_charge.amount / 100, 2),
-            'basket': payment_intent.metadata.basket,
-
+            'address': self._sanitize_address(shipping.address),
+            'city': shipping.address.city,
+            'county': shipping.address.state,
+            'postcode': shipping.address.postal_code,
+            'country': shipping.address.country,
+            'grand_total': grand_total,
+            'delivery_cost': delivery_cost,
+            'order_total': order_total,
+            'basket': self._get_basket(payment_intent),
+            'stripe_payment_intent_id': payment_intent.id,
         }
 
     def _sanitize_address(self, address):
@@ -80,10 +156,8 @@ class WebhookHandler:
         Sanitize address fields by replacing empty strings with None.
         """
         return {
-            field: (
-                value if value else None
-                ) for field, value in address.items()
-            }
+            field: (value if value else None) for field, value in address.items()  # noqa
+        }
 
     def _retrieve_stripe_charge(self, charge_id):
         """
@@ -91,60 +165,73 @@ class WebhookHandler:
         """
         return stripe.Charge.retrieve(charge_id)
 
-    def _order_exists(self, order_data):
+    def _get_order(self, order_data):
         """
-        Check if an order already exists in the database.
+        Attempt to get the order object, trying 5 times.
         """
         for attempt in range(self.MAX_ATTEMPTS):
             try:
-                Order.objects.get(
-                    customer_name__iexact=order_data['name'],
+                return Order.objects.get(
+                    customer_name__iexact=order_data['customer_name'],
                     email__iexact=order_data['email'],
-                    phone_number__iexact=order_data['phone'],
+                    phone_number__iexact=order_data['phone_number'],
                     address__iexact=order_data['address'],
                     city__iexact=order_data['city'],
                     county__iexact=order_data['county'],
                     postcode__iexact=order_data['postcode'],
-                    zipcode__iexact=order_data['zipcode'],
                     country__iexact=order_data['country'],
                     grand_total=order_data['grand_total'],
-                    existing_basket=order_data['existing_basket'],
-                    stripe_payment_intent_id=order_data['stripe_payment_intent_id'],  # noqa
+                    existing_basket=order_data['basket'],
+                    stripe_payment_intent_id=order_data[
+                        'stripe_payment_intent_id'
+                    ],
                 )
-                return True
             except Order.DoesNotExist:
                 time.sleep(self.SLEEP_DURATION)
-        return False
+        return None
 
-    def _handle_existing_order(self, event):
+    def _handle_existing_order(self, event, order):
         """
         Handle the case where the order already exists.
         """
-        return HttpResponse(
-            content=f'Webhook received: {event["type"]} | SUCCESS: order already in database',  # noqa
-            status=200
-        )
+        try:
+            self._send_confirmation_email(order)
+            return HttpResponse(
+                content=f'Webhook received: {event["type"]} | SUCCESS: order already in database',  # noqa
+                status=200
+            )
+        except Exception as e:
+            return self._create_error_response(
+                event, f"Error sending confirmation email: {str(e)}"
+            )
 
-    def _create_order(self, order_data, basket):
+    def _create_order(self, order_data, basket,):
         """
         Create a new order in the database.
         """
+        order = Order.objects.create(
+            customer_name=order_data['customer_name'],
+            # account_profile=['profile'],
+            email=order_data['email'],
+            phone_number=order_data['phone_number'],
+            address=order_data['address'],
+            city=order_data['city'],
+            county=order_data['county'],
+            postcode=order_data['postcode'],
+            country=order_data['country'],
+            grand_total=order_data['grand_total'],
+            existing_basket=basket,
+            stripe_payment_intent_id=order_data['stripe_payment_intent_id'],
+            delivery_cost=order_data.get('delivery_cost', 0),
+            order_total=order_data.get(
+                'order_total', order_data['grand_total']
+                )
+        )
         try:
-            order = Order.objects.create(
-                customer_name=order_data['name'],
-                email=order_data['email'],
-                phone_number=order_data['phone'],
-                address=order_data['address'],
-                city=order_data['city'],
-                county=order_data['county'],
-                postcode=order_data['postcode'],
-                zipcode=order_data['zipcode'],
-                country=order_data['country'],
-                grand_total=order_data['grand_total'],
-            )
-            return order
-        except Exception as e:  # noqa
-            return None
+            self._send_confirmation_email(order)
+        except Exception as e:
+            print(f"Error sending confirmation email: {str(e)}")
+        return order
 
     def _create_order_line_items(self, order, basket):
         """
@@ -176,3 +263,33 @@ class WebhookHandler:
             content=f'Webhook received: {event["type"]}',
             status=200
         )
+
+    def _update_profile(self, payment_intent, save_info, order_data):
+        """
+        Update profile information if save_info was checked.
+        """
+        profile = None
+        username = self._get_username(payment_intent)
+        if username != 'AnonymousUser':
+            try:
+                profile = AccountProfile.objects.get(user__username=username)
+                if save_info:
+                    profile.primary_phone_number = order_data['phone_number']
+                    profile.primary_country = order_data['country']
+                    profile.primary_postcode = order_data['postcode']
+                    profile.primary_city = order_data['city']
+                    profile.primary_address = order_data['address']
+                    profile.primary_county = order_data['county']
+                    profile.save()
+            except AccountProfile.DoesNotExist:
+                pass
+
+    def _get_username(self, payment_intent):
+        """
+        Safely get the username from payment_intent metadata.
+        """
+        try:
+            return payment_intent.metadata.username
+        except AttributeError:
+            # If username is not present in metadata, return 'AnonymousUser'
+            return 'AnonymousUser'

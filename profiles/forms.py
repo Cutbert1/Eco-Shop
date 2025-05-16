@@ -21,8 +21,7 @@ class AccountProfileForm(forms.ModelForm):
             'primary_phone_number': 'Phone Number',
             'primary_address': 'Street Address',
             'primary_city': 'City',
-            'primary_postcode': 'Postal Code',
-            'primary_zipcode': 'Zip Code',
+            'primary_postcode': 'Postal or Zip Code',
             'primary_county': 'County or State',
             'primary_country': 'Country',
         }

@@ -11,3 +11,7 @@
     max-height: 416px; /* height of profile form + submit button */
     overflow-y: auto;
 }
+
+.order-history {
+    overflow-y: auto;
+}

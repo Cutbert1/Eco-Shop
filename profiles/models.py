@@ -22,7 +22,6 @@ class AccountProfile(models.Model):
     primary_city = models.CharField(max_length=100, null=True, blank=True)
     primary_county = models.CharField(max_length=100, null=True, blank=True)
     primary_postcode = models.CharField(max_length=24, null=True, blank=True)
-    primary_zipcode = models.CharField(max_length=24, null=True, blank=True)
     primary_country = CountryField(
         blank_label='Select Country', null=True, blank=True
         )

@@ -28,7 +28,6 @@ class Order(models.Model):
     city = models.CharField(max_length=100, null=False, blank=False)
     county = models.CharField(max_length=100, null=True, blank=True)
     postcode = models.CharField(max_length=20, blank=True, null=True)
-    zipcode = models.CharField(max_length=20, blank=True, null=True)
     country = CountryField(
         blank_label='Select Country *', blank=False, null=False
         )
