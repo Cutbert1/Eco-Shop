@@ -20,6 +20,11 @@ def profile(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Successfully updated Profile')
+        else:
+            messages.error(
+                request, 'Update failed. Please ensure form validity'
+                )
+
         return form
 
     def get_orders(profile):
