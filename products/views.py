@@ -113,3 +113,50 @@ def add_product(request):
     }
 
     return render(request, template, context)
+
+
+def update_product(request, product_id):
+    """ Update product details """
+    def get_product(product_id):
+        """ Get product object or return 404 """
+        return get_object_or_404(Product, pk=product_id)
+
+    def handle_post_request(request, product):
+        """ Handle POST request for updating product """
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Successfully updated {product.name}')
+            return redirect(reverse('product_detail', args=[product.id]))
+        else:
+            messages.error(
+                request, 'Update is unsuccessful. Please ensure form validity.'
+            )
+        return form
+
+    def handle_get_request(product):
+        """ Handle GET request for updating product """
+        form = ProductForm(instance=product)
+        messages.info(request, f'You are updating {product.name}')
+        return form
+
+    product = get_product(product_id)
+
+    if request.method == 'POST':
+        form = handle_post_request(request, product)
+        if isinstance(form, ProductForm):
+            # If form is returned, it means update was unsuccessful
+            pass
+        else:
+            # If redirect is returned, it means update was successful
+            return form
+    else:
+        form = handle_get_request(product)
+
+    template = 'products/update_product.html'
+    context = {
+        'form': form,
+        'product': product,
+    }
+
+    return render(request, template, context)

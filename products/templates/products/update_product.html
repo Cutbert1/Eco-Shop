@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+ 
+{% block page_header %}
+    <div class="container header-container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <hr>
+                <h3 class="text-center mb-4 fw-bold">Product Management</h3>
+                <h5 class="text-muted">Update a Product</h5>
+                <hr>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+ 
+{% block content %}
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title text-center mb-4 text-muted">Product Inverntory</h6>
+                        <form method="POST" action="{% url 'update_product' product.id %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a class="btn btn-outline-dark rounded-0" href="{% url 'products' %}">Cancel</a>
+                                <button class="btn btn-dark rounded-0" type="submit">Update Product</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

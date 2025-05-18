@@ -22,7 +22,7 @@ def profile(request):
             messages.success(request, 'Successfully updated Profile')
         else:
             messages.error(
-                request, 'Update failed. Please ensure form validity'
+                request, 'Update is unsuccessful. Please ensure form validity.'
                 )
 
         return form
