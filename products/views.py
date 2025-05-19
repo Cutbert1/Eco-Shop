@@ -93,26 +93,36 @@ def product_detail(request, product_id):
 
 
 def add_product(request):
-    """ Add an item to product inventory """
-    if request.method == 'POST':
+    """Handles the addition of a new product to the inventory."""
+
+    def handle_post_request(request):
+        """Processes the POST request to add a product."""
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Product has been added successfully!')
-            return redirect(reverse('add_product'))
-        else:
-            messages.error(
-                request, 'Unable to add product. Please check the form.'  # noqa
-                )
-    else:
-        form = ProductForm()
+            product = form.save()
+            messages.success(request, f'Successfully added {product.name}')
+            return redirect_to_product_detail(product.id)
 
-    template = 'products/add_product.html'
-    context = {
-        'form': form,
-    }
+        messages.error(
+            request, 'Unable to add product. Please check the form.'
+            )
+        return render_add_product_form(form)
 
-    return render(request, template, context)
+    def redirect_to_product_detail(product_id):
+        """Redirects to the product detail page."""
+        return redirect(reverse('product_detail', args=[product_id]))
+
+    def render_add_product_form(form=None):
+        """Renders the add product form."""
+        form = form or ProductForm()
+        template = 'products/add_product.html'
+        context = {'form': form}
+        return render(request, template, context)
+
+    if request.method == 'POST':
+        return handle_post_request(request)
+
+    return render_add_product_form()
 
 
 def update_product(request, product_id):
@@ -160,3 +170,13 @@ def update_product(request, product_id):
     }
 
     return render(request, template, context)
+
+
+def delete_product(request, product_id):
+    """ Delete a product from the store inventory """
+    product = get_object_or_404(Product, pk=product_id)
+    product.delete()
+    messages.success(
+        request, f'{product.name} has been removed from inventory!'
+        )
+    return redirect(reverse('products'))

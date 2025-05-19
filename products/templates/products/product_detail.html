@@ -45,6 +45,12 @@
                     {% else %}
                         <p class="mb-3 text-muted">No Rating</p>
                     {% endif %}
+                    {% if request.user.is_superuser %}
+                        <div class="ms-3 mb-3">
+                            <a href="{% url 'update_product' product.id %}" class="btn btn-sm btn-outline-primary me-2">Update</a>
+                            <a href="{% url 'delete_product' product.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
+                    {% endif %}
                     <p class="mb-4">{{ product.description }}</p>
                     <form class="form product-form" action="{% url 'add_item_to_basket' product.id %}" method="POST">
                         {% csrf_token %}
