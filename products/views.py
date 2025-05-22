@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.contrib import messages
 from django.db.models.functions import Lower
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 
 from .models import Product
 from .forms import ProductForm
@@ -92,8 +93,14 @@ def product_detail(request, product_id):
     return render(request, 'products/product_detail.html', context)
 
 
+@login_required(login_url='/accounts/login/')
 def add_product(request):
     """Handles the addition of a new product to the inventory."""
+    if not request.user.is_superuser:
+        messages.error(
+            request, 'Unable to add product. Only admin can add product'
+            )
+        return redirect(reverse('home'))
 
     def handle_post_request(request):
         """Processes the POST request to add a product."""
@@ -125,8 +132,15 @@ def add_product(request):
     return render_add_product_form()
 
 
+@login_required(login_url='/accounts/login/')
 def update_product(request, product_id):
     """ Update product details """
+    if not request.user.is_superuser:
+        messages.error(
+            request, 'Unable to update product. Only admin can update product'
+            )
+        return redirect(reverse('home'))
+
     def get_product(product_id):
         """ Get product object or return 404 """
         return get_object_or_404(Product, pk=product_id)
@@ -172,8 +186,15 @@ def update_product(request, product_id):
     return render(request, template, context)
 
 
+@login_required(login_url='/accounts/login/')
 def delete_product(request, product_id):
     """ Delete a product from the store inventory """
+    if not request.user.is_superuser:
+        messages.error(
+            request, 'Unable to delete product. Only admin can delete product'
+            )
+        return redirect(reverse('home'))
+
     product = get_object_or_404(Product, pk=product_id)
     product.delete()
     messages.success(
