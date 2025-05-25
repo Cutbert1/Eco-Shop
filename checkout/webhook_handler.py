@@ -7,7 +7,7 @@ from .models import Order, OrderLineItem
 from products.models import Product
 from profiles.models import AccountProfile
 
-import stripe
+import stripe  # noqa
 import json
 import time
 
@@ -57,28 +57,24 @@ class WebhookHandler:
         """
         Handle the payment_intent.succeeded webhook event from Stripe.
         """
-        # Get the payment intent from Stripe
-        payment_intent = event.data.object
-        save_info = self._get_save_info(payment_intent)
-        stripe_charge = self._retrieve_stripe_charge(
-            payment_intent.latest_charge
-        )
+        try:
+            payment_intent = event.data.object
+            save_info = self._get_save_info(payment_intent)
+            stripe_charge = self._retrieve_stripe_charge(
+                payment_intent.latest_charge
+            )
 
-        # Get the basket metadata
-        basket = self._get_basket(payment_intent)
+            basket = self._get_basket(payment_intent)
 
-        # Get the billing and shipping details
-        order_data = self._extract_order_data(payment_intent, stripe_charge)
+            order_data = self._extract_order_data(
+                payment_intent, stripe_charge
+                )
 
-        # Attempt to get the order object (if it exists), trying 5 times
-        order = self._get_order(order_data)
+            order = self._get_order(order_data)
 
-        if order:
-            # If the order exists, verify the order in the database
-            return self._handle_existing_order(event)
-        else:
-            # If it doesn't exist, create the order in the database
-            try:
+            if order:
+                return self._handle_existing_order(event, order)
+            else:
                 order = self._create_order(order_data, basket)
                 if not order:
                     return self._create_error_response(
@@ -86,15 +82,13 @@ class WebhookHandler:
                     )
                 self._create_order_line_items(order, basket)
 
-                # Update profile information if save_info was checked
                 self._update_profile(payment_intent, save_info, order_data)
 
                 return self._create_response(event)
-            except Exception as e:
-                # When creating the order, include an exception catch to throw a 500  # noqa
-                return self._create_error_response(
-                    event, f"Error creating order: {str(e)}"
-                )
+        except Exception as e:
+            return self._create_error_response(
+                event, f"Error processing payment_intent.succeeded: {str(e)}"
+            )
 
     def handle_payment_intent_payment_failed(self, event):
         """
@@ -109,7 +103,6 @@ class WebhookHandler:
         try:
             return payment_intent.metadata.save_info
         except AttributeError:
-            # If save_info is not present in metadata, return a default value
             return False
 
     def _get_basket(self, payment_intent):
@@ -119,7 +112,6 @@ class WebhookHandler:
         try:
             return payment_intent.metadata.basket
         except AttributeError:
-            # If basket is not present in metadata, return an empty string or handle accordingly  # noqa
             return ""
 
     def _extract_order_data(self, payment_intent, charge):
@@ -129,7 +121,6 @@ class WebhookHandler:
         billing_details = charge.billing_details
         shipping = payment_intent.shipping
 
-        # Calculate delivery cost and order total
         grand_total = round(charge.amount / 100, 2)
         temp_order = Order(order_total=grand_total)
         delivery_cost = temp_order.calculate_delivery_cost()
@@ -139,7 +130,7 @@ class WebhookHandler:
             'customer_name': billing_details.name,
             'email': billing_details.email,
             'phone_number': billing_details.phone,
-            'address': self._sanitize_address(shipping.address),
+            'address': json.dumps(self._sanitize_address(shipping.address)),
             'city': shipping.address.city,
             'county': shipping.address.state,
             'postcode': shipping.address.postal_code,
@@ -291,5 +282,4 @@ class WebhookHandler:
         try:
             return payment_intent.metadata.username
         except AttributeError:
-            # If username is not present in metadata, return 'AnonymousUser'
             return 'AnonymousUser'
