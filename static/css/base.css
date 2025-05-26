@@ -193,7 +193,7 @@ body {
 }
 
 /*  Moble navbar collapse */
-@media (max-width: 991px) {
+@media screen and (max-width: 991px) {
     .header-container {
         padding-top: 116;
     }
@@ -201,4 +201,134 @@ body {
     body {
         height: calc(100vh - 116px);
     }
+
+    .navbar-toggler {
+        padding: .90px .90px;
+        font-size: 16px;
+    }
+
+    .display-4.fw-bold.eco {
+        font-size: 32px;
+    }
+
+    .responsive-display {
+        margin-bottom: 16px;
+        margin-top: 288px;
+    }
+
+    .nav-link {
+        padding: 2.5px;
+    }
+
+    .nav-link i.fa-lg {
+        font-size: 16px;
+    }
+
+    #banner h4 {
+        font-size: 18px;
+    }
+
+    .btn.btn-outline-dark.rounded-0,
+    .btn.btn-primary,
+    .btn.btn-dark.rounded-0 {
+        padding: 0.5px 0.5px;
+    }
+
+    .responsive-heading {
+        margin-bottom: 16px;
+        margin-top: 95px;
+    }
+
+    .increment-qty, .decrement-qty {
+        padding: .25rem .5rem;
+    }
+
+    .prod-img {
+        margin-top: 8rem ! important;
+        margin-bottom: 2rem ! important;
+
+    }
+
+}
+    
+@media screen and (max-width: 991.98px) {
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .qty_input {
+    width: 70px;
+  }
+
+  /*.img-fluid {
+    max-width: 60px;
+    height: auto;
+  }*/
+
+  .d-flex.align-items-center {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .input-group.input-group-sm {
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  .update-link,
+  .remove-item {
+    display: inline-block;
+    margin-top: 5px;
+    margin-right: 5px;
+  }
+}
+
+
+@media screen and (max-width: 425px) {
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table-hover td,
+  .table-hover th {
+    white-space: normal;
+  }
+
+  /*.img-fluid {
+    max-width: 50px;
+    height: auto;
+  }*/
+
+  .qty_input {
+    width: 50px;
+  }
+
+  .d-flex.align-items-center {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .input-group.input-group-sm {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .update-link,
+  .remove-item {
+    margin-top: 5px;
+    margin-right: 5px;
+    display: inline-block;
+  }
+
+  td,
+  th {
+    font-size: 13px; 
+    padding: 0.4rem 0.5rem;
+  }
+
+  .table td:nth-child(4),
+  .table th:nth-child(4) {
+    min-width: 80px;
+  }
 }
