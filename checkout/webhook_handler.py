@@ -7,7 +7,7 @@ from .models import Order, OrderLineItem
 from products.models import Product
 from profiles.models import AccountProfile
 
-import stripe  # noqa
+import stripe
 import json
 import time
 

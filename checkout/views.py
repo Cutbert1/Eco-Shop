@@ -1,4 +1,6 @@
-from django.shortcuts import render, HttpResponse, redirect, reverse, get_object_or_404  # noqa
+from django.shortcuts import (
+    render, HttpResponse, redirect, reverse, get_object_or_404
+)
 from django.conf import settings
 from django.contrib import messages
 from django.views.decorators.http import require_POST
