@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /basket/
+Disallow: /checkout/
+Disallow: /accounts/
+Sitemap: https://eco-shop-natural-56f100a41f30.herokuapp.com/Sitemap.xml
