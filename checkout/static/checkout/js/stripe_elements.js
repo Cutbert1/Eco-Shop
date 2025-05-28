@@ -1,10 +1,10 @@
-/* Core logic is from stripe documentation */
+// Core logic from stripe documentation //
 var stripePublickey = $('#id_stripe_public_key').text().slice(1, -1);
 var clientSecret = $('#id_client_secret').text().slice(1, -1);
 var stripe = Stripe(stripePublickey);
 var elements = stripe.elements();
 
-/* Core CSS is from stripe documentation */
+/* Core CSS from stripe documentation */
 var style = {
     base: {
         color: '#000',
@@ -43,7 +43,7 @@ const createErrorMessage = (message) => `
 `;
 
 
-// Form submit. Core logic from stripe documentation
+// Form submit: Core logic from stripe documentation
 
 const form = document.getElementById('payment-form');
 const submitButton = document.getElementById('submit-button');
@@ -58,9 +58,9 @@ form.addEventListener('submit', async function(ev) {
         const billingDetails = getBillingDetails();
         const shippingDetails = getShippingDetails();
  
-        // Use jQuery's prop() instead of attr() for checkbox state
+        
         var saveInfo = $('#id-save-info').prop('checked');
-        // From using {% csrf_token %} in the form
+        
         var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
         var postData = {
             'csrfmiddlewaretoken': csrfToken,
@@ -69,7 +69,7 @@ form.addEventListener('submit', async function(ev) {
         };
         var url = '/checkout/store_checkout_info/';
  
-        // Complete the AJAX post request
+        
         await $.post(url, postData);
  
         const result = await stripe.confirmCardPayment(clientSecret, {

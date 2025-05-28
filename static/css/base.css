@@ -10,7 +10,15 @@ body {
     font-family: 'Montserrat';
 }
 
-/* from Bulma */
+@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.flashing {
+  animation: flash 1s infinite;
+}
+
 .icon {
     align-items: center;
     display: inline-flex;
@@ -31,20 +39,15 @@ body {
     width: fit-content;
 }
 
-.shop-now-button {
+.shop-all-products {
     background: black;
     color: white;
     min-width: 260px;
 }
 
-.btn-black {
+.btn-dark {
     background: black;
     color: white;
-}
-
-.single_add_to_basket {
-    width: 235px;
-    background-color: #93c90e !important;
 }
 
 .product-form {
@@ -64,12 +67,12 @@ body {
     font-size: 1rem;
 }
 
-.shop-now-button:hover,
-.shop-now-button:active,
-.shop-now-button:focus,
-.btn-black:hover,
-.btn-black:active,
-.btn-black:focus {
+.shop-all-products:hover,
+.shop-all-products:active,
+.shop-all-products:focus,
+.btn-dark:hover,
+.btn-dark:active,
+.btn-dark:focus {
     background: #222;
     color: white;
 }
@@ -125,7 +128,7 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
 }
  
@@ -139,6 +142,50 @@ body {
     width: 24px;
     height: 24px;
 }
+
+.footer {
+    padding: 5px 0;
+    background-color: #6c757d
+}
+
+.clearance {
+    bottom: 80px;
+    left: 20px;
+    z-index: 1050; 
+    padding: 12px 20px; 
+    border-radius: 5px;
+    position: fixed;
+
+}
+
+  #mc_embed_signup {
+    position: fixed;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    z-index: 9999;
+    max-width: 400px;
+  }
+
+  #mc_embed_signup h5 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  #mc_embed_signup .button {
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+
+  #mc_embed_signup .button:hover {
+    background-color: #218838;
+  }
 
 /* ------------------------------- bootstrap toasts */
 
