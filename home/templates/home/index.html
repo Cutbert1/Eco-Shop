@@ -36,7 +36,7 @@
                     <nav aria-label="Footer navigation">
                         <ul class="list-unstyled d-flex flex-wrap justify-content-center justify-content-md-start m-0 p-0 gap-3">
                             <li>
-                                <a class="text-decoration-none text-white" href="#" target="_blank">Terms</a>
+                                <a class="text-decoration-none text-white" href="{% url 'view_terms'%}" target="_blank">Terms</a>
                             </li>
                             <li>
                                 <a class="text-decoration-none text-white" href="#" target="_blank">Privacy</a>
@@ -66,6 +66,7 @@
             </div>
         </div>
     </footer>
+    <!--Mailchimp-->
     <div id="mc_embed_signup">
         <form action="https://herokuapp.us3.list-manage.com/subscribe/post?u=61b13adb4a2fd6d7c0604cec5&amp;id=1115231364&amp;f_id=002f04e1f0" method="post" 
             id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
@@ -135,7 +136,7 @@
             cancelButton.style.cursor = "pointer";
             cancelButton.title = "Close";
 
-            //cancelButton.addEventListener("mouseenter", () => cancelButton.style.color = "#000");
+            cancelButton.addEventListener("mouseenter", () => cancelButton.style.color = "#000");
             cancelButton.addEventListener("mouseleave", () => cancelButton.style.color = "#999");
 
             cancelButton.addEventListener("click", function () {

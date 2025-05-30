@@ -1,0 +1,81 @@
+ 
+<!--{% load static %}-->
+
+<link rel="stylesheet" href="{% static 'terms/css/terms.css' %}">
+
+ 
+{% block content %}
+    <div class="container" id="terms-content">
+        <h1>Terms and Conditions</h1>
+        <p><strong>Effective Date:</strong> May 30, 2025</p>
+
+        <p>Welcome to Eco Shop. By using this website, you agree to the following terms and conditions.</p>
+
+        <h2>1. General</h2>
+        <p>This website is operated by Your Eco Shop. These Terms apply to all users of the site.</p>
+
+        <h2>2. Orders</h2>
+        <ul>
+            <li>Orders are subject to availability and price confirmation.</li>
+            <li>We reserve the right to cancel or refuse any order.</li>
+        </ul>
+
+        <h2>3. Pricing and Payment</h2>
+        <ul>
+            <li>Prices are in $ and include taxes where applicable.</li>
+            <li>Payments can be made via credit/debit cards only, other payment methods will be incorprated in the future.</li>
+        </ul>
+
+        <h2>4. Shipping and Delivery</h2>
+        <p>We process orders within 2 business days. Delivery times vary by location.</p>
+
+        <h2>5. Returns and Refunds</h2>
+        <p>Returns accepted within 31 days. Products must be unused and in original packaging. See our <a href="#">Return Policy</a>.</p>
+
+        <h2>6. Intellectual Property</h2>
+        <p>All site content is owned by Your Eco Shop and protected by law.</p>
+
+        <h2>7. Limitation of Liability</h2>
+        <p>We are not responsible for damages resulting from use of our site or services.</p>
+
+        <h2>8. GDPR - Data Protection and Privacy</h2>
+        <p>We comply with the General Data Protection Regulation (GDPR).</p>
+        <ul>
+            <li>We collect only necessary personal data (e.g., name, address, email, payment details).</li>
+            <li>We use your data to process orders, provide customer service, and meet legal obligations.</li>
+            <li>You have the right to access, rectify, or delete your data. Contact us at <a href="mailto:support@ecoshop.com">support@ecoshop.com</a>.</li>
+            <li>We do not sell your data to third parties. Data may be shared with service providers only for operational purposes (e.g., delivery).</li>
+        </ul>
+
+        <h2>9. Changes to Terms</h2>
+        <p>We reserve the right to update these terms. Changes take effect once posted on this site.</p>
+
+        <h2>10. Contact Us</h2>
+        <p>If you have any questions, please contact us at:</p>
+        <p>
+        <strong>Eco Shop</strong><br>
+        Address Line 1<br>
+        Address Line 2<br>
+        City, Postcode<br>
+        Country<br>
+        Email: <a href="mailto:support@ecoshop.com">support@ecoshop.com</a>
+        </p>
+
+    <button class="btn-download" onclick="downloadPDF()">Download as PDF</button>
+  </div>
+{% endblock%}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    async function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        const content = document.getElementById('terms-content').innerText;
+        const lines = doc.splitTextToSize(content, 180);
+
+        doc.setFontSize(12);
+        doc.text(lines, 10, 10);
+        doc.save('terms-and-conditions.pdf');
+    }
+</script>

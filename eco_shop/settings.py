@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'profiles',
     'phonenumber_field',
     'storages',
+    'terms',
 ]
 
 MIDDLEWARE = [

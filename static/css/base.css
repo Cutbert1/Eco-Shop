@@ -378,4 +378,10 @@ body {
   .table th:nth-child(4) {
     min-width: 80px;
   }
+
+  #mc_embed_signup {
+    width: 90%;
+    left: 5%;
+    transform: translateY(-50%);
+  }
 }
