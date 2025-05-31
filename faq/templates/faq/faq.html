@@ -1,0 +1,40 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'faq/css/faq.css' %}">
+
+<body>
+  <div class="container">
+    <h1>Frequently Asked Questions</h1>
+    <div class="faq-item">
+      <h2>1. Are your products really eco-friendly?</h2>
+      <p>Yes! All our products are made with sustainability in mind — using natural, biodegradable, or recyclable materials. We also partner only with certified eco-conscious suppliers.</p>
+    </div>
+    <div class="faq-item">
+      <h2>2. Is your packaging recyclable or plastic-free?</h2>
+      <p>We use 100% recyclable and plastic-free packaging materials. Our boxes, tape, and labels are all compostable or recyclable to reduce waste.</p>
+    </div>
+    <div class="faq-item">
+      <h2>3. Where do you ship from?</h2>
+      <p>We ship from our warehouse in the USA using carbon-neutral courier services. Delivery times may vary depending on your location.</p>
+    </div>
+    <div class="faq-item">
+      <h2>4. Do you offer international shipping?</h2>
+      <p>Yes, we ship worldwide. Shipping rates and delivery times are calculated at checkout based on your location.</p>
+    </div>
+    <div class="faq-item">
+      <h2>5. What if I'm not happy with my purchase?</h2>
+      <p>We offer a 31-day satisfaction guarantee. If you're not happy with your order, contact us to arrange a return or exchange. Read our <a href="{% url 'view_returns' %}">Return Policy</a>.</p>
+    </div>
+    <div class="faq-item">
+      <h2>6. Are your products cruelty-free and vegan?</h2>
+      <p>Yes. All our products are certified cruelty-free and vegan. We never test on animals or use animal-derived ingredients.</p>
+    </div>
+    <div class="faq-item">
+      <h2>7. What sustainability certifications do you have?</h2>
+      <p>Our products and suppliers carry certifications like FSC, Fair Trade, GOTS, and EcoCert.</p>
+    </div>
+    <div class="faq-item">
+      <h2>9. Can I suggest a product or give feedback?</h2>
+      <p>Absolutely! We love hearing from our community. Reach out via <a href="mailto:hello@ecoshop.com">hello@ecoshop.com</a> or drop your suggestion on our page <a href="https://www.facebook.com/profile.php?id=61576996372110">Facebook</a> page.</p>
+    </div>
+  </div>
+</body>

@@ -1,69 +1,57 @@
- 
-<!--{% load static %}-->
-
+ {% load static %}
 <link rel="stylesheet" href="{% static 'terms/css/terms.css' %}">
 
  
-{% block content %}
+<body>
     <div class="container" id="terms-content">
         <h1>Terms and Conditions</h1>
         <p><strong>Effective Date:</strong> May 30, 2025</p>
 
-        <p>Welcome to Eco Shop. By using this website, you agree to the following terms and conditions.</p>
+        <p>Welcome to <strong class="shop fw-bold">Eco | Shop!</strong> By using our website, you are agreeing to the following terms and conditions..</p>
 
         <h2>1. General</h2>
-        <p>This website is operated by Your Eco Shop. These Terms apply to all users of the site.</p>
+        <p>This website is run by Eco Shop, and these Terms apply to everyone who visits the site.</p>
 
         <h2>2. Orders</h2>
         <ul>
-            <li>Orders are subject to availability and price confirmation.</li>
+            <li>Orders depend on availability and price confirmation.</li>
             <li>We reserve the right to cancel or refuse any order.</li>
         </ul>
 
         <h2>3. Pricing and Payment</h2>
         <ul>
-            <li>Prices are in $ and include taxes where applicable.</li>
-            <li>Payments can be made via credit/debit cards only, other payment methods will be incorprated in the future.</li>
+            <li>All prices are in dollars and include taxes where applicable.</li>
+            <li>Currently, payments can only be made via credit or debit cards, but we plan to add more payment options in the future.</li>
         </ul>
 
         <h2>4. Shipping and Delivery</h2>
-        <p>We process orders within 2 business days. Delivery times vary by location.</p>
+        <p>We aim to process orders within 2 business days, but delivery times can vary based on your location..</p>
 
         <h2>5. Returns and Refunds</h2>
-        <p>Returns accepted within 31 days. Products must be unused and in original packaging. See our <a href="#">Return Policy</a>.</p>
+        <p>You can return items within 31 days, provided they are unused and in their original packaging.. See our <a href="{% url 'view_returns'%}">Return Policy</a>.</p>
 
         <h2>6. Intellectual Property</h2>
-        <p>All site content is owned by Your Eco Shop and protected by law.</p>
+        <p>All site content is owned by Eco Shop and is protected by law.</p>
 
         <h2>7. Limitation of Liability</h2>
-        <p>We are not responsible for damages resulting from use of our site or services.</p>
+        <p>We are not liable for any damages that may arise from your use of our site or services.</p>
+        <h2>8. Changes to Terms</h2>
+        <p>We may update these terms from time to time, and any changes will take effect once they are posted on this site..</p>
 
-        <h2>8. GDPR - Data Protection and Privacy</h2>
-        <p>We comply with the General Data Protection Regulation (GDPR).</p>
-        <ul>
-            <li>We collect only necessary personal data (e.g., name, address, email, payment details).</li>
-            <li>We use your data to process orders, provide customer service, and meet legal obligations.</li>
-            <li>You have the right to access, rectify, or delete your data. Contact us at <a href="mailto:support@ecoshop.com">support@ecoshop.com</a>.</li>
-            <li>We do not sell your data to third parties. Data may be shared with service providers only for operational purposes (e.g., delivery).</li>
-        </ul>
-
-        <h2>9. Changes to Terms</h2>
-        <p>We reserve the right to update these terms. Changes take effect once posted on this site.</p>
-
-        <h2>10. Contact Us</h2>
-        <p>If you have any questions, please contact us at:</p>
+        <h2>9. Contact Us</h2>
+        <p>If you have any questions, feel free to reach out to us at:</p>
         <p>
-        <strong>Eco Shop</strong><br>
-        Address Line 1<br>
-        Address Line 2<br>
-        City, Postcode<br>
-        Country<br>
+        <strong class="shop fw-bold">Eco | Shop</strong><br>
+        546 Rodendo Beach<br>
+        Los Angeles<br>
+        California, 18246<br>
+        USA<br>
         Email: <a href="mailto:support@ecoshop.com">support@ecoshop.com</a>
         </p>
 
     <button class="btn-download" onclick="downloadPDF()">Download as PDF</button>
   </div>
-{% endblock%}
+</body>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>

@@ -1,0 +1,67 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'terms/css/terms.css' %}">
+
+
+<body>
+    <div class="container" id="returns-content">
+        <h1>Return & Refund Policy</h1>
+        <p><strong>Effective Date:</strong> May 30, 2025</p>
+
+        <p>Thanks for choosing <strong class="shop fw-bold">Eco | Shop</strong>. If you are not completely happy with your purchase, we are here to assist you.</p>
+
+        <h2>1. Returns</h2>
+        <ul>
+            <li>You have <strong>31 calendar days</strong> to return an item from the day you received it.</li>
+            <li>To qualify for a return, your item must be unused and in the same condition as when you got it.</li>
+            <li>Your item should be in its original packaging and include the receipt or proof of purchase.</li>
+        </ul>
+
+        <h2>2. Return Process</h2>
+        <p>To start a return, please follow these steps:</p>
+        <ul>
+            <li>Reach out to our support team at <a href="mailto:support@ecoshop.com">support@ecoshop.com</a> with your order number and the reason for your return.</li>
+            <li>We will email you a return authorization along with instructions on where to send your package.</li>
+        </ul>
+
+        <h2>3. Refunds</h2>
+        <ul>
+            <li>Once we receive your item, we will inspect it and notify you of the status of your refund.</li>
+            <li>If your return is approved, we will process a refund to your original payment method.</li>
+            <li>Refunds may take 5 - 10 business days to show up in your account.</li>
+        </ul>
+
+        <h2>4. Shipping Costs</h2>
+        <ul>
+            <li>You wll be responsible for your own shipping costs when returning an item, unless the return is due to our mistake.</li>
+            <li>Shipping costs are non-refundable.</li>
+        </ul>
+
+        <h2>5. Exchanges</h2>
+        <p>We only replace items if they are defective or damaged. If you need to exchange an item, please contact us at <a href="mailto:support@ecoshop.com">support@ecoshop.com</a>.</p>
+
+        <h2>6. Contact Us</h2>
+        <p>If you have any questions on how to return your item, contact us at:</p>
+        <p>
+            <strong class="shop fw-bold">Eco | Shop</strong><br>
+            Email: <a href="mailto:support@ecoshop.com">support@ecoshop.com</a><br>
+            Phone: +1 5555 555555<br>
+            Address: 546 Rodendo Beach, Los Angeles, California, 18246, USA
+        </p>
+        <button class="btn-download" onclick="downloadPDF()">Download as PDF</button>
+    </div>
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    async function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        const content = document.getElementById('returns-content').innerText;
+        const lines = doc.splitTextToSize(content, 180);
+
+        doc.setFontSize(12);
+        doc.text(lines, 10, 10);
+        doc.save('returns-and-refund.pdf');
+    }
+</script>
