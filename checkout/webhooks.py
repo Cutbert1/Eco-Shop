@@ -42,10 +42,8 @@ def verify_webhook_signature(payload, sig_header):
             payload, sig_header, settings.STRIPE_WH_SECRET
         )
     except (ValueError, stripe.error.SignatureVerificationError) as e:
-        # Log the error for debugging purposes (optional)
         print(f"Webhook verification failed: {str(e)}")
         return HttpResponse(status=400)
     except Exception as e:
-        # Handle unexpected errors
         print(f"An unexpected error occurred: {str(e)}")
         return HttpResponse(content=e, status=400)

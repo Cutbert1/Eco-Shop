@@ -37,7 +37,7 @@ class WebhookHandler:
             {'order': order,
              'contact_email': settings.DEFAULT_FROM_EMAIL,
              'order_total': order.order_total,
-             'delivery_cost': order.delivery_cost
+             'delivery_cost': order.delivery_cost,
              })
 
         send_mail(
@@ -163,16 +163,6 @@ class WebhookHandler:
         for attempt in range(self.MAX_ATTEMPTS):
             try:
                 return Order.objects.get(
-                    customer_name__iexact=order_data['customer_name'],
-                    email__iexact=order_data['email'],
-                    phone_number__iexact=order_data['phone_number'],
-                    address__iexact=order_data['address'],
-                    city__iexact=order_data['city'],
-                    county__iexact=order_data['county'],
-                    postcode__iexact=order_data['postcode'],
-                    country__iexact=order_data['country'],
-                    grand_total=order_data['grand_total'],
-                    existing_basket=order_data['basket'],
                     stripe_payment_intent_id=order_data[
                         'stripe_payment_intent_id'
                     ],

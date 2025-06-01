@@ -41,6 +41,7 @@ def store_checkout_info(request):
         return _handle_error(request, 'Client secret is missing.')
 
     payment_intent_id = _extract_payment_intent_id(client_secret)
+
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
     try:
@@ -76,28 +77,23 @@ def checkout(request):
 
     def create_order(order_form, basket, request):
         order = order_form.save(commit=False)
-        payment_intent_id = request.POST.get(
-            'client_secret').split('-secret')[0]
+
+        client_secret = request.POST.get('client_secret')
+        if not client_secret:
+            messages.error(
+                request, "Missing payment information. Please try again."
+                )
+            return None
+
+        payment_intent_id = client_secret.split('_secret')[0]
         order.stripe_payment_intent_id = payment_intent_id
         order.existing_basket = json.dumps(basket)
-        order.save()
-
-        stripe.api_key = settings.STRIPE_SECRET_KEY
-        total = calculate_total(basket)
-        stripe_total = round(total * 100)
 
         try:
-            payment_intent = stripe.PaymentIntent.create(
-                amount=stripe_total,
-                currency=settings.STRIPE_CURRENCY,
-            )
-            order.stripe_payment_intent_id = payment_intent.id
             order.save()
-        except stripe.error.StripeError as e:
-            messages.error(
-                request, f"An error occurred while processing your payment: {str(e)}"  # noqa
-                )
-            order.delete()
+
+        except Exception as e:
+            messages.error(request, f"Order saving failed: {str(e)}")
             return None
 
         return order
