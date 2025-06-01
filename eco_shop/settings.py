@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'returns',
     'privacy',
     'faq',
+    'blog',
 ]
 
 MIDDLEWARE = [

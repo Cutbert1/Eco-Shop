@@ -33,5 +33,6 @@ urlpatterns = [
     path('returns/', include('returns.urls')),
     path('privacy/', include('privacy.urls')),
     path('faq/', include('faq.urls')),
+    path('blog/', include('blog.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 handler404 = 'eco_shop.views.handler404'  # noqa
