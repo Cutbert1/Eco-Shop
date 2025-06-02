@@ -192,7 +192,6 @@ class WebhookHandler:
         """
         order = Order.objects.create(
             customer_name=order_data['customer_name'],
-            # account_profile=['profile'],
             email=order_data['email'],
             phone_number=order_data['phone_number'],
             address=order_data['address'],

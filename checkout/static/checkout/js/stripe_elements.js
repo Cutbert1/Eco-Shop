@@ -24,7 +24,7 @@ var card = elements.create('card', {style: style});
 card.mount('#card-element');
 
 
-// Card element error handling
+
 card.addEventListener('change', (event) => {
     const errorContainer = document.getElementById('card-errors');
  

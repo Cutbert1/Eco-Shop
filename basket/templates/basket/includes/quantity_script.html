@@ -1,11 +1,11 @@
 <script type="text/javascript">
-    // Wait for the DOM to be fully loaded
+    
     document.addEventListener('DOMContentLoaded', function() {
-        // Get all increment and decrement buttons
+        
         const incrementBtns = document.querySelectorAll('.increment-qty');
         const decrementBtns = document.querySelectorAll('.decrement-qty');
  
-        // Add click event listeners to increment buttons
+        
         incrementBtns.forEach(btn => {
             btn.addEventListener('click', function() {
                 const itemId = this.getAttribute('data-item_id');
@@ -17,7 +17,7 @@
             });
         });
  
-        // Add click event listeners to decrement buttons
+        
         decrementBtns.forEach(btn => {
             btn.addEventListener('click', function() {
                 const itemId = this.getAttribute('data-item_id');
@@ -29,7 +29,7 @@
             });
         });
     });
-        // Submit quantity updated form
+    
         document.addEventListener('DOMContentLoaded', function() {
             const updateButtons = document.querySelectorAll('.update-link');
             const updateForms = document.querySelectorAll('.update-form');
@@ -42,13 +42,11 @@
            });
         });
 
-        // Remove item and reload page
        $(document).ready(function() {
            $('.remove-item').click(function(e) {
                 e.preventDefault();
                 var itemId = this.id.split('remove_')[1];
  
-        // Send AJAX request to remove item
         $.ajax({
             url: `/basket/remove/${itemId}/`,
             type: 'POST',

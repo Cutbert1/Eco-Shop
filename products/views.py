@@ -169,10 +169,8 @@ def update_product(request, product_id):
     if request.method == 'POST':
         form = handle_post_request(request, product)
         if isinstance(form, ProductForm):
-            # If form is returned, it means update was unsuccessful
             pass
         else:
-            # If redirect is returned, it means update was successful
             return form
     else:
         form = handle_get_request(product)
