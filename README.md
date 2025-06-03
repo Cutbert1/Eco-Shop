@@ -1,16 +1,23 @@
 # Eco | Shop
 ## Introduction
 #### Project Description
+This is a local eco-friendly natural products online shop, specialised in selling home/hand made natural products focused on alternative sustainable products, ranging from household products to beauty products. 
 #### Project Purpose
+The main purpose of the project is create, motivate and  change households behaviours of using non sustainable products which are harmful to our environment and eco system in general. Making green products a household brand and easily accessible, by providing a cheap sustainable alternative to every day products used at home.
 #### User Demographic
+User demography includes everyone, but most importantly individuals who are keen about green products and want to contribute their quoter in saving our environment from global warming. Marketing strategy, is also aimed at getting more people to become eco-friendly in choosing product they use.
 ## Design
 #### Colour Scheme
+To maintain eco-friendly theme, 3 main colours were used Green, Azure and white.
+### Database Design
 #### Topograhy
+The Montserrat font is used  all through the website. For extended page ( Terms, Privacy, Returns, FAQ and Blog), arial font were used and Sans Serif is used as the backup.
 #### Imagery
+The home page follows the theme of green background with happy shoppers. Other images through the project are product images of different types
 ## Features
 ### Existing Features
 ### Home page
-#### Navbar
+### Navbar
 ### Products page
 ### Product Details Page
 ### Add Product Page (Product Management)
@@ -133,7 +140,7 @@
 #### Python Files
 |Page Tested|Screenshot of Errors and Warnings   |Solution Applied|Screenshot of clear Validation Output|
 |:------------|:----------------|:-------------|:------------|
-||basket_tools.py|WWWWWWWWWWWW|QQQQQQQQQQQQQQ|TTTTTTTTTTT|
+|basket_tools.py|WWWWWWWWWWWW|QQQQQQQQQQQQQQ|TTTTTTTTTTT|
 |contexts.py|AAAAAAAAAAA|CCCCCCCCCCCC|BBBBBBBBBBB|
 |basket\urls.py|SSSSSSSSSS|AAAAAAAAAAA|DDDDDDDDDDDDDD|
 |basket\views.py|CCCCCCCCCCCC|BBBBBBBBBBBBB|NNNNNNNNNNNNN|
