@@ -100,7 +100,65 @@ Footer that displays links to access social media pages for eco shop.
 Renders a new window for Terms, Privacy, FQA, Returns, Our Blog.
 
 ![footer-links](/static/images/readme_images/features_images/footer-links.jpg)
-## E-commerce business model including marketing strategies.
+## E-commerce business model.
+### Business model B2C(Business-to-Consumer)
+The business model chosen for this project is B2C. Before choosing this business model 3 key questions were answered.
+|Who is the customer| What will they buy | How will they pay |
+|:------------|:----------------|:--------------|
+|Decides to buy on their own|Sustainable alternative products|Single Payment|
+|Keen on Green products|Sustainable alternative products|Single Payment|
+|Inpulsive buyers|Sustainable alternative products|Single Payment|
+|Easy payment system without hassle|Sustainable alternative products|Single Payment|
+
+With these questions answered, a consideration of the features of the application  that aligns with above answers was considered.
+#### What will they buy (Products)
+|Application Features| 
+|:------------|
+|Product Search|
+|Filter Categories|
+|Add Products|
+|Update Products|
+|Show Products Count|
+|User Profile|
+|Order Notification|
+|Authentication System|
+|Basket and Payment System|
+
+|Application Database|
+|:------------|
+|Product Images|
+|Product Name|
+|Product Description|
+|Delivery Cost|
+|Shipping Details|
+|Product Ratings|
+
+#### How will they pay (Single Payment)
+|Singel Payment|
+|:------------|
+|Easy Payment without hassle|
+|Transaction must be finished after each single payment|
+|Payment refund or product return for unsatisfied customer within a specified time-line|
+
+## Marketing Strategies
+This is project has no budget and having considered pros and cons of all marketing strategies,  key marketing strategies  used are Organic social media marketing, Email marketing and Search engine optimisation.
+
+**Reasons for choosing Organic social media marketing strategy:**
+* The business has little or no budget for affiliate marketing and paid advertising.
+* As this is an eco-friendly shop we intend to build a brand identity that is recognisable to everyone, especially for green conscious audience. 
+* Aim to build loyalty with our customers/ audience through interaction on social media 
+* Create and share contents and blogs targeted at green audience .
+* Showcases our products to variety of potential customers in different social media platform.
+* Gives our customers opportunity to share our contents to other platforms.
+
+**Reasons for choosing Email marketing strategy:**
+* Due to lack of budget email marketing was choosen because it is free to set up.
+* With large email list eco shop can reach out to large audience at considerably low cost
+* Eco shop will have complete design over email correspondence.
+* Using email marketing is more likely to convert our subscribed customers to paying customers.
+* As a startup, we don't have to be overly consistent to pull in paying customers and we also have the opportunity to test diffrence sections of our newsletter.
+
+
 ## Search Engine Optimization and Ranking
 ### A short-tail and long tail keywords were formulated
 |Short-Tail Keywords|   Long-Tail Keywords   |
@@ -135,38 +193,44 @@ robots.txt was also included to the project detailing links the user-agent shoul
 ## Web Marketing 
 ### Facebook Page for digital marketing
 Facebook business page created for eco | shop
+
 ![facebook1](/static/images/readme_images/features_images/facebook1.jpg)
+
 ![facebook2](/static/images/readme_images/features_images/facebook2.jpg)
+
 ![facebook3](/static/images/readme_images/features_images/facebook3.jpg)
+
 ![facebook4](/static/images/readme_images/features_images/facebook4.jpg)
+
 ![facebook5](/static/images/readme_images/features_images/facebook5.jpg)
 ### Newsletter signup form for the purposes of digital marketing.
 A simple subscription form was created to enable interested users subscribe using mailchimp. Only email field was used to make it easy and quick for users to subscribe.
+
 ![email-marketing](/static/images/readme_images/features_images/email-marketing.jpg)
 ## Manual Testing
 ### Features Testing
 |Key Features|   User Value   |Functionality Test|Outcome|
 |:------------|:----------------|:-------------|:------------|
-|Logo|AAAAAAAAAA|DDDDDDDDDD|VVVVVVVVVVV|
-|Navbar|ZZZZZZZZZ|XXXXXXXXXX|HHHHHHHHHHH|
-|Product Search|AAAAAAAAA|ZZZZZZZ|VVVVVVVVVVV|
-|Filter by Price|NNNNNNN|LLLLLLLLL|PPPPPPPPP|
-|Filter by Rating|EEEEEEEE|DDDDDDDDD|WWWWWWWWWW|
-|Filter by Category|BBBBBBBBBB|XXXXXXXXXXX|HHHHHHHHH|
-|Filter by Skincare|FFFFFFFFFF|KKKKKKKK|RRRRRRRRR|
-|Filter by Haircare|KKKKKKKKK|VVVVVVVVVVV|LLLLLLLLLL|
-|Filter by Makeup|JJJJJJJJ|GGGGGGGGGG|DDDDDDDDDDD|
-|Filterby Bathrom|LLLLLLLLL|WWWWWWWWW|QQQQQQQQQQ|
-|Filter by Kitchen|AAAAAAAAA|QQQQQQQQQQQQQ|EEEEEEEEEEE|
-|Filter by Special Offers|AAAAAAAAA|ZZZZZZZZZZZ|SSSSSSSSSSS|
-|Sort by Price (low to high)|DDDDDDDDDD|QQQQQQQQQQQ|TTTTTTTTTTT|
-|Sort by Price (high to low )|AAAAAAAAAA|YYYYYYYYYYYY|RRRRRRRRRRR|
-|Sort by Rating (low to high )|TTTTTTTTTTT|FFFFFFFFFFF|HHHHHHHHHH|
-|Sort by Rating (high to low )|QQQQQQQQQQ|ZZZZZZZZZ|AAAAAAAAAA|
-|Sort by Name (A to Z )|DDDDDDDDD|NNNNNNNNNN|WWWWWWWWWWW|
-|Sort by Name (Z to A )|JJJJJJJJJ|KKKKKKKKKK|LLLLLLLLLLL|
-|Sort by Category (A to Z )|HHHHHHHHHHH|CCCCCCCCCC|NNNNNNNNNNN|
-|Sort by Category (Z to A )|HHHHHHHHHHH|VVVVVVVVVVVVVV|LLLLLLLLL|
+|Logo|Assist user navigate through the website as it renders the Home page when logo is clicked.![logo](/static/images/readme_images/features-testing-images/logo.jpg)|While on any other page (products, product_detail, basket, checkout etc) click on logo.|While on checkout page, logo was clicked and home page was rendered. Facilitates users experience should they want to view our blog, term, FAQ and return policy. ![logo-outcome](/static/images/readme_images/features-testing-images/logo-outcome.jpg)|
+|Navbar|Use to transverse all through the site, to search for products, filter by categories, price and ratings. ![navbar](/static/images/readme_images/features-testing-images/navbar.jpg)|From any page any page, click on drop down for any category to select products from sub categories |Clicked on makeup to select  glitters. ![navbar-outcome](/static/images/readme_images/features-testing-images/navbar-outcome.jpg)|
+|Product Search|Use for product search, word in product name or description. ![search](/static/images/readme_images/features-testing-images/search.jpg)|Type chosen word in search field and press enter, if word exist products related to the word will render.|Typed “natural” in search field and products with “natural” in there name or description is displayed with product count. ![search-outcome](/static/images/readme_images/features-testing-images/search-outcome.jpg)|
+|Filter by Price|Use to filter price in ascending order, from cheapest to most expensive products. This is for all products.|Select “All Products”, then select “By Price”. Page will render products prices in ascending order.|Selected “All Products”, then selected “By Price”. Page renders product prices in ascending order. ![filer-price-outcome](/static/images/readme_images/features-testing-images/filter-price-outcome.jpg)|
+|Filter by Rating|Use to filter rating in descending order, from highest to lowest rated products. This is for all products.|Selected “All Products”, then selected “By Rating”. Page renders product ratings in descending order.|Selected “All Products”, then selected “By rating”. Page renders rating in descending order. ![rating-outcome](/static/images/readme_images/features-testing-images/rating-outcome.jpg)|
+|Filter by Category|Use to filter products by category name alphabetical order. This is for all products.|Selected “All Products”, then selected “By Category”. Page renders products by category name alphabetical order.|Selected “All Products”, then selected “By Category”. Page renders products by category name alphabetical order. ![category-outcome](/static/images/readme_images/features-testing-images/category-outcome.jpg)|
+|Filter by Skincare|Use to filter products by skincare, and chose any sub category of your choice|Select “Skincare”, then select any sub category of your choice. Page renders products of chosen sub category.|Selected “Skincare”, then selected “Deodorants”. Page renders deodorant products in store. ![skincare-outcome](/static/images/readme_images/features-testing-images/skincare-outcome.jpg)|
+|Filter by Haircare|Use to filter products by haircare, and chose any sub category your choice.|Select “Haircare”, then select any sub category of your choice. Page renders products of chosen sub category.|Selected “Haircare”, then selected “Conditioners”. Page renders Conditioner products in store. ![haircare-outcome](/static/images/readme_images/features-testing-images/haircare-outcome.jpg)|
+|Filter by Makeup|Use to filter products by makeup, and chose any sub category of your choice.|Select “Makeup”, then select any sub category of your choice. Page renders products of chosen sub category.|Selected “Makeup”, then selected “Lips”. Page renders Lips products in store. ![makeup-outcome](/static/images/readme_images/features-testing-images/makeup-outcome.jpg)|
+|Filterby Bathroom|Use to filter products by bathroom, and chose any sub category of your choice.|Select “Bathroom”, then select any sub category of your choice. Page renders products of chosen sub category.|Selected “Bathroom”, then selected “Soap Bar”. Page renders Soap Bar products in store. ![bathroom-outcome](/static/images/readme_images/features-testing-images/bathroom-outcome.jpg)|
+|Filter by Kitchen|Use to filter products by kitchen, and chose any sub category of your choice.|Select “Kitchen”, then select any sub category of your choice. Page renders products of chosen sub category.|Selected “Kitchen”, then selected “Kitchen Essentials”. Page renders Kitchen Essentials products in store. ![kitchen-essentials-outcome](/static/images/readme_images/features-testing-images/kitchen-essentials-outcome.jpg)|
+|Filter by Special Offers|Use to filter products by special offers, and chose any sub category of your choice.|Select “Special Offers”, then select any sub category of your choice. Page renders products of chosen sub category.|Selected “Special Offers”, then selected “Clearance”. Page renders Clearance products in store. ![special-offer-outcome](/static/images/readme_images/features-testing-images/special-offers-outcome.jpg)|
+|Sort by Price (low to high)|Use to sort products by price (low to high)|Select “Sort by price (low to high)”, Page renders products with prices in ascending order|Selected “Sort by price (low to high)”,Page renders products starting from lowest priced item. ![sort-price-lh](/static/images/readme_images/features-testing-images/sort-price-lh.jpg)|
+|Sort by Price (high to low )|Select “Sort by price (high to low)”, Page renders products with prices in descending order.|Select “Sort by price (high to low)”, Page renders products with prices in descending order.|Selected “Sort by price (high to low)”,Page renders products starting from highest priced item. ![sort-price-hl](/static/images/readme_images/features-testing-images/sort-price-hl.jpg)|
+|Sort by Rating (low to high)|Use to sort products by rating (low to high)|Select “Sort by rating (low to high)”, Page renders products with ratings in ascending order.|Selected “Sort by rating (low to high)”,Page renders products starting from lowest rated item. ![ratings-lh](/static/images/readme_images/features-testing-images/ratings-lh.jpg)|
+|Sort by Rating (high to low)|Use to sort products by rating (high to low)|Select “Sort by rating (high to low)”, Page renders products with ratings in descending order.|Selected “Sort by rating (high to low)”,Page renders products starting from highest rated item. ![ratings-hl](/static/images/readme_images/features-testing-images/ratings-hl.jpg)|
+|Sort by Name (A to Z)|DDDDDDDDD|NNNNNNNNNN|WWWWWWWWWWW|
+|Sort by Name (Z to A)|JJJJJJJJJ|KKKKKKKKKK|LLLLLLLLLLL|
+|Sort by Category (A to Z)|HHHHHHHHHHH|CCCCCCCCCC|NNNNNNNNNNN|
+|Sort by Category (Z to A)|HHHHHHHHHHH|VVVVVVVVVVVVVV|LLLLLLLLL|
 |Shop all products button|AAAAAAAAAA|SSSSSSSSSS|VVVVVVVVV|
 |Clearance and Deals button|QQQQQQQQQ|RRRRRRRRRR|UUUUUUUUUUU|
 |Super User Update product button|VVVVVVVVVVV|SSSSSSSSSSS|RRRRRRRRRRR|
