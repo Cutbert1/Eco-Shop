@@ -250,19 +250,19 @@ A simple subscription form was created to enable interested users subscribe usin
 |Login|Use to log into the site as a registered user|As a registered user, clicked on “account” dropdown to login. ![login](/static/images/readme_images/features-testing-images/login.jpg)|Clicked on “account” dropdown, then login, renders sign-in page. ![login-outcome](/static/images/readme_images/features-testing-images/login-outcome.jpg)|
 |Signup|Use to register details on site |As a non-registered user, clicked on “account” dropdown to register|Clicked on “account” dropdown, then register, renders sign-up page. ![signup](/static/images/readme_images/features-testing-images/signup.jpg)|
 |Basket|Use to store purchases being made by a user|Select “add to basket” on the product you want to purchase|Selected “add to basket” on the product I want to purchase, basket stored the product details, amount, quantity, name of product etc. ![basket](/static/images/readme_images/features-testing-images/basket.jpg)|
-|Checkout form|Use to fill in billing, shipping and payment details.|Complete billing, shipping and payment details then click “complete order”. ![checkout-form](/static/images/readme_images/features-testing-images/checkout-form.jpg)|Order processed and checkout complete page rendered with order details. ![checkout-form-outcome](/static/images/readme_images/features-testing-images/checkout-form-outcome.jpg)|
-|Webhook payment_intent_succeeded|BBBBBBBBBB|NNNNNNNNNNN|WWWWWWWWW|
-|Webhook payment_intent_failed|BBBBBBBBBB|NNNNNNNNNNN|
-|E-mail Confirmation|QQQQQQQQQQQQQQ|HHHHHHHHHHHHHHHH|WWWWWWWWWW|
-|Newsletter signup form|RRRRRRRRRR|ZZZZZZZZZZZZZ|QQQQQQQQQQQQQ|
+|Checkout form|Use to fill in billing, shipping and payment details.|Complete billing, shipping and payment details, phone number MUST contain country code then click “complete order”. ![checkout-form](/static/images/readme_images/features-testing-images/checkout-form.jpg)|Order processed and checkout complete page rendered with order details. ![checkout-form-outcome](/static/images/readme_images/features-testing-images/checkout-form-outcome.jpg)|
+|Webhook payment_intent_succeeded|Used to confirm customer payment|Place an order on the frontend and review webhook events for deployed eco shop checkout/wh/ endpoint [stripe](https://eco-shop-natural-56f100a41f30herokuapp.com/checkout/wh/)|Placed an order and checked [stripe](https://eco-shop-natural-56f100a41f30herokuapp.com/checkout/wh/) for payment_intent_succeed event. ![payment-intent-succeed](/static/images/readme_images/features-testing-images/payment-intent-succeed.jpg)|
+|Webhook payment_intent_failed|BBBBBBBBBB|NNNNNNNNNNN|DDDDDDDDDDDDDD|
+|E-mail Confirmation|Use to confirm order has been processed to the customer|Place an order and email confirmation detailing order info will be sent to your inbox.|Placed an order and confirmation email was sent to my inbox. ![email](/static/images/readme_images/features_images/confirmation-email.jpg)|
+|Newsletter signup form|Use to enable users to subscribe to eco shop, digital marketing|Fill your email address and click subscribe. ![newsletter](/static/images/readme_images/features-testing-images/newsletter.jpg)|Fill in email address clicked subscribed, check mailchimp account ans saw email address added. ![mailchimp](/static/images/readme_images/features-testing-images/mailchimp.jpg)|
 |Call to action Banner flash on checkout page|QQQQQQQQQQQ|RRRRRRRRRRRR|FFFFFFFFFF|
-|Our Blog external link|QQQQQQQQQQQQQ|EEEEEEEEEEEEE|RRRRRRRRRRRR|
-|Terms and Conditions link|HHHHHHHHHHHHH|JJJJJJJJJJJ|KKKKKKKKKKK|
-|Privacy Statement link|GGGGGGGGGGGGG|LLLLLLLLLLLLLLL|YYYYYYYYYYYYY|
-|Returns link|DDDDDDDDDDDD|AAAAAAAAAAAAAAA|BBBBBBBBBBBBBB|
-|Facebook link|AAAAAAAAAAAAAAA|BBBBBBBBBBBBB|CCCCCCCCCCCC|
-|Scroll-to-top-button|QQQQQQQQQQ|TTTTTTTTTT|AAAAAAAAAAAAA|
-|Download button for Terms, Privacy and Returns|QQQQQQQQQQ|TTTTTTTTTTT|ZZZZZZZZZZZZZ|
+|Our Blog external link|Use to access external content to read more from our blog|From “our blog” page click “read more”|From “our blog” page clicked “read more”, renders external content related to topic being discussed on the blog.|
+|Terms and Conditions link|Use to access our terms and conditions of service|From the home page footer click "Terms"|Clicked "Terms" and terms and conditions page was rendered|
+|Privacy Statement link|Use to access our policy statement|From the home page footer click "Privacy"|Clicked "Privacy" and privacy statment page was rendered|
+|Returns link|Use to access our return policy and process|From the home page footer click "Returns"|Clicked "Returns" and return policy and process page was rendered|
+|Facebook link|Use to access our Facebook business page|From the home page footer click "facebook icon"|Clicked "facebook icon" and facebook business page was rendered|
+|Scroll-to-top-button|Use to scroll to the top of product list page|Click on scroll to get to the top of product list page. ![scroll](/static/images/readme_images/features-testing-images/scroll.jpg)|While at the bottom of product list page, clicked on scroll button to get to the top of the page. Scroll button is not visible when you are at the top of the page|
+|Download button for Terms, Privacy and Returns|Use to download Terms, Privacy statement and Return policy to your device|On "Terms page, click on download to get document downloaded to your device. ![download](/static/images/readme_images/features-testing-images/download.jpg)|From "Terms" page clicked download, document downloaded to my device|
 
 ### Lighthouse Performance
 |View Tested|   Outcome of the audit  |Soulution Applied|Screenshot of clear Validator output|

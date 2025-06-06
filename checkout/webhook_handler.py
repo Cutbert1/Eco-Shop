@@ -186,7 +186,7 @@ class WebhookHandler:
                 event, f"Error sending confirmation email: {str(e)}"
             )
 
-    def _create_order(self, order_data, basket,):
+    def _create_order(self, order_data, basket):
         """
         Create a new order in the database.
         """
