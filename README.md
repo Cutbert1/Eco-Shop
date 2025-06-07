@@ -267,8 +267,8 @@ A simple subscription form was created to enable interested users subscribe usin
 ### Lighthouse Performance
 |View Tested|   Outcome of the audit  |Soulution Applied|Screenshot of clear Validator output|
 |:------------|:----------------|:-------------|:------------|
-|Moble|AAAAAAAAAAAAA|ZZZZZZZZZZZ|CCCCCCCCCCCC|
-|Desktop|CCCCCCCCCCCC|VVVVVVVVVV|NNNNNNNNNNNNNNN|
+|Moble|![mobile](/static/images/readme_images/lighthouse_test/mobile.jpg)|Unable to apply any solution to improve performance as most are due to external links used to for specific functionalities throughout the site. ![3rd-part-mobile](/static/images/readme_images/lighthouse_test/3rd%20-party-mobile.jpg)|![lighthouse-desktop](/static/images/readme_images/lighthouse_test/desktop.jpg)|
+|Desktop|![lighthouse-desktop](/static/images/readme_images/lighthouse_test/desktop.jpg)|Unable to apply any solution to improve performance as most are due to external links used to for specific functionalities throughout the site. ![3rd-party](/static/images/readme_images/lighthouse_test/3rd%20party.jpg)|![lighthouse-desktop](/static/images/readme_images/lighthouse_test/desktop.jpg)|
 
 ### Validation Testing
 #### HTML Pages
