@@ -1,12 +1,19 @@
 {% load static %}
-<link rel="stylesheet" href="{% static 'faq/css/faq.css' %}">
+<!DOCTYPE html>
+<html lang="en">
+    <head>  
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{% static 'faq/css/faq.css' %}">
+        <title>Eco Shop</title>     
+    </head>
 
-<header>
+<body>
+  <header>
     <h1 class="text-white">Eco | Shop</h1>
     <p>Know more about our services</p>
-</header>
-<body>
-  <div class="container">
+  </header>
+  <div class="container" id="terms-content">
     <h1>Frequently Asked Questions</h1>
     <div class="faq-item">
       <h2>1. Are your products really eco-friendly?</h2>
@@ -43,3 +50,4 @@
     </div>
   </div>
 </body>
+</html>

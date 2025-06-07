@@ -38,7 +38,7 @@
                             <td class="align-middle">
                                 <div class="d-flex align-items-center">
                                     {% if item.product.product_image %}
-                                    <img class="img-fluid rounded mr-3" src="{{ item.product.product_image.url }}" style="max-width: 80px;">
+                                    <img class="img-fluid rounded mr-3" src="{{ item.product.product_image.url }}" alt="item-image" style="max-width: 80px;">
                                     {% else %}
                                     <img class="img-fluid rounded mr-3" src="{{ MEDIA_URL}}noimage.png" style="max-width: 80px;">
                                     {% endif %}
@@ -73,7 +73,7 @@
                                     <div class="mt-2">
                                         <a class="btn btn-sm btn-outline-primary me-2 update-link" id="updateButton">Update</a>
                                         <a class="btn btn-sm btn-outline-danger remove-item" id="remove_{{ item.item_id }}">Remove</a>
-                                    </di>
+                                    </div>
                                 </form>
                             </td>
                             <td class="align-middle">${{ item.product.price | calc_subtotal:item.quantity }}</td>

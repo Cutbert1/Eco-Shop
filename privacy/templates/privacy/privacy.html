@@ -1,11 +1,18 @@
 {% load static %}
-<link rel="stylesheet" href="{% static 'terms/css/terms.css' %}">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'terms/css/terms.css' %}">
+    <title>Eco Shop</title>
+</head>
 
-<header>
-    <h1 class="text-white">Eco | Shop</h1>
-    <p>Our Privacy Statement</p>
-</header>
 <body>
+    <header>
+        <h1 class="text-white">Eco | Shop</h1>
+        <p>Our Privacy Statement</p>
+    </header>
     <div class="container" id="privacy-content">
         <h1>Privacy Policy</h1>
         <p><strong>Effective Date:</strong> May 30, 2025</p>
@@ -60,6 +67,7 @@
         <button class="btn-download" onclick="downloadPDF()">Download as PDF</button>
     </div>
 </body>
+</html>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>

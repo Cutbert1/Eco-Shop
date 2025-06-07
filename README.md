@@ -255,7 +255,7 @@ A simple subscription form was created to enable interested users subscribe usin
 |Webhook payment_intent_failed|BBBBBBBBBB|NNNNNNNNNNN|DDDDDDDDDDDDDD|
 |E-mail Confirmation|Use to confirm order has been processed to the customer|Place an order and email confirmation detailing order info will be sent to your inbox.|Placed an order and confirmation email was sent to my inbox. ![email](/static/images/readme_images/features_images/confirmation-email.jpg)|
 |Newsletter signup form|Use to enable users to subscribe to eco shop, digital marketing|Fill your email address and click subscribe. ![newsletter](/static/images/readme_images/features-testing-images/newsletter.jpg)|Fill in email address clicked subscribed, check mailchimp account ans saw email address added. ![mailchimp](/static/images/readme_images/features-testing-images/mailchimp.jpg)|
-|Call to action Banner flash on checkout page|QQQQQQQQQQQ|RRRRRRRRRRRR|FFFFFFFFFF|
+|404 page|Use to inform users they are accessing  a URL that does not exist in the application|Change URL to any broken URL path|FFFFFFFFFF|
 |Our Blog external link|Use to access external content to read more from our blog|From “our blog” page click “read more”|From “our blog” page clicked “read more”, renders external content related to topic being discussed on the blog.|
 |Terms and Conditions link|Use to access our terms and conditions of service|From the home page footer click "Terms"|Clicked "Terms" and terms and conditions page was rendered|
 |Privacy Statement link|Use to access our policy statement|From the home page footer click "Privacy"|Clicked "Privacy" and privacy statment page was rendered|
@@ -274,20 +274,22 @@ A simple subscription form was created to enable interested users subscribe usin
 #### HTML Pages
 |Page Tested|Screenshot of Errors and Warnings   |Solution Applied|Screenshot of clear Validation Output|
 |:------------|:----------------|:-------------|:------------|
-|index.html|AAAAAAAAAA|ZZZZZZZZZZZZ|XXXXXXXXXXXX|
-|base.html|ZZZZZZZZZZZZZ|AAAAAAAAAAAA|HHHHHHHHHHH|
-|basket.html|WWWWWWWWWWW|VVVVVVVVVVVVV|BBBBBBBBBBBB|
-|blog.html|AAAAAAAAAAA|XXXXXXXXXXX|BBBBBBBBBBBBBBB|
-|checkout.html|ZZZZZZZZZZZZZ|CCCCCCCCCCCCCC|VVVVVVVVVVVVV|
-|checkout_complete.html|AAAAAAAAAAAA|XXXXXXXXXXXX|CCCCCCCCCCCC|
-|faq.html|QQQQQQQQQQQQQQ|ZZZZZZZZZZZZ|FFFFFFFFFFFF|
-|privacy.html|AAAAAAAAAAAAAAA|ZZZZZZZZZZZ|LLLLLLLLLLL|
-|products.html|DDDDDDDDDDDDDD|FFFFFFFFFFFFF|QQQQQQQQQQQ|
-|product_detail.html|DDDDDDDDDD|ZZZZZZZZZZZ|QQQQQQQQQQQQ|
-|update_product.html|CCCCCCCCCCCCCC|SSSSSSSSSSSS|FFFFFFFFFFFFFFFF|
-|profile.html|WWWWWWWWWWW|QQQQQQQQQQ|YYYYYYYYYYY|
-|returns.html|UUUUUUUUU|KKKKKKKKKK|LLLLLLLLLLLL|
-|terms.html|QQQQQQQQQQQ|HHHHHHHHHHH|JJJJJJJJJJJ|
+|Home page|![home-page](/static/images/readme_images/validation_testing/homepage.jpg)|Updated unordered list as parent element to list item. Changed ID to avoid duplication between mobile-top-header.html and base.html. Removed trailing slash from mailchimp href.|All error was cleared. There are 2 warnings of possible misuse of aria-label. ![home-page-fix](/static/images/readme_images/validation_testing/homepage-fix.jpg)|
+|products page|![product-list-fix](/static/images/readme_images/validation_testing/homepage-fix.jpg)|No error. 2 warnings of aria-label possible misuse |No error. 2 warnings of possible misuse aria-label use. ![product-list-fix](/static/images/readme_images/validation_testing/homepage-fix.jpg)|
+|product_detail.html|![product-details](/static/images/readme_images/validation_testing/homepage-fix.jpg)|No error. 2 warnings of aria-label possible misuse |No error. 2 warnings of possible misuse aria-label use.![product-details](/static/images/readme_images/validation_testing/homepage-fix.jpg) |
+|basket page|![basket-page](/static/images/readme_images/validation_testing/basket-page.jpg)|Add alt attribute to image. Updated stray div end tag which also resolved the form error|All error was cleared. There are 2 warnings of possible misuse of aria-label. ![basket-page-fix](/static/images/readme_images/validation_testing/homepage-fix.jpg)|
+|checkout page|![checkout-page](/static/images/readme_images/validation_testing/homepage-fix.jpg)|No error. 2 warnings of aria-label possible misuse|![checkout-page-fix](/static/images/readme_images/validation_testing/homepage-fix.jpg)|
+|checkout_complete.html|![checkout-complete-page](/static/images/readme_images/validation_testing/homepage-fix.jpg)|No error. 2 warnings of aria-label possible misuse|![checkout-complete-page-fix](/static/images/readme_images/validation_testing/homepage-fix.jpg)|
+|Blog page|![blog-page](/static/images/readme_images/validation_testing/blog-page.jpg)|Add html boilerplate, updated unclosed div elements|No error or warning. ![blog-page-fix](/static/images/readme_images/validation_testing/blog-page-fix.jpg)|
+|FAQ page|![faq-page](/static/images/readme_images/validation_testing/faq-page.jpg)|Add html boilerplate, and moved header to become child to body tag|No error or warning. ![faq-page-fix](/static/images/readme_images/validation_testing/faq-page-fix.jpg)|
+|Privacy page|![privacy-page](/static/images/readme_images/validation_testing/privacy-page.jpg)|Add html boilerplate, and moved header to become child to body tag|No error or warning. ![privay-page-fix](/static/images/readme_images/validation_testing/privacy-page-fix.jpg)|
+|Terms page|![terms-page](/static/images/readme_images/validation_testing/terms-page.jpg)|Add html boilerplate, and moved header to become child to body tag|No error or warning. ![terms-page-fix](/static/images/readme_images/validation_testing/terms-page-fix.jpg)|
+|Returns page|![returns-page](/static/images/readme_images/validation_testing/returns-page.jpg)|Add html boilerplate, and moved header to become child to body tag.|No error or warning. ![returns-page-fix](/static/images/readme_images/validation_testing/returns-page-fix.jpg)|
+|update_product page|CCCCCCCCCCC|SSSSSSSSSSSS|FFFFFFFFFFFFFFFF|
+|Add_product page|CCCCCCCCCCC|SSSSSSSSSSSS|FFFFFFFFFFFFFFFF|
+|profile page|WWWWWWWWWWW|QQQQQQQQQQ|YYYYYYYYYYY|
+
+
 |clearable_file_input.html|AAAAAAAAAAAA|EEEEEEEEEEE|TTTTTTTTTT|
 
 #### CSS Files
