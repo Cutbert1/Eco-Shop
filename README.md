@@ -255,7 +255,7 @@ A simple subscription form was created to enable interested users subscribe usin
 |Webhook payment_intent_failed|BBBBBBBBBB|NNNNNNNNNNN|DDDDDDDDDDDDDD|
 |E-mail Confirmation|Use to confirm order has been processed to the customer|Place an order and email confirmation detailing order info will be sent to your inbox.|Placed an order and confirmation email was sent to my inbox. ![email](/static/images/readme_images/features_images/confirmation-email.jpg)|
 |Newsletter signup form|Use to enable users to subscribe to eco shop, digital marketing|Fill your email address and click subscribe. ![newsletter](/static/images/readme_images/features-testing-images/newsletter.jpg)|Fill in email address clicked subscribed, check mailchimp account ans saw email address added. ![mailchimp](/static/images/readme_images/features-testing-images/mailchimp.jpg)|
-|404 page|Use to inform users they are accessing  a URL that does not exist in the application|Change URL to any broken URL path|FFFFFFFFFF|
+|404 page|Use to inform users they are accessing  a URL that does not exist in the application|Change URL to any broken URL path, eg plan|Renderes 404 page. ![404-fix](/static/images/readme_images/features-testing-images/404-fix.jpg)|
 |Our Blog external link|Use to access external content to read more from our blog|From “our blog” page click “read more”|From “our blog” page clicked “read more”, renders external content related to topic being discussed on the blog.|
 |Terms and Conditions link|Use to access our terms and conditions of service|From the home page footer click "Terms"|Clicked "Terms" and terms and conditions page was rendered|
 |Privacy Statement link|Use to access our policy statement|From the home page footer click "Privacy"|Clicked "Privacy" and privacy statment page was rendered|
@@ -271,7 +271,7 @@ A simple subscription form was created to enable interested users subscribe usin
 |Desktop|![lighthouse-desktop](/static/images/readme_images/lighthouse_test/desktop.jpg)|Unable to apply any solution to improve performance as most are due to external links used to for specific functionalities throughout the site. ![3rd-party](/static/images/readme_images/lighthouse_test/3rd%20party.jpg)|![lighthouse-desktop](/static/images/readme_images/lighthouse_test/desktop.jpg)|
 
 ### Validation Testing
-#### HTML Pages
+#### HTML Pages [HTML W3C Validator](https://validator.w3.org/)
 |Page Tested|Screenshot of Errors and Warnings   |Solution Applied|Screenshot of clear Validation Output|
 |:------------|:----------------|:-------------|:------------|
 |Home page|![home-page](/static/images/readme_images/validation_testing/homepage.jpg)|Updated unordered list as parent element to list item. Changed ID to avoid duplication between mobile-top-header.html and base.html. Removed trailing slash from mailchimp href.|All error was cleared. There are 2 warnings of possible misuse of aria-label. ![home-page-fix](/static/images/readme_images/validation_testing/homepage-fix.jpg)|
@@ -285,59 +285,67 @@ A simple subscription form was created to enable interested users subscribe usin
 |Privacy page|![privacy-page](/static/images/readme_images/validation_testing/privacy-page.jpg)|Add html boilerplate, and moved header to become child to body tag|No error or warning. ![privay-page-fix](/static/images/readme_images/validation_testing/privacy-page-fix.jpg)|
 |Terms page|![terms-page](/static/images/readme_images/validation_testing/terms-page.jpg)|Add html boilerplate, and moved header to become child to body tag|No error or warning. ![terms-page-fix](/static/images/readme_images/validation_testing/terms-page-fix.jpg)|
 |Returns page|![returns-page](/static/images/readme_images/validation_testing/returns-page.jpg)|Add html boilerplate, and moved header to become child to body tag.|No error or warning. ![returns-page-fix](/static/images/readme_images/validation_testing/returns-page-fix.jpg)|
-|update_product page|CCCCCCCCCCC|SSSSSSSSSSSS|FFFFFFFFFFFFFFFF|
+|Update product page|CCCCCCCCCCC|SSSSSSSSSSSS|FFFFFFFFFFFFFFFF|
 |Add_product page|CCCCCCCCCCC|SSSSSSSSSSSS|FFFFFFFFFFFFFFFF|
 |profile page|WWWWWWWWWWW|QQQQQQQQQQ|YYYYYYYYYYY|
 
 
-|clearable_file_input.html|AAAAAAAAAAAA|EEEEEEEEEEE|TTTTTTTTTT|
-
-#### CSS Files
+#### CSS Files [CSS W3C Jigsaw Validator](https://jigsaw.w3.org/css-validator/)
 |Page Tested|Screenshot of Errors and Warnings   |Solution Applied|Screenshot of clear Validation Output|
 |:------------|:----------------|:-------------|:------------|
-|base.css|AAAAAAAAAAAA|DDDDDDDDDDDDD|GGGGGGGGGGGG|
-|blog.css|DDDDDDDDDD|WWWWWWWWWWWW|RRRRRRRRRR|
-|checkout.css|WWWWWWWWWWW|QQQQQQQQQQQQ|RRRRRRRRRRR|
-|faq.css|ZZZZZZZZZZZ|XXXXXXXXXX|VVVVVVVVVVVVVVV|
-|profile.css|DDDDDDDDDD|AAAAAAAAAAAA|EEEEEEEEEE|
-|terms.css|BBBBBBBBBBBBBB|VVVVVVVVVVVVVVV|QQQQQQQQQQQ|
+|base.css|![base-css](/static/images/readme_images/validation_testing/base-css.jpg)|Add px as a unit to header-container class|![base-css-fix](/static/images/readme_images/validation_testing/base-css-fix.jpg)|
+|blog.css|No error or warning. ![blog-css](/static/images/readme_images/validation_testing/blog-css.jpg)|N/A|![blog-css](/static/images/readme_images/validation_testing/blog-css.jpg)|
+|checkout.css|No error or warning. ![checkout-css](/static/images/readme_images/validation_testing/checkout-css.jpg)|N/A|![checkout-css](/static/images/readme_images/validation_testing/checkout-css.jpg)|
+|faq.css|No error or warning. ![faq-css](/static/images/readme_images/validation_testing/faq-css.jpg)|N/A|![faq-css](/static/images/readme_images/validation_testing/faq-css.jpg)|
+|profile.css|No error or warning. ![profile-css](/static/images/readme_images/validation_testing/profile-css.jpg)|NA|![profile-css](/static/images/readme_images/validation_testing/profile-css.jpg)|
+|terms.css|No error or warning. ![terms-css](/static/images/readme_images/validation_testing/terms-css.jpg)|N/A|![terms-css](/static/images/readme_images/validation_testing/terms-css.jpg)|
 
-#### Python Files
+#### Python Files [PEP3 Validator](https://pep8ci.herokuapp.com/)
 |Page Tested|Screenshot of Errors and Warnings   |Solution Applied|Screenshot of clear Validation Output|
 |:------------|:----------------|:-------------|:------------|
-|basket_tools.py|WWWWWWWWWWWW|QQQQQQQQQQQQQQ|TTTTTTTTTTT|
-|contexts.py|AAAAAAAAAAA|CCCCCCCCCCCC|BBBBBBBBBBB|
-|basket\urls.py|SSSSSSSSSS|AAAAAAAAAAA|DDDDDDDDDDDDDD|
-|basket\views.py|CCCCCCCCCCCC|BBBBBBBBBBBBB|NNNNNNNNNNNNN|
-|checkout\admin.py|QQQQQQQQQQQQ|XXXXXXXXXXX|VVVVVVVVVVVV|
-|checkout\forms.py|SSSSSSSSSSSSS|XXXXXXXXXXXX|BBBBBBBBBBB|
-|checkout\models.py|GGGGGGGGGGGGGG|HHHHHHHHHHHH|JJJJJJJJJJ|
-|checkout\signals.py|DDDDDDDDDDD|WWWWWWWWWWW|LLLLLLLLLLL|
-|checkout\urls.py|YYYYYYYYYYYY|UUUUUUUUUU|RRRRRRRRRR|
-|checkout\views.py|QQQQQQQQQQQQQ|HHHHHHHHHHHH|LLLLLLLLL|
-|checkout\webhook_handler.py|RRRRRRRRRRRRR|WWWWWWWWWWW|TTTTTTTTTTT|
-|checkout|webhooks.py|HHHHHHHHHHH|KKKKKKKKKKK|JJJJJJJJJJ|
-|products\admin.py|QQQQQQQQQQQQQQ|HHHHHHHHHH|EEEEEEEEEEEEE|
-|products\forms.py|UUUUUUUUUU|RRRRRRRRRRR|KKKKKKKKKKKK|
-|products\models.py|AAAAAAAAAA|ZZZZZZZZZZZZZ|DDDDDDDDDDD|
-|products\urls.py|UUUUUUUUUUUU|VVVVVVVVVVV|NNNNNNNNNNNNN|
-|products\views.py|QQQQQQQQQQ|PPPPPPPPPPP|MMMMMMMMMMMMM|
-|products\widgets.py|SSSSSSSSSSS|XXXXXXXXX|BBBBBBBBBBBB|
-|profiles\forms.py|FFFFFFFFFFFFF|RRRRRRRRRRRRR|WWWWWWWWWW|
-|profiles\models.py|QQQQQQQQQQQQQQ|YYYYYYYYYYYY|UUUUUUUUUU|
-|profiles\urls.py|YYYYYYYYYYY|KKKKKKKKKKKK|LLLLLLLLLLL|
-|profiles\views.py|PPPPPPPPPPP|DDDDDDDDDD|MMMMMMMMMMM|
+|basket\views.py|No error or warning. ![basket-views](/static/images/readme_images/validation_testing/basket-views.jpg)|N/A|![basket-views](/static/images/readme_images/validation_testing/basket-views.jpg)|
+|basket\contexts.py|No error or warning. ![basket-context](/static/images/readme_images/validation_testing/basket-context.jpg)|N/A|![basket-context](/static/images/readme_images/validation_testing/basket-context.jpg)|
+|basket\urls.py|No error or warning. ![basket-urls](/static/images/readme_images/validation_testing/basket-urls.jpg)|N/A| ![basket-urls](/static/images/readme_images/validation_testing/basket-urls.jpg)|
+|checkout\admin.py|No error or warning. ![checkout-admin](/static/images/readme_images/validation_testing/checkout-admin.jpg)|N/A|![checkout-admin](/static/images/readme_images/validation_testing/checkout-admin.jpg)|
+|checkout\forms.py|No error or warning. ![checkout-form](/static/images/readme_images/validation_testing/checkout-form.jpg)|N/A|![checkout-form](/static/images/readme_images/validation_testing/checkout-form.jpg)|
+|checkout\models.py|No error or warning. ![checkout-models](/static/images/readme_images/validation_testing/checkout-models.jpg)|N/A|![checkout-models](/static/images/readme_images/validation_testing/checkout-models.jpg)|
+|checkout\signals.py|No error or warning. ![checkout-signals](/static/images/readme_images/validation_testing/checkout-signals.jpg)|N/A|![checkout-signals](/static/images/readme_images/validation_testing/checkout-signals.jpg)|
+|checkout\urls.py|No error or warning. ![checkout-urls](/static/images/readme_images/validation_testing/checkout-urls.jpg)|N/A|![checkout-urls](/static/images/readme_images/validation_testing/checkout-urls.jpg)|
+|checkout\views.py|No error or warning. ![checkout-views](/static/images/readme_images/validation_testing/checkout-views.jpg)|N/A|![checkout-views](/static/images/readme_images/validation_testing/checkout-views.jpg)|
+|checkout\webhook_handler.py|No error or warning. ![checkout-webhook-handler](/static/images/readme_images/validation_testing/checkout-webhook-handler.jpg)|N/A|![checkout-webhook-handler](/static/images/readme_images/validation_testing/checkout-webhook-handler.jpg)|
+|checkout\webhooks.py|No error or warning. ![checkout-webhook](/static/images/readme_images/validation_testing/checkout-webhook.jpg)|N/A|![checkout-webhook](/static/images/readme_images/validation_testing/checkout-webhook.jpg)|
+|products\admin.py|No error or warning. ![product-admin](/static/images/readme_images/validation_testing/product-admin.jpg)|N/A|![product-admin](/static/images/readme_images/validation_testing/product-admin.jpg)|
+|products\forms.py|No error or warning. ![product-form](/static/images/readme_images/validation_testing/product-form.jpg)|N/A|![product-form](/static/images/readme_images/validation_testing/product-form.jpg)|
+|products\models.py|No error or warning. ![product-models](/static/images/readme_images/validation_testing/product-models.jpg)|N/A|![product-models](/static/images/readme_images/validation_testing/product-models.jpg)|
+|products\urls.py|No error or warning. ![product-urls](/static/images/readme_images/validation_testing/product-urls.jpg)|N/A|![product-urls](/static/images/readme_images/validation_testing/product-urls.jpg)|
+|products\views.py|No error or warning. ![product-views](/static/images/readme_images/validation_testing/product-views.jpg)|N/A|![product-views](/static/images/readme_images/validation_testing/product-views.jpg)|
+|products\widgets.py|No error or warning. ![product-widget](/static/images/readme_images/validation_testing/product-widget.jpg)|N/A|![product-widget](/static/images/readme_images/validation_testing/product-widget.jpg)|
+|profiles\forms.py|No error or warning. ![profile-form](/static/images/readme_images/validation_testing/profile-form.jpg)|N/A|![profile-form](/static/images/readme_images/validation_testing/profile-form.jpg)|
+|profiles\models.py|No error or warning. ![profile-models](/static/images/readme_images/validation_testing/profile-models.jpg)|N/A|![profile-models](/static/images/readme_images/validation_testing/profile-models.jpg)|
+|profiles\urls.py|No error or warning. ![profile-urls](/static/images/readme_images/validation_testing/profile-urls.jpg)|N/A|![profile-urls](/static/images/readme_images/validation_testing/profile-urls.jpg)|
+|profiles\views.py|No error or warning. ![profile-views](/static/images/readme_images/validation_testing/profile-views.jpg)|N/A|![profile-views](/static/images/readme_images/validation_testing/profile-views.jpg)|
 
-#### JavaScript Files
+#### JavaScript Files [JavaScript Validator JSHint](https://jshint.com/)
 |Page Tested|Screenshot of Errors and Warnings   |Solution Applied|Screenshot of clear Validation Output|
 |:------------|:----------------|:-------------|:------------|
-|quantity_script.html|SSSSSSSSSSS|QQQQQQQQQQQ|DDDDDDDDDD|
-|stripe_elements.js|DDDDDDDDDDDDDDD|UUUUUUUUUU|TTTTTTTTT|
-|country_field.js|QQQQQQQQQQQQ|SSSSSSSSSSS|ZZZZZZZZZZZZ|
+|quantity_script|No error. ![quantity-script](/static/images/readme_images/validation_testing/qauntity-script.jpg)|N/A|![quantity-script](/static/images/readme_images/validation_testing/qauntity-script.jpg)|
+|stripe_elements.js|No error. ![stripe-elements](/static/images/readme_images/validation_testing/stripe-elelments.jpg)|N/A|![stripe-elements](/static/images/readme_images/validation_testing/stripe-elelments.jpg)|
+|country_field.js|No error. ![country-fields](/static/images/readme_images/validation_testing/country-fields.jpg)|N/A|![country-fields](/static/images/readme_images/validation_testing/country-fields.jpg)|
 
 ### Browser compatibility
-#### Browser compatibility Test Result
+|Browser Tested|Functionality Tested|Visual Consistency|Outcome|
+|:------------:|:----------------:|:-------------:|:-------------:|
+|![chrome](/static/images/readme_images/browser-compatibility-test/chrome.jpg)|Navigations, Forms, Links and Buttons|Layout, design, content display consistency|Intended appearance and responsiveness is good|
+|![edge](/static/images/readme_images/browser-compatibility-test/edge.jpg)|Navigations, Forms, Links and Buttons|Layout, design, content display consistency|Intended appearance and responsiveness is good|
+|![firefox](/static/images/readme_images/browser-compatibility-test/firefox.jpg)|Navigations, Forms, Links and Buttons|Layout, design, content display consistency|Intended appearance and responsiveness is good|
 ### Screen sizes Responsiveness
+|Device Tested|Site responsive >=700px |Site responsive <699px|Render as expected|
+|:------------:|:----------------:|:-------------:|:--------------:|
+|iPhone 12 Pro (Mobile)|N/A|Good|Good 390px X 844px ![iPhone-12-pro](/static/images/readme_images/screen-size-responsivness-test/iphone-12%20pro.jpg)|
+|iPad Mini (Tablet)|Good|N/A|Good 768px X 1024px ![ipad-mini](/static/images/readme_images/screen-size-responsivness-test/ipad-mini.jpg)|
+|iPad Air (Laptop)|Good|N/A|Good 820px X 1180px ![ipad-air](/static/images/readme_images/screen-size-responsivness-test/ipad-air.jpg)|
+|Nest Hub Max (Desktop)|Good|N/A|Good 1280px X 800px ![nest-hub-max](/static/images/readme_images/screen-size-responsivness-test/nest-hub-max.jpg)|
+
 ### Pages Responsivnes
 ### Accessibility
 ## Technologies Used

@@ -8,7 +8,7 @@
 }
 
 .order-record {
-    max-height: 416px; /* height of profile form + submit button */
+    max-height: 416px;
     overflow-y: auto;
 }
 

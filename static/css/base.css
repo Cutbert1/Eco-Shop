@@ -242,7 +242,7 @@ body {
 /*  Moble navbar collapse */
 @media screen and (max-width: 991px) {
     .header-container {
-        padding-top: 116;
+        padding-top: 116px;
     }
 
     body {
