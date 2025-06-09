@@ -252,7 +252,6 @@ A simple subscription form was created to enable interested users subscribe usin
 |Basket|Use to store purchases being made by a user|Select “add to basket” on the product you want to purchase|Selected “add to basket” on the product I want to purchase, basket stored the product details, amount, quantity, name of product etc. ![basket](/static/images/readme_images/features-testing-images/basket.jpg)|
 |Checkout form|Use to fill in billing, shipping and payment details.|Complete billing, shipping and payment details, phone number MUST contain country code then click “complete order”. ![checkout-form](/static/images/readme_images/features-testing-images/checkout-form.jpg)|Order processed and checkout complete page rendered with order details. ![checkout-form-outcome](/static/images/readme_images/features-testing-images/checkout-form-outcome.jpg)|
 |Webhook payment_intent_succeeded|Used to confirm customer payment|Place an order on the frontend and review webhook events for deployed eco shop checkout/wh/ endpoint [stripe](https://eco-shop-natural-56f100a41f30herokuapp.com/checkout/wh/)|Placed an order and checked [stripe](https://eco-shop-natural-56f100a41f30herokuapp.com/checkout/wh/) for payment_intent_succeed event. ![payment-intent-succeed](/static/images/readme_images/features-testing-images/payment-intent-succeed.jpg)|
-|Webhook payment_intent_failed|BBBBBBBBBB|NNNNNNNNNNN|DDDDDDDDDDDDDD|
 |E-mail Confirmation|Use to confirm order has been processed to the customer|Place an order and email confirmation detailing order info will be sent to your inbox.|Placed an order and confirmation email was sent to my inbox. ![email](/static/images/readme_images/features_images/confirmation-email.jpg)|
 |Newsletter signup form|Use to enable users to subscribe to eco shop, digital marketing|Fill your email address and click subscribe. ![newsletter](/static/images/readme_images/features-testing-images/newsletter.jpg)|Fill in email address clicked subscribed, check mailchimp account ans saw email address added. ![mailchimp](/static/images/readme_images/features-testing-images/mailchimp.jpg)|
 |404 page|Use to inform users they are accessing  a URL that does not exist in the application|Change URL to any broken URL path, eg plan|Renderes 404 page. ![404-fix](/static/images/readme_images/features-testing-images/404-fix.jpg)|
@@ -285,10 +284,6 @@ A simple subscription form was created to enable interested users subscribe usin
 |Privacy page|![privacy-page](/static/images/readme_images/validation_testing/privacy-page.jpg)|Add html boilerplate, and moved header to become child to body tag|No error or warning. ![privay-page-fix](/static/images/readme_images/validation_testing/privacy-page-fix.jpg)|
 |Terms page|![terms-page](/static/images/readme_images/validation_testing/terms-page.jpg)|Add html boilerplate, and moved header to become child to body tag|No error or warning. ![terms-page-fix](/static/images/readme_images/validation_testing/terms-page-fix.jpg)|
 |Returns page|![returns-page](/static/images/readme_images/validation_testing/returns-page.jpg)|Add html boilerplate, and moved header to become child to body tag.|No error or warning. ![returns-page-fix](/static/images/readme_images/validation_testing/returns-page-fix.jpg)|
-|Update product page|CCCCCCCCCCC|SSSSSSSSSSSS|FFFFFFFFFFFFFFFF|
-|Add_product page|CCCCCCCCCCC|SSSSSSSSSSSS|FFFFFFFFFFFFFFFF|
-|profile page|WWWWWWWWWWW|QQQQQQQQQQ|YYYYYYYYYYY|
-
 
 #### CSS Files [CSS W3C Jigsaw Validator](https://jigsaw.w3.org/css-validator/)
 |Page Tested|Screenshot of Errors and Warnings   |Solution Applied|Screenshot of clear Validation Output|
@@ -347,25 +342,64 @@ A simple subscription form was created to enable interested users subscribe usin
 |Nest Hub Max (Desktop)|Good|N/A|Good 1280px X 800px ![nest-hub-max](/static/images/readme_images/screen-size-responsivness-test/nest-hub-max.jpg)|
 
 ### Pages Responsivnes
-### Accessibility
+|Home Page|Products Page|Product Detail Page|Basket Page|Checkout Page|Product Management Page|
+|:------------:|:----------------:|:-------------:|:--------------:|:--------:|:------:|
+|![home-page](/static/images/readme_images/page-responsivness/home-page.jpg)|![products-page](/static/images/readme_images/page-responsivness/products-page.jpg)|![product-detail-page](/static/images/readme_images/page-responsivness/products-details.jpg)|![basket-page](/static/images/readme_images/page-responsivness/basket-page.jpg)|![checkout-page](/static/images/readme_images/page-responsivness/checkout-page.jpg)|![product-management-page](/static/images/readme_images/page-responsivness/product-management-page.jpg)|
 ## Technologies Used
+* Bootstrap
+* Django
+* Amazon Web Service
+* Database
+* Heroku
+* Stripe
 ### Languages Used
+* Python
+* JavaScript
+* HTML
+* CSS
+* DTL
 ## Bugs
 #### Bugs Resolved
 |Bug|   Description |Solution Applied|Result|
 |:------------|:----------------|:-------------|:------------|
+|Basket, search and account duplication|After created mobile-top-header.html, on rendering when I try to reduce the size of screen the account, basket and search tends to duplicate when screen is reduced from 992px. ![duplicate](/static/images/readme_images/bugs/duplicate.jpg)|Added “d-lg-none" class to account basket and search|Bug fixed. ![duplicate-fix](/static/images/readme_images/bugs/duplicate-fix.jpg)|
+|Webhook Handler|After making a purchase it shows successful on frontend, however there is internal server error 500 on /check/wh printed on python terminal. On stripe CLI it also shows 500 POST error. However stripe portal shows that payment intent is created and charge succeeds. ![webhook-handler1](/static/images/readme_images/bugs/webhook-handler1.jpg) ![webhook-handler2](/static/images/readme_images/bugs/webhook-handler2.jpg) ![payment-intent](/static/images/readme_images/bugs/payment-intent.jpg) ![log](/static/images/readme_images/bugs/log.jpg)|Followed below steps **1**. Get the payment intent from Stripe. **2**. Get the basket metadata. **3**. Get the billing and shipping details. **4**. Attempt to get the order object (if it exists), trying 5 times. **5**. If the order exists, verify the order in the database. **6**. If it doesn't exist (else), create the order in the database. **7**. When creating the order, included an exception catch to throw and 500 your Devtools > Network tab.|Bug fixed. ![webhook-handler-fix](/static/images/readme_images/bugs/webhook-handler-fix.jpg)|
 
 #### Bugs Unresolved
 |Bug|   Description |Solution Applied|Result|
 |:------------|:----------------|:-------------|:------------|
 
 ## Libraries
+* Django-allauth
+* Django-countries
+* django-crispy-forms
+* Django-phonenumber
+* Pillow
+* Psycopg2==2.9.10
+* Setup tools
+* Gunicorn
+* Boto
 ## Deployment
+### Deployment Steps
+|Steps|  Action |
+|:------------|:----------------|
+|requirments.txt|Ensure all installed packages are in requirements.txt file. ![requirements](/static/images/readme_images/Deployment/requirements.jpg)|
+|Cache control|Set cache control in settings.py. ![cache-control](/static/images/readme_images/Deployment/cache-control.jpg)|
+|DEBUG|Set DEBUG = 'DEVELOPMENT' in os.environ. ![debug](/static/images/readme_images/Deployment/debug.jpg)|
+|Heroku|Sign into Heroku and go to settings tab and ensure all config variables are added, Key:Value pairs. ![heroku](/static/images/readme_images/Deployment/heroku.jpg)|
+|Deploy|Go to Deploy tab to continue deployment. ![deploy](/static/images/readme_images/Deployment/deploy.jpg)|
+|Connection|Ensure Heroku App is linked to GitHub repository. ![connection](/static/images/readme_images/Deployment/connection.jpg)|
+|Branch Deployment|Click on deploy branch. ![branch](/static/images/readme_images/Deployment/branch.jpg)|
+
 ## Credits
 ### Codes
+* Code Institue eCommerce Project. **Boutique Ado**
 ### Tutorials
+* Tutor Support
+* [stackoverflow](https://stackoverflow.com/questions)
 ### Photos
-### Text Content
+* Product images and description : [Peace with the wild](https://www.peacewiththewild.co.uk/)
+
 
 
 
