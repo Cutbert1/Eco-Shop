@@ -20,6 +20,17 @@ import json
 
 @require_POST
 def store_checkout_info(request):
+    """
+    Store checkout information in Stripe PaymentIntent metadata.
+
+    Extracts the PaymentIntent ID from the client secret and updates
+    its metadata to include:
+    - Current basket contents
+    - Whether the user wants to save their info
+    - The username (if authenticated)
+
+    If the update fails, returns an error response.
+    """
     def _extract_payment_intent_id(client_secret):
         return client_secret.split('_secret')[0]
 
@@ -52,6 +63,18 @@ def store_checkout_info(request):
 
 
 def checkout(request):
+    """
+    GET:
+      - Validate basket is not empty.
+      - Calculate totals and create a Stripe PaymentIntent.
+      - Initialize the OrderForm (prefill if user has a profile).
+      - Render the checkout page with context.
+
+    POST:
+      - Validate and process submitted order form.
+      - Create Order and OrderLineItems.
+      - Redirect to checkout completion page on success.
+    """
     stripe_public_key = settings.STRIPE_PUBLIC_KEY
     stripe_secret_key = settings.STRIPE_SECRET_KEY
 
@@ -195,14 +218,18 @@ def checkout(request):
 def checkout_complete(request, order_number):
     """
     Handle successful checkouts and render the success page.
+    - If the user is authenticated, attach the user's profile to the order
+      and optionally update their saved profile information.
+    - Display a success message with the order number.
+    - Clear the basket from the session.
+    - Render the checkout success template with order details.
 
     Args:
         request: The HTTP request object.
         order_number: The unique identifier for the order.
     """
     def update_order_profile(order, user, save_info):
-        """Attach the user's profile to the order
-        and update profile information if needed."""
+
         profile = AccountProfile.objects.get(user=user)
         order.account_profile = profile
         order.save()
@@ -211,7 +238,7 @@ def checkout_complete(request, order_number):
             update_profile_data(profile, order)
 
     def update_profile_data(profile, order):
-        """Update the account profile with order information."""
+
         profile_data = {
             'primary_phone_number': order.phone_number,
             'primary_address': order.address,
@@ -227,18 +254,18 @@ def checkout_complete(request, order_number):
             account_profile_form.save()
 
     def send_success_message(request, order_number, email):
-        """Send a success message to the user."""
+
         messages.success(request, (
             f'Order completed! Your order number is {order_number}. '
             f'Confirmation email has been sent to {email}.'
         ))
 
     def clear_basket(request):
-        """Clear the user's shopping basket from the session."""
+
         request.session.pop('basket', None)
 
     def render_checkout_complete_page(request, order):
-        """Render the checkout complete page."""
+
         return render(
             request, 'checkout/checkout_complete.html', {'order': order}
             )

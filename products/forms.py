@@ -4,6 +4,11 @@ from .models import Product, Category
 
 
 class ProductForm(forms.ModelForm):
+    """
+    - Uses a custom clearable file input widget for the product image.
+    - Dynamically sets category choices with user-friendly names.
+    - Adds consistent CSS styling to all fields.
+    """
 
     class Meta:
         model = Product

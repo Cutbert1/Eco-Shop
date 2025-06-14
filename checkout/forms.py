@@ -3,6 +3,10 @@ from .models import Order
 
 
 class OrderForm(forms.ModelForm):
+    """
+    Provides user-friendly placeholders, custom CSS classes,
+    and autofocus to enhance the checkout user experience.
+    """
     class Meta:
         model = Order
         fields = [
@@ -19,6 +23,10 @@ class OrderForm(forms.ModelForm):
         self._set_placeholders_and_classes()
 
     def _set_placeholders_and_classes(self):
+        """
+        Apply placeholders, CSS classes, and other HTML attributes
+        to each form field to improve the form's usability.
+        """
         placeholders = {
             'customer_name': 'Customer Name',
             'email': 'Email Address',

@@ -11,13 +11,29 @@ logger = logging.getLogger(__name__)
 
 
 def view_basket(request):
-    """ Renders content of backet page"""
+    """ Renders current content of user shopping backet.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: Rendered basket page.
+    """
 
     return render(request, 'basket/basket.html')
 
 
 def add_item_to_basket(request, item_id):
-    """Add a specific quantity of an item to the shopping basket."""
+    """Add a specific quantity of an item to the shopping basket.
+
+    Args:
+        request (HttpRequest): HTTP request object that contains
+            the POST data with 'quantity' and optional 'redirect_url'.
+        item_id (int or str): ID of the product to add.
+
+        Returns:
+        HttpResponseRedirect: Redirects URL.
+    """
 
     product = Product.objects.get(pk=item_id)
 
@@ -45,7 +61,17 @@ def update_basket(basket, item_id, quantity):
 
 
 def update_basket_quantity(request, item_id):
-    """ Update quantity of individual product in a user's basket """
+    """ Update quantity of individual product in a user's basket
+        If quantity is set to zero or less, the item is removed.
+
+    Args:
+        request (HttpRequest): HTTP request object which has
+            the new quantity in POST data.
+        item_id (str or int): ID of the product to update.
+
+    Returns:
+        HttpResponseRedirect: Redirects to the basket view page.
+    """
 
     product = Product.objects.get(pk=item_id)
 
@@ -64,7 +90,16 @@ def update_basket_quantity(request, item_id):
 
 @require_POST
 def remove_from_basket(request, item_id):
-    """ Remove the item from the shopping basket """
+    """ Remove a specific product from the
+        shopping basket through AJAX request.
+
+    Args:
+        request (HttpRequest): HTTP request object.
+        item_id (str or int): ID of the product to be removed.
+
+    Returns:
+        JsonResponse: JSON response indicating success or error.
+    """
 
     product = Product.objects.get(pk=item_id)
 

@@ -11,7 +11,15 @@ import stripe
 @require_POST
 @csrf_exempt
 def stripe_webhook(request):
-    """Handle incoming webhooks from Stripe."""
+    """Handle incoming webhooks from Stripe.
+    - Verifies the Stripe webhook signature to ensure authenticity.
+    - Maps the event type to a specific
+      handler method in the WebhookHandler class.
+    - Handles supported events.
+
+    Args:
+        request (HttpRequest): Incoming HTTP POST request from Stripe.
+    """
     stripe.api_key = settings.STRIPE_SECRET_KEY
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')

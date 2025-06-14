@@ -12,7 +12,18 @@ from .forms import ProductForm
 
 
 def fetch_all_products(request):
-    """Fetch all products with optional search and category filtering."""
+    """
+    Fetch and display all products with optional sorting, searching,
+    and category filtering.
+
+    - Sorting by name or other fields with ascending/descending order.
+    - Filtering by one or more categories.
+    - Searching products by name or description.
+
+    Renders:
+        products/products.html with the filtered product list
+        and context for sorting and filtering UI.
+    """
     products = Product.objects.all()
     search_query = request.GET.get('q', '').strip()
     categories = get_categories_from_request(request)
@@ -95,7 +106,19 @@ def product_detail(request, product_id):
 
 @login_required(login_url='/accounts/login/')
 def add_product(request):
-    """Handles the addition of a new product to the inventory."""
+    """
+    Handles the addition of a new product to the inventory.
+
+    - Only accessible by logged-in superusers;
+      others are redirected with an error.
+    - Handles form submission via POST to create a new product.
+    - On successful creation, redirects to the product detail page.
+    - On GET or invalid POST, renders the add product form.
+
+    Template:
+        products/add_product.html
+
+    """
     if not request.user.is_superuser:
         messages.error(
             request, 'Unable to add product. Only admin can add product'
@@ -103,7 +126,7 @@ def add_product(request):
         return redirect(reverse('home'))
 
     def handle_post_request(request):
-        """Processes the POST request to add a product."""
+
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save()
@@ -116,11 +139,11 @@ def add_product(request):
         return render_add_product_form(form)
 
     def redirect_to_product_detail(product_id):
-        """Redirects to the product detail page."""
+
         return redirect(reverse('product_detail', args=[product_id]))
 
     def render_add_product_form(form=None):
-        """Renders the add product form."""
+
         form = form or ProductForm()
         template = 'products/add_product.html'
         context = {'form': form}
@@ -134,7 +157,19 @@ def add_product(request):
 
 @login_required(login_url='/accounts/login/')
 def update_product(request, product_id):
-    """ Update product details """
+    """
+    Allow a superuser to update an existing product's details.
+
+    Workflow:
+    - Only accessible by logged-in superusers;
+      others are redirected with an error.
+    - Handles form submission via POST to update the product.
+    - On GET, pre-fills the form with the current product data.
+    - Shows success or error messages based on the outcome.
+
+    Template:
+        products/update_product.html
+    """
     if not request.user.is_superuser:
         messages.error(
             request, 'Unable to update product. Only admin can update product'
@@ -142,11 +177,11 @@ def update_product(request, product_id):
         return redirect(reverse('home'))
 
     def get_product(product_id):
-        """ Get product object or return 404 """
+
         return get_object_or_404(Product, pk=product_id)
 
     def handle_post_request(request, product):
-        """ Handle POST request for updating product """
+
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             form.save()
@@ -159,7 +194,7 @@ def update_product(request, product_id):
         return form
 
     def handle_get_request(product):
-        """ Handle GET request for updating product """
+
         form = ProductForm(instance=product)
         messages.info(request, f'You are updating {product.name}')
         return form
@@ -186,7 +221,19 @@ def update_product(request, product_id):
 
 @login_required(login_url='/accounts/login/')
 def delete_product(request, product_id):
-    """ Delete a product from the store inventory """
+    """
+    Allow a superuser to delete a product from the inventory.
+
+    - Only accessible to logged-in superusers;
+      others are redirected with an error.
+    - Deletes the specified product by ID.
+    - Shows a success message after deletion.
+    - Redirects to the product list page.
+
+    Args:
+        request: HTTP request object.
+        product_id: Primary key of the product to delete.
+    """
     if not request.user.is_superuser:
         messages.error(
             request, 'Unable to delete product. Only admin can delete product'

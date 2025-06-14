@@ -22,6 +22,7 @@ def update_order_total_on_delete(sender, instance, **kwargs):
 
 def _update_order_total(line_item):
     """
-    Helper function to update the total of the order associated with the line item.  # noqa
+    Helper function to update the total of
+    the order associated with the line item.
     """
     line_item.order.update_total()

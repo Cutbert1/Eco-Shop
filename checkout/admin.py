@@ -5,11 +5,23 @@ from .models import Order, OrderLineItem
 
 
 class OrderLineItemAdminInline(admin.TabularInline):
+    """
+    Displays order line items in a tabular format within the
+    Order admin page. Makes the line item total read-only.
+    """
     model = OrderLineItem
     readonly_fields = ('lineitem_total',)
 
 
 class OrderAdmin(admin.ModelAdmin):
+    """
+    Provides:
+    - Inline editing of related OrderLineItems.
+    - Read-only fields for computed values and
+      details of  values that connot be changed.
+    - Custom layout for the edit form.
+    - List display, ordering, filtering, and search capabilities.
+    """
     inlines = (OrderLineItemAdminInline,)
 
     readonly_fields = (

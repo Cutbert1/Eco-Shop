@@ -127,7 +127,6 @@ function getShippingDetails() {
     
 }
 
- 
 function disableForm() {
     card.update({ disabled: true });
     submitButton.disabled = true;
