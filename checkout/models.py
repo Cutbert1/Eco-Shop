@@ -51,20 +51,33 @@ class Order(models.Model):
         return uuid.uuid4().hex.upper()
 
     def update_total(self):
+        """
+        Update order totals including delivery and grand total, then save.
+        """
         self.order_total = self.calculate_order_total()
         self.delivery_cost = self.calculate_delivery_cost()
         self.grand_total = self.order_total + self.delivery_cost
         self.save()
 
     def calculate_order_total(self):
+        """
+        Calculate the total cost of all related line items.
+        """
         return self.lineitems.aggregate(Sum('lineitem_total'))['lineitem_total__sum'] or 0  # noqa
 
     def calculate_delivery_cost(self):
+        """
+        Calculate the delivery cost based on order total
+        and free delivery threshold
+        """
         if self.order_total < settings.FREE_DELIVERY_THRESHOLD:
             return self.order_total * settings.STANDARD_DELIVERY_PERCENTAGE / 100  # noqa
         return 0
 
     def save(self, *args, **kwargs):
+        """
+        Override save method to generate order number if missing.
+        """
         if not self.order_number:
             self.order_number = self._generate_order_number()
         super().save(*args, **kwargs)
@@ -78,6 +91,10 @@ class Order(models.Model):
 
 
 class OrderLineItem(models.Model):
+    """
+    Individual line item within an order.
+    Links a product to an order icluding quantity and total cost.
+    """
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, related_name='lineitems'
         )
@@ -94,14 +111,24 @@ class OrderLineItem(models.Model):
     )
 
     def save(self, *args, **kwargs):
+        """
+        Override save to calculate line item total before saving,
+        then update the parent order total.
+        """
         self.lineitem_total = self.calculate_lineitem_total()
         super().save(*args, **kwargs)
         self.update_order_total()
 
     def calculate_lineitem_total(self):
+        """
+        Calculate total price for this line item.
+        """
         return self.product.price * self.quantity
 
     def update_order_total(self):
+        """
+        Update the total cost for the related order.
+        """
         self.order.update_total()
 
     def __str__(self):

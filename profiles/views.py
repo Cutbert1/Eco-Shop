@@ -9,13 +9,23 @@ from checkout.models import Order
 
 
 def profile(request):
-    """ Show user profile. """
+    """
+    Display and handle updates to the authenticated user's profile.
+
+    GET:
+        - Display user's profile details in a form.
+        - Display list of user's orders.
+
+    POST:
+        - Process submitted profile update form.
+        - If valid, save changes and display a success message.
+        - If invalid, display an error message.
+    """
     def get_profile():
-        """Get the user's profile or return 404 if not found."""
+
         return get_object_or_404(AccountProfile, user=request.user)
 
     def handle_post_request(profile):
-        """Handle POST request for updating the profile."""
         form = AccountProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
@@ -28,11 +38,9 @@ def profile(request):
         return form
 
     def get_orders(profile):
-        """Get all orders associated with the profile."""
         return profile.orders.all()
 
     def prepare_context(form, orders):
-        """Prepare the context dictionary for rendering."""
         return {
             'form': form,
             'orders': orders,
@@ -54,6 +62,20 @@ def profile(request):
 
 
 def order_record(request, order_number):
+    """
+    Show a specific order's record for the user.
+
+    Retrieves the order matching the order number,
+    shows an information about the previous confirmation,
+    and renders the order details using the checkout confirmation template.
+
+    Args:
+        request: HTTP request object.
+        order_number (str): Unique identifier for the order.
+
+    Returns:
+        HttpResponse: Rendered page showing the order details.
+    """
     order = get_object_or_404(Order, order_number=order_number)
 
     messages.info(request, (

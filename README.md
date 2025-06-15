@@ -47,7 +47,7 @@ This is the page were only a super user can access to add products.
 This is the page were only a super user can access to make changes to a products.
 ![update-product1](/static/images/readme_images/features_images/update-product1.jpg)
 ![update-product2](/static/images/readme_images/features_images/update-product2.jpg)
-### Basket
+### Basket Page
 This page tallies up all your items, provide you with ability to add more quantity, reduce quantity or remove item completely from your basket. You can go to secure checkout from this page or continue shopping.
 
 ![basket](/static/images/readme_images/features_images/basket.jpg)
@@ -100,6 +100,12 @@ Footer that displays links to access social media pages for eco shop.
 Renders a new window for Terms, Privacy, FQA, Returns, Our Blog.
 
 ![footer-links](/static/images/readme_images/features_images/footer-links.jpg)
+
+## Future Improvements
+* Add a loading overlay with a  spinner at the centre of the screen indicating payment is being processed.
+* Add wish list container for registered users 
+* Add points and rewards for registered, frequent customers
+* Add products review comment section
 ## E-commerce business model.
 ### Business model B2C(Business-to-Consumer)
 The business model chosen for this project is B2C. Before choosing this business model 3 key questions were answered.
@@ -141,7 +147,7 @@ With these questions answered, a consideration of the features of the applicatio
 |Payment refund or product return for unsatisfied customer within a specified time-line|
 
 ## Marketing Strategies
-This is project has no budget and having considered pros and cons of all marketing strategies,  key marketing strategies  used are Organic social media marketing, Email marketing and Search engine optimisation.
+This project has no budget and having considered pros and cons of all marketing strategies,  key marketing strategies  used are Organic social media marketing, Email marketing and Search engine optimisation.
 
 **Reasons for choosing Organic social media marketing strategy:**
 * The business has little or no budget for affiliate marketing and paid advertising.
@@ -251,7 +257,7 @@ A simple subscription form was created to enable interested users subscribe usin
 |Signup|Use to register details on site |As a non-registered user, clicked on “account” dropdown to register|Clicked on “account” dropdown, then register, renders sign-up page. ![signup](/static/images/readme_images/features-testing-images/signup.jpg)|
 |Basket|Use to store purchases being made by a user|Select “add to basket” on the product you want to purchase|Selected “add to basket” on the product I want to purchase, basket stored the product details, amount, quantity, name of product etc. ![basket](/static/images/readme_images/features-testing-images/basket.jpg)|
 |Checkout form|Use to fill in billing, shipping and payment details.|Complete billing, shipping and payment details, phone number MUST contain country code then click “complete order”. ![checkout-form](/static/images/readme_images/features-testing-images/checkout-form.jpg)|Order processed and checkout complete page rendered with order details. ![checkout-form-outcome](/static/images/readme_images/features-testing-images/checkout-form-outcome.jpg)|
-|Webhook payment_intent_succeeded|Used to confirm customer payment|Place an order on the frontend and review webhook events for deployed eco shop checkout/wh/ endpoint [stripe](https://eco-shop-natural-56f100a41f30herokuapp.com/checkout/wh/)|Placed an order and checked [stripe](https://eco-shop-natural-56f100a41f30herokuapp.com/checkout/wh/) for payment_intent_succeed event. ![payment-intent-succeed](/static/images/readme_images/features-testing-images/payment-intent-succeed.jpg)|
+|Webhook payment_intent.succeeded|Used to confirm customer payment|Place an order on the frontend and review webhook events for deployed eco shop checkout/wh/ endpoint [stripe](https://eco-shop-natural-56f100a41f30herokuapp.com/checkout/wh/)|Placed an order and checked [stripe](https://eco-shop-natural-56f100a41f30herokuapp.com/checkout/wh/) for payment_intent.succeeded event. ![payment-intent-succeed](/static/images/readme_images/features-testing-images/payment-intent-succeed.jpg)|
 |E-mail Confirmation|Use to confirm order has been processed to the customer|Place an order and email confirmation detailing order info will be sent to your inbox.|Placed an order and confirmation email was sent to my inbox. ![email](/static/images/readme_images/features_images/confirmation-email.jpg)|
 |Newsletter signup form|Use to enable users to subscribe to eco shop, digital marketing|Fill your email address and click subscribe. ![newsletter](/static/images/readme_images/features-testing-images/newsletter.jpg)|Fill in email address clicked subscribed, check mailchimp account ans saw email address added. ![mailchimp](/static/images/readme_images/features-testing-images/mailchimp.jpg)|
 |404 page|Use to inform users they are accessing  a URL that does not exist in the application|Change URL to any broken URL path, eg plan|Renderes 404 page. ![404-fix](/static/images/readme_images/features-testing-images/404-fix.jpg)|
@@ -266,8 +272,8 @@ A simple subscription form was created to enable interested users subscribe usin
 ### Lighthouse Performance
 |View Tested|   Outcome of the audit  |Soulution Applied|Screenshot of clear Validator output|
 |:------------|:----------------|:-------------|:------------|
-|Moble|![mobile](/static/images/readme_images/lighthouse_test/mobile.jpg)|Unable to apply any solution to improve performance as most are due to external links used to for specific functionalities throughout the site. ![3rd-part-mobile](/static/images/readme_images/lighthouse_test/3rd%20-party-mobile.jpg)|![lighthouse-desktop](/static/images/readme_images/lighthouse_test/desktop.jpg)|
-|Desktop|![lighthouse-desktop](/static/images/readme_images/lighthouse_test/desktop.jpg)|Unable to apply any solution to improve performance as most are due to external links used to for specific functionalities throughout the site. ![3rd-party](/static/images/readme_images/lighthouse_test/3rd%20party.jpg)|![lighthouse-desktop](/static/images/readme_images/lighthouse_test/desktop.jpg)|
+|Moble|![mobile](/static/images/readme_images/lighthouse_test/mobile.jpg)|Unable to apply any solution to improve performance as most are due to external links used for specific functionalities throughout the site. Example, Stripe, AWS, Fontawsom, Bootstrap etc. ![3rd-part-mobile](/static/images/readme_images/lighthouse_test/3rd%20-party-mobile.jpg)|![lighthouse-desktop](/static/images/readme_images/lighthouse_test/desktop.jpg)|
+|Desktop|![lighthouse-desktop](/static/images/readme_images/lighthouse_test/desktop.jpg)|Unable to apply any solution to improve performance as most are due to external links used for specific functionalities throughout the site. Example, Stripe, AWS, Fontawsom, Bootstrap etc. ![3rd-party](/static/images/readme_images/lighthouse_test/3rd%20party.jpg)|![lighthouse-desktop](/static/images/readme_images/lighthouse_test/desktop.jpg)|
 
 ### Validation Testing
 #### HTML Pages [HTML W3C Validator](https://validator.w3.org/)
@@ -364,10 +370,7 @@ A simple subscription form was created to enable interested users subscribe usin
 |:------------|:----------------|:-------------|:------------|
 |Basket, search and account duplication|After created mobile-top-header.html, on rendering when I try to reduce the size of screen the account, basket and search tends to duplicate when screen is reduced from 992px. ![duplicate](/static/images/readme_images/bugs/duplicate.jpg)|Added “d-lg-none" class to account basket and search|Bug fixed. ![duplicate-fix](/static/images/readme_images/bugs/duplicate-fix.jpg)|
 |Webhook Handler|After making a purchase it shows successful on frontend, however there is internal server error 500 on /check/wh printed on python terminal. On stripe CLI it also shows 500 POST error. However stripe portal shows that payment intent is created and charge succeeds. ![webhook-handler1](/static/images/readme_images/bugs/webhook-handler1.jpg) ![webhook-handler2](/static/images/readme_images/bugs/webhook-handler2.jpg) ![payment-intent](/static/images/readme_images/bugs/payment-intent.jpg) ![log](/static/images/readme_images/bugs/log.jpg)|Followed below steps **1**. Get the payment intent from Stripe. **2**. Get the basket metadata. **3**. Get the billing and shipping details. **4**. Attempt to get the order object (if it exists), trying 5 times. **5**. If the order exists, verify the order in the database. **6**. If it doesn't exist (else), create the order in the database. **7**. When creating the order, included an exception catch to throw and 500 your Devtools > Network tab.|Bug fixed. ![webhook-handler-fix](/static/images/readme_images/bugs/webhook-handler-fix.jpg)|
-
-#### Bugs Unresolved
-|Bug|   Description |Solution Applied|Result|
-|:------------|:----------------|:-------------|:------------|
+|Checkout form|When checkout form is not properly completed and “complete order” is clicked, form throws up a toast error message which is expected, however the payment_entent.succeed goes through in stripe and confirmation email sent to user.|Added fields validation for checkout form, hence form does not submit unless all fields are validated. Therefore payment_intent.succeeded and confirmation email can only go through when form is properly completed. ![form-validation](/static/images/readme_images/bugs/form-field.jpg)|Bug fixed. Only payment_intent.created is ready at this time until form is properly completed before payment_intent.succeeded can go through|
 
 ## Libraries
 * Django-allauth

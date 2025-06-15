@@ -4,6 +4,10 @@ from django.db import models
 
 
 class Category(models.Model):
+    """
+    Includes a required internal name and an user-friendly
+    display name. Categories ordered alphabetically by name.
+    """
     name = models.CharField(max_length=200)
     friendly_name = models.CharField(max_length=200, null=True, blank=True)
 
@@ -13,15 +17,20 @@ class Category(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        """Return the name of the category."""
         return self.name
 
     def get_friendly_name(self):
-        """Return the friendly name of the category, if available."""
         return self.friendly_name or self.name
 
 
 class Product(models.Model):
+    """
+    Each product belongs to an optional category, has a unique name and SKU,
+    a detailed description, price, optional rating, timestamps for creation
+    and updates, and product image.
+
+    Products are ordered by creation date, newest first.
+    """
     category = models.ForeignKey(
         "Category",
         null=True,

@@ -12,7 +12,11 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 class AccountProfile(models.Model):
     """
-    Profile model for managing standard contact details and purchase history
+    Stores user profile information including contact details and
+    shipping information for an authenticated user.
+
+    Each profile linked one-to-one with a User instance.
+    Also records timestamps for creation and last updat
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     primary_phone_number = PhoneNumberField(
@@ -41,7 +45,7 @@ class AccountProfile(models.Model):
 @receiver(post_save, sender=User)
 def create_or_update_account_profile(sender, instance, created, **kwargs):
     """
-    Create or update the account profile
+    Signal receiver that ensures each User has an associated AccountProfile
     """
     if created:
         AccountProfile.objects.create(user=instance)

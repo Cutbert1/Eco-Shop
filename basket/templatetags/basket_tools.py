@@ -11,11 +11,11 @@ def calc_subtotal(price, quantity):
     Calculate the subtotal of an item based on its price and quantity.
 
     Args:
-        price (float or Decimal): The price of the item.
-        quantity (int): The quantity of the item.
+        price (float or Decimal): Price of the item.
+        quantity (int): Quantity of the item.
 
     Returns:
-        Decimal: The calculated subtotal.
+        Decimal: Calculated subtotal.
     """
     try:
         price = Decimal(price)
@@ -31,10 +31,10 @@ def format_currency(value):
     Format a number as currency.
 
     Args:
-        value (float or Decimal): The value to format.
+        value (float or Decimal): Value to format.
 
     Returns:
-        str: The formatted currency string.
+        str: Formatted currency string.
     """
     try:
         return f"${value:.2f}"
@@ -45,13 +45,13 @@ def format_currency(value):
 @register.simple_tag
 def calc_total(items):
     """
-    Calculate the total sum of all items.
+    Calculate total sum of all items.
 
     Args:
-        items (list): A list of dictionaries containing 'price' and 'quantity' keys.  # noqa
+        items (list): List of dictionaries containing 'price' and 'quantity' keys.  # noqa
 
     Returns:
-        Decimal: The calculated total.
+        Decimal: Calculated total.
     """
     total = sum(calc_subtotal(
         item['price'], item['quantity']) for item in items

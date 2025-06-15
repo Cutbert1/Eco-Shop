@@ -14,7 +14,11 @@ import time
 
 class WebhookHandler:
     """
-    Handles Stripe webhooks and processes various event types.
+    Handles Stripe webhook events and processes each event type accordingly.
+
+    Provides helper methods for processing payment intents,
+    creating or updating orders, sending confirmation emails,
+    updating user profiles, and safely extracting data from Stripe metadata.
     """
 
     MAX_ATTEMPTS = 5
@@ -151,9 +155,7 @@ class WebhookHandler:
         }
 
     def _retrieve_stripe_charge(self, charge_id):
-        """
-        Retrieve the Stripe charge object.
-        """
+
         return stripe.Charge.retrieve(charge_id)
 
     def _get_order(self, order_data):

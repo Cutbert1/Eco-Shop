@@ -42,7 +42,7 @@ const createErrorMessage = (message) => `
     <span class="small">${message}</span>
 `;
 
-
+// Validate checkout form fields
 function validateFormFields() {
     const requiredFields = [
         { field: form.customer_name, name: 'Name' },
