@@ -43,6 +43,29 @@ const createErrorMessage = (message) => `
 `;
 
 
+function validateFormFields() {
+    const requiredFields = [
+        { field: form.customer_name, name: 'Name' },
+        { field: form.email, name: 'Email' },
+        { field: form.phone_number, name: 'Phone number' },
+        { field: form.address, name: 'Address' },
+        { field: form.city, name: 'City' },
+        { field: form.postcode, name: 'Postal code' },
+        { field: form.country, name: 'Country' },
+        { field: form.county, name: 'County/State' }
+    ];
+
+    for (let item of requiredFields) {
+        if (!item.field.value.trim()) {
+            displayError(`Please fill in the ${item.name}.`);
+            return false;
+        }
+    }
+
+    errorDiv.innerHTML = '';
+    return true;
+}
+
 // Form submit: Core logic from stripe documentation
 
 const form = document.getElementById('payment-form');
@@ -51,6 +74,10 @@ const errorDiv = document.getElementById('card-errors');
  
 form.addEventListener('submit', async function(ev) {
     ev.preventDefault();
+
+    if (!validateFormFields()) {
+        return;
+    }
  
     try {
         disableForm();

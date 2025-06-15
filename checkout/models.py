@@ -26,7 +26,7 @@ class Order(models.Model):
         null=True, blank=True, help_text="Enter phone number with country code"
         )
     city = models.CharField(max_length=100, null=False, blank=False)
-    county = models.CharField(max_length=100, null=True, blank=True)
+    county = models.CharField(max_length=100, null=False, blank=False)
     postcode = models.CharField(max_length=20, blank=True, null=True)
     country = CountryField(
         blank_label='Select Country *', blank=False, null=False
