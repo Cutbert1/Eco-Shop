@@ -17,6 +17,7 @@ To maintain eco-friendly theme, 3 main colours were used Green, Azure and white.
 |Category|1 --> *|Product|One-to-Many|
 |Order|1 --> *|OrderLineItem|One-to-Many|
 |Product|1 --> *|OrderLineItem|One-to-Many|
+
 ![database-design](/static/images/readme_images/features_images/database-design.jpg)
 #### Topograhy
 The Montserrat font was used  all through the website. For extended page ( Terms, Privacy, Returns, FAQ and Blog), arial font were used and Sans Serif is used as the backup.
