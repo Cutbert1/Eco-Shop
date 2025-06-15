@@ -18,6 +18,13 @@ To maintain eco-friendly theme, 3 main colours were used Green, Azure and white.
 |Order|1 --> *|OrderLineItem|One-to-Many|
 |Product|1 --> *|OrderLineItem|One-to-Many|
 
+* **User** has exactly one **AccountProfile**.
+* **AccountProfile** can have multiple **Orders**.
+* **Order** has multiple **OrderLineItems**.
+* **Product** can appear in multiple **OrderLineItems**.
+* **Category** groups **Products**
+
+### Entity Relationship Diagram
 ![database-design](/static/images/readme_images/features_images/database-design.jpg)
 #### Topograhy
 The Montserrat font was used  all through the website. For extended page ( Terms, Privacy, Returns, FAQ and Blog), arial font were used and Sans Serif is used as the backup.
