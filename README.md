@@ -10,6 +10,14 @@ User demography includes everyone, but most importantly individuals who are keen
 #### Colour Scheme
 To maintain eco-friendly theme, 3 main colours were used Green, Azure and white.
 ### Database Design
+|Entity 1| Relationship | Entity 2 |Cardinality|
+|:------------|:----------------|:--------------|:-------------|
+|User|1 --> 1|AccountProfile|One-to-One|
+|AccountProfile|1 --> *|Order|One-to-Many|
+|Category|1 --> *|Product|One-to-Many|
+|Order|1 --> *|OrderLineItem|One-to-Many|
+|Product|1 --> *|OrderLineItem|One-to-Many|
+
 #### Topograhy
 The Montserrat font was used  all through the website. For extended page ( Terms, Privacy, Returns, FAQ and Blog), arial font were used and Sans Serif is used as the backup.
 #### Imagery
