@@ -3,11 +3,12 @@ html {
 }
 
 body {
-    background: url('/media/homepage_background.jpg') no-repeat center center fixed;
+    background: url('/media/homepage_background.jpg') no-repeat fixed;
     background-size: cover;
     height: calc(100vh - 164px);
     color: #555;
     font-family: 'Montserrat';
+    background-position: center top;
 }
 
 @keyframes flash {
@@ -222,6 +223,10 @@ body {
   .container {
     max-width: 80%;
   }
+
+  body {
+    background-position: center -70%;
+  }
 }
 
 /* fixed top navbar only on medium and up */
@@ -241,20 +246,22 @@ body {
 
 /*  Moble navbar collapse */
 @media screen and (max-width: 991px) {
+     
     .header-container {
         padding-top: 116px;
     }
 
     body {
         height: calc(100vh - 116px);
+        background-position: center top;
     }
 
     .navbar-toggler {
-        padding: .90px .90px;
+        padding: 0.9px 0.9px;
         font-size: 16px;
     }
 
-    .display-4.fw-bold.eco {
+    .display-4.fw-bold {
         font-size: 32px;
     }
 
@@ -268,11 +275,11 @@ body {
     }
 
     .nav-link i.fa-lg {
-        font-size: 16px;
+        font-size: 10px;            
     }
 
     #banner h4 {
-        font-size: 18px;
+        font-size: 15px;
     }
 
     .btn.btn-outline-dark.rounded-0,
@@ -375,3 +382,4 @@ body {
     transform: translateY(-50%);
   }
 }
+
