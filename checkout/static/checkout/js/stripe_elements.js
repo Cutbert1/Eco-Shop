@@ -62,9 +62,19 @@ function validateFormFields() {
         }
     }
 
+    // 🔎 Extra validation: phone number format
+    const phoneValue = form.phone_number.value.trim();
+    const phoneRegex = /^\+\d{7,15}$/;
+
+    if (!phoneRegex.test(phoneValue)) {
+        displayError("Please enter a valid phone number with country code (e.g. +447445363737).");
+        return false;
+    }
+
     errorDiv.innerHTML = '';
     return true;
 }
+
 
 // Form submit: Core logic from stripe documentation
 
