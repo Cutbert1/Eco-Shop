@@ -1,0 +1,4760 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/.vscode/arctictern.py b/.vscode/arctictern.py
+index bd164cefed94c5a8f17e2d8e2fe2e5f1c246ec64..9b3b4d69335600b553d4a75a1483446d3e9263be 100644
+--- a/.vscode/arctictern.py
++++ b/.vscode/arctictern.py
+@@ -39,143 +39,143 @@ UPGRADE_FILE_LIST = [{"filename": ".vscode/settings.json",
+                       },
+                      {"filename": ".vscode/init_tasks.sh",
+                       "url": ".vscode/init_tasks.sh"
+                       },
+                      {"filename": ".vscode/uptime.sh",
+                       "url": ".vscode/uptime.sh"
+                       },
+                      {"filename": ".vscode/make_url.py",
+                       "url": ".vscode/make_url.py"
+                      },
+                      {"filename": ".vscode/arctictern.py",
+                       "url": ".vscode/arctictern.py"
+                      }]
+ 
+ FINAL_LINES = "\nexport POST_UPGRADE_RUN=1\nsource ~/.bashrc\n"
+ 
+ 
+ def get_versions():
+ 
+     if exists(".vscode/version.txt"):
+         with open(".vscode/version.txt", "r") as f:
+             THIS_VERSION = float(f.read().strip())
+     else:
+         with open(".vscode/version.txt", "w") as f:
+             f.write(str(THIS_VERSION))
+-    
++
+     r = requests.get(BASE_URL + ".vscode/version.txt")
+     CURRENT_VERSION = float(r.content)
+ 
+     return {"this_version": THIS_VERSION,
+             "current_version": CURRENT_VERSION}
+ 
+ def needs_upgrade():
+     """
+     Checks the version of the current template against
+     this version.
+     Returns True if upgrade is needed, False if not.
+     """
+ 
+     versions = get_versions()
+-    
++
+     print(f"Upstream version: {versions['current_version']}")
+     print(f"Local version: {versions['this_version']}")
+ 
+     return versions["current_version"] > versions["this_version"]
+ 
+ 
+ def write_version():
+ 
+     versions = get_versions()
+ 
+     with open(".vscode/version.txt", "w") as f:
+         f.write(str(versions["current_version"]))
+ 
+ 
+ def build_post_upgrade():
+ 
+     r = requests.get(BASE_URL + ".vscode/upgrades.json")
+     upgrades = json.loads(r.content.decode("utf-8"))
+     content = ""
+ 
+     for k,v in upgrades.items():
+         if float(k) > THIS_VERSION:
+             print(f"Adding version changes for {k} to post_upgrade.sh")
+             content += v
+ 
+     if content:
+         content += FINAL_LINES
+         with open(".vscode/post_upgrade.sh", "w") as f:
+             f.writelines(content)
+-    
++
+     print("Built post_upgrade.sh. Restart your workspace for it to take effect.")
+ 
+ 
+ def process(file, suffix):
+     """
+     Replaces and optionally backs up the files that
+     need to be changed.
+     Arguments: file - a path and filename
+                suffix - the suffix to the BASE_URL
+     """
+ 
+     if file == ".gitpod.dockerfile" or file == ".gitpod.yml":
+         try:
+             shutil.copyfile(file, f"{file}.tmp")
+         except FileNotFoundError:
+             pass
+ 
+     with open(file, "wb") as f:
+         r = requests.get(BASE_URL + suffix)
+         f.write(r.content)
+ 
+     if exists(f"{file}.tmp"):
+         result = os.system(f"diff -q {file} {file}.tmp > /dev/null")
+         if result != 0:
+             os.remove(f"{file}.tmp")
+             return True
+-    
++
+     return False
+ 
+ 
+ def start_migration():
+     """
+     Calls the process function and
+     renames the directory
+     """
+     push_and_recreate = False
+ 
+     if not os.path.isdir(".vscode"):
+         print("Creating .vscode directory")
+         os.mkdir(".vscode")
+ 
+     for file in UPGRADE_FILE_LIST:
+         print(f"Processing: {file['filename']}")
+         result = process(file["filename"], file["url"])
+         if result == True:
+             push_and_recreate = True
+-    
++
+     if push_and_recreate:
+         write_version()
+ 
+     if needs_upgrade() and not push_and_recreate:
+         build_post_upgrade()
+ 
+     print("Changes saved.")
+     print("Please add, commit and push to GitHub.")
+     print("You may need to stop and restart your workspace for")
+     print("the changes to take effect.\n")
+ 
+     if push_and_recreate:
+         print(f"{COLOURS['red']}{COLOURS['bold']}*** IMPORTANT INFORMATION ***{COLOURS['reset']}")
+         print("The files used to create this workspace have been updated")
+         print("Please download any files that are in .gitignore and")
+         print("recreate this workspace by clicking on the Gitpod button")
+         print("in GitHub. Then, upload your saved files again.\n")
+ 
+ 
+ if __name__ == "__main__":
+ 
+     print(f"\n🐦 {COLOURS['blue']}{COLOURS['bold']}ArcticTern version 0.3{COLOURS['reset']}")
+     print("CI Template Migration Utility")
+     print("-----------------------------")
+     print("Upgrades the workspace to the latest version.\n")
+diff --git a/basket/contexts.py b/basket/contexts.py
+index e20249eaf31c269e2c851c76d070861b246fda41..502349981a45e8780f6f6586e7bde7b7e487d5b7 100644
+--- a/basket/contexts.py
++++ b/basket/contexts.py
+@@ -1,28 +1,30 @@
+ from django.shortcuts import get_object_or_404
+ from decimal import Decimal
++
+ from django.conf import settings
++from django.shortcuts import get_object_or_404
+ 
+ from products.models import Product
+ 
+ 
+ def calculate_delivery(total):
+     """
+     Delivery cost calculation, including amount to qualify for free delivery.
+ 
+     Args:
+         total (Decimal): The existing total value of the basket.
+ 
+     Returns:
+         tuple: A tuple that contains:
+             - delivery (Decimal): The delivery cost.
+             - free_delivery_delta (Decimal): Remaining amount
+               to reach the free delivery threshold.
+     """
+     if total < settings.FREE_DELIVERY_THRESHOLD:
+         delivery = total * Decimal(settings.STANDARD_DELIVERY_PERCENTAGE / 100)
+         free_delivery_delta = settings.FREE_DELIVERY_THRESHOLD - total
+     else:
+         delivery = 0
+         free_delivery_delta = 0
+     return delivery, free_delivery_delta
+ 
+diff --git a/basket/templates/basket/basket.html b/basket/templates/basket/basket.html
+index 337d830f4dc84e597cb05a93d11e56175f915051..7ca5c22a67115df81bb5d52bf329b6a18b372e7e 100644
+--- a/basket/templates/basket/basket.html
++++ b/basket/templates/basket/basket.html
+@@ -1,135 +1,158 @@
+ {% extends "base.html" %}
+ {% load static %}
+ {% load basket_tools %}
+- 
++
+ {% block page_header %}
+     <div class="container header-container">
+         <div class="row">
+             <div class="col"></div>
+         </div>
+     </div>
+ {% endblock %}
+- 
++
+ {% block content %}
+ <div class="overlay"></div>
+ <div class="container my-5">
+     <div class="row">
+         <div class="col">
+             <h2 class="text-center mb-4 fw-bold responsive-heading">Your Shopping Basket</h2>
+             <hr class="w-50 mx-auto mb-4">
+         </div>
+     </div>
+     <div class="row">
+         <div class="col">
+             {% if basket_items %}
+             <div class="table-responsive rounded shadow-sm">
+                 <table class="table table-hover">
+                     <thead class="bg-light">
+                         <tr>
+                             <th scope="col" class="border-0">Product</th>
+                             <th scope="col" class="border-0">Price</th>
+                             <th scope="col" class="border-0">Quantity</th>
+                             <th scope="col" class="border-0">Subtotal</th>
+                         </tr>
+                     </thead>
+                     <tbody>
+                     {% for item in basket_items %}
+                         <tr>
+                             <td class="align-middle">
+                                 <div class="d-flex align-items-center">
+                                     {% if item.product.product_image %}
+                                     <img class="img-fluid rounded mr-3" src="{{ item.product.product_image.url }}" alt="item-image" style="max-width: 80px;">
+                                     {% else %}
+                                     <img class="img-fluid rounded mr-3" src="{{ MEDIA_URL}}noimage.png" style="max-width: 80px;">
+                                     {% endif %}
+                                     <div>
+                                         <h6 class="mb-0">{{ item.product.name }}</h6>
++                                        {% if item.product.brand %}
++                                            <small class="text-muted d-block">by {{ item.product.brand }}</small>
++                                        {% endif %}
+                                         <small class="text-muted">SKU: {{ item.product.sku|upper }}</small>
++                                        {% if item.product.short_description %}
++                                            <p class="text-muted small mb-0">{{ item.product.short_description }}</p>
++                                        {% endif %}
++                                        {% if item.product.is_digital %}
++                                            <span class="badge bg-success mt-1"><i class="fa-solid fa-cloud-arrow-down me-1"></i>Digital</span>
++                                        {% elif item.product.is_low_stock %}
++                                            <span class="badge bg-warning text-dark mt-1"><i class="fa-solid fa-triangle-exclamation me-1"></i>Low stock</span>
++                                        {% elif not item.product.is_in_stock %}
++                                            <span class="badge bg-danger mt-1"><i class="fa-solid fa-clock-rotate-left me-1"></i>Restocking</span>
++                                        {% endif %}
+                                     </div>
+                                 </div>
+                             </td>
+                             <td class="align-middle">${{ item.product.price }}</td>
+                             <td class="align-middle">
+                                 <form class="form update-form" method="POST" action="{% url 'update_basket_quantity' item.item_id %}" id="updateForm">
+                                     {% csrf_token %}
+                                     <div class="input-group input-group-sm">
+                                         <div class="input-group-prepend">
+-                                            <button class="btn btn-outline-secondary decrement-qty" 
++                                            <button class="btn btn-outline-secondary decrement-qty"
+                                                 data-item_id="{{ item.item_id }}" id="decrement-qty_{{ item.item_id }}" type="button">
+                                                 <i class="fas fa-minus fa-sm"></i>
+                                             </button>
+                                         </div>
++                                        {% with max_qty=item.product.max_order_quantity %}
+                                         <input class="form-control form-control-sm qty_input text-center" type="number"
+-                                            name="quantity" value="{{ item.quantity }}" min="1" max="99"
+-                                            data-item_id="{{ item.item_id }}"
++                                            name="quantity" value="{{ item.quantity }}" min="1" {% if max_qty %}max="{{ max_qty }}"{% endif %}
++                                            data-item_id="{{ item.item_id }}" data-max="{{ max_qty|default_if_none:'' }}"
+                                             id="id_qty_{{ item.item_id }}">
++                                        {% endwith %}
+                                         <div class="input-group-append">
+                                             <button class="btn btn-outline-secondary increment-qty"
+                                                 data-item_id="{{ item.item_id }}" id="increment-qty_{{ item.item_id }}" type="button">
+                                                 <i class="fas fa-plus fa-sm"></i>
+                                             </button>
+                                         </div>
+                                     </div>
+                                     <div class="mt-2">
+                                         <a class="btn btn-sm btn-outline-primary me-2 update-link" id="updateButton">Update</a>
+                                         <a class="btn btn-sm btn-outline-danger remove-item" id="remove_{{ item.item_id }}">Remove</a>
+                                     </div>
+                                 </form>
+                             </td>
+                             <td class="align-middle">${{ item.product.price | calc_subtotal:item.quantity }}</td>
+                         </tr>
+                     {% endfor %}
+                     </tbody>
+                 </table>
+             </div>
+             <div class="row mt-5">
+                 <div class="col-12 col-md-6 offset-md-6">
+                     <div class="card shadow-sm">
+-                        <div class="card-body">
++                            <div class="card-body">
+                             <h5 class="card-title">Order Summary</h5>
+                             <hr>
+                             <div class="d-flex justify-content-between">
+                                 <span>Subtotal:</span>
+                                 <span>${{ total|floatformat:2 }}</span>
+                             </div>
+                             <div class="d-flex justify-content-between">
+                                 <span>Delivery:</span>
+                                 <span>${{ delivery|floatformat:2 }}</span>
+                             </div>
+                             <hr>
+                             <div class="d-flex justify-content-between">
+                                 <strong>Grand Total:</strong>
+                                 <strong>${{ grand_total|floatformat:2 }}</strong>
+                             </div>
+                             {% if free_delivery_delta > 0 %}
+                                 <div class="mt-3">
+                                     <small class="text-danger">
+-                                        Spend <strong>${{ free_delivery_delta }}</strong> more to get free delivery!
++                                        Spend <strong>${{ free_delivery_delta|floatformat:2 }}</strong> more to get free delivery!
+                                     </small>
+                                 </div>
++                            {% else %}
++                                <div class="mt-3">
++                                    <small class="text-success"><i class="fa-solid fa-truck me-1"></i> Congratulations! Your order qualifies for free delivery.</small>
++                                </div>
+                             {% endif %}
++                            <div class="alert alert-light border mt-3" role="status">
++                                <i class="fa-solid fa-seedling text-success me-1"></i>
++                                Your order removes packaging waste by using recyclable materials only.
++                            </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+             <div class="row mt-5">
+                 <div class="col-12">
+                     <div class="d-flex justify-content-between">
+                         <a href="{% url 'products' %}" class="btn btn-outline-dark btn-lg text-uppercase">
+                             <i class="fa-solid fa-angles-left"></i> Continue Shopping
+                         </a>
+                         <a href="{% url 'checkout' %}" class="btn btn-success btn-lg text-uppercase">
+                             Secure Checkout  <i class="fas fa-lock ml-2"></i>
+                         </a>
+                     </div>
+                 </div>
+             </div>
+             {% else %}
+                 <div class="text-center">
+                     <p class="lead mb-5">Your basket is empty.</p>
+                     <a href="{% url 'products' %}" class="btn btn-outline-dark btn-lg text-uppercase rounded-0">
+                         <i class="fa-solid fa-circle-chevron-left mr-2"></i> Continue Shopping
+                     </a>
+                 </div>
+             {% endif %}
+         </div>
+@@ -141,27 +164,27 @@
+     </svg>
+ </button>
+ {% endblock %}
+ 
+ {% block postloadjs %}
+ {{ block.super }}
+ <script type="text/javascript">
+ 		document.querySelector('.scroll-to-top-button').addEventListener('click', () => {
+             window.scrollTo({
+                 top: 0,
+                 behavior: 'smooth'
+             });
+         });
+ 
+     window.addEventListener('scroll', () => {
+         const button = document.querySelector('.scroll-to-top-button');
+         if (window.pageYOffset > 300) {
+             button.style.display = 'flex';
+         } else {
+             button.style.display = 'none';
+         }
+     });
+ 	</script>
+ {% include 'basket/includes/quantity_script.html' %}
+ {% endblock %}
+-     
++
+ 
+diff --git a/basket/templates/basket/includes/quantity_script.html b/basket/templates/basket/includes/quantity_script.html
+index e27d27b5cc7c520b1e065dcb8a4171802f7f1145..f2e8b4d3f503fa7b99b9c238ac21d8f6b92d3c13 100644
+--- a/basket/templates/basket/includes/quantity_script.html
++++ b/basket/templates/basket/includes/quantity_script.html
+@@ -1,71 +1,73 @@
+ <script type="text/javascript">
+-    
++
+     document.addEventListener('DOMContentLoaded', function() {
+-        
++
+         const incrementBtns = document.querySelectorAll('.increment-qty');
+         const decrementBtns = document.querySelectorAll('.decrement-qty');
+- 
+-        
++
++
+         incrementBtns.forEach(btn => {
+             btn.addEventListener('click', function() {
+                 const itemId = this.getAttribute('data-item_id');
+                 const qtyInput = document.getElementById(`id_qty_${itemId}`);
+                 let currentValue = parseInt(qtyInput.value);
+-                if (currentValue < 99) {
++                const maxValue = qtyInput.dataset.max ? parseInt(qtyInput.dataset.max, 10) : null;
++                if (!maxValue || currentValue < maxValue) {
+                     qtyInput.value = currentValue + 1;
+                 }
+             });
+         });
+- 
+-        
++
++
+         decrementBtns.forEach(btn => {
+             btn.addEventListener('click', function() {
+                 const itemId = this.getAttribute('data-item_id');
+                 const qtyInput = document.getElementById(`id_qty_${itemId}`);
+                 let currentValue = parseInt(qtyInput.value);
+-                if (currentValue > 1) {
++                const minValue = parseInt(qtyInput.min || '1', 10);
++                if (currentValue > minValue) {
+                     qtyInput.value = currentValue - 1;
+                 }
+             });
+         });
+     });
+-    
++
+         document.addEventListener('DOMContentLoaded', function() {
+             const updateButtons = document.querySelectorAll('.update-link');
+             const updateForms = document.querySelectorAll('.update-form');
+- 
++
+             updateButtons.forEach((button, index) => {
+                 button.addEventListener('click', function(e) {
+                     e.preventDefault();
+                     updateForms[index].submit();
+                 });
+            });
+         });
+ 
+        $(document).ready(function() {
+            $('.remove-item').click(function(e) {
+                 e.preventDefault();
+                 var itemId = this.id.split('remove_')[1];
+- 
++
+         $.ajax({
+             url: `/basket/remove/${itemId}/`,
+             type: 'POST',
+             data: {
+                 'item_id': itemId,
+                 'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+             },
+             success: function(response) {
+                 if (response.message === 'Item removed successfully') {
+-                    
++
+                     location.reload();
+                 } else {
+                     console.error('Error removing item:', response.message);
+                 }
+             },
+             error: function(xhr, status, error) {
+                 console.error('AJAX error:', status, error);
+             }
+         });
+     });
+ });
+ </script>
+\ No newline at end of file
+diff --git a/basket/views.py b/basket/views.py
+index ef04045b8baebc6c0fd516d201dca17a84993493..a5a8374a1b070141678a5babdd2411791d8367c1 100644
+--- a/basket/views.py
++++ b/basket/views.py
+@@ -1,115 +1,185 @@
+-from django.shortcuts import render, redirect, reverse
++from django.shortcuts import render, redirect, reverse, get_object_or_404
+ from django.http import JsonResponse
+ from django.views.decorators.http import require_POST
+ from django.contrib import messages
+ 
+ from products.models import Product
+ import logging
+ 
+ logger = logging.getLogger(__name__)
+ # Create your views here.
+ 
+ 
+ def view_basket(request):
+     """ Renders current content of user shopping backet.
+ 
+     Args:
+         request (HttpRequest): The HTTP request object.
+ 
+     Returns:
+         HttpResponse: Rendered basket page.
+     """
+ 
+     return render(request, 'basket/basket.html')
+ 
+ 
+ def add_item_to_basket(request, item_id):
+     """Add a specific quantity of an item to the shopping basket.
+ 
+     Args:
+         request (HttpRequest): HTTP request object that contains
+             the POST data with 'quantity' and optional 'redirect_url'.
+         item_id (int or str): ID of the product to add.
+ 
+         Returns:
+         HttpResponseRedirect: Redirects URL.
+     """
+ 
+-    product = Product.objects.get(pk=item_id)
++    product = get_object_or_404(Product, pk=item_id)
+ 
+-    quantity = get_quantity_from_request(request)
++    quantity_requested = get_quantity_from_request(request)
+     redirect_url = request.POST.get('redirect_url')
+     basket = get_basket_from_session(request)
++    current_quantity = basket.get(str(item_id), 0)
++
++    allowed_quantity = validate_quantity_against_stock(
++        request, product, quantity_requested, current_quantity
++    )
++
++    if allowed_quantity <= 0:
++        request.session['basket'] = basket
++        return redirect(redirect_url)
+ 
+-    update_basket(basket, item_id, quantity)
++    update_basket(basket, item_id, allowed_quantity)
+ 
+     request.session['basket'] = basket
+     messages.success(request, f'Added {product.name} to your basket')
+     return redirect(redirect_url)
+ 
+ 
+ def get_quantity_from_request(request):
+     return int(request.POST.get('quantity', 1))
+ 
+ 
+ def get_basket_from_session(request):
+     return request.session.get('basket', {})
+ 
+ 
+ def update_basket(basket, item_id, quantity):
++    item_id = str(item_id)
+     basket[item_id] = basket.get(item_id, 0) + quantity
+ 
+ 
+ def update_basket_quantity(request, item_id):
+     """ Update quantity of individual product in a user's basket
+         If quantity is set to zero or less, the item is removed.
+ 
+     Args:
+         request (HttpRequest): HTTP request object which has
+             the new quantity in POST data.
+         item_id (str or int): ID of the product to update.
+ 
+     Returns:
+         HttpResponseRedirect: Redirects to the basket view page.
+     """
+ 
+-    product = Product.objects.get(pk=item_id)
++    product = get_object_or_404(Product, pk=item_id)
+ 
+     quantity = int(request.POST.get('quantity', 0))
+     basket = request.session.get('basket', {})
+ 
+-    if quantity > 0:
+-        basket[item_id] = quantity
+-    else:
+-        basket.pop(item_id, None)
++    if quantity <= 0:
++        basket.pop(str(item_id), None)
++        request.session['basket'] = basket
++        messages.info(request, f'{product.name} removed from basket')
++        return redirect(reverse('view_basket'))
++
++    allowed_quantity = validate_quantity_against_stock(
++        request, product, quantity, 0
++    )
++
++    if allowed_quantity <= 0:
++        basket.pop(str(item_id), None)
++        request.session['basket'] = basket
++        messages.warning(
++            request,
++            f'{product.name} was removed because the requested quantity is not available.',
++        )
++        return redirect(reverse('view_basket'))
++
++    basket[str(item_id)] = allowed_quantity
+ 
+     request.session['basket'] = basket
+-    messages.success(request, f'{product.name} : quantity updated to {basket[item_id]}')  # noqa
++    if allowed_quantity < quantity:
++        messages.warning(
++            request,
++            f'Only {allowed_quantity} units of {product.name} are available. '
++            'Quantity adjusted accordingly.',
++        )
++    else:
++        messages.success(
++            request, f'{product.name} : quantity updated to {allowed_quantity}'
++        )
+     return redirect(reverse('view_basket'))
+ 
+ 
++def validate_quantity_against_stock(request, product, quantity_requested, current_quantity):
++    """Ensure a user cannot add more items than are available in stock."""
++
++    max_quantity = product.max_order_quantity()
++
++    if max_quantity is None:
++        return quantity_requested
++
++    if max_quantity == 0:
++        messages.error(
++            request,
++            f'Sorry, {product.name} is currently out of stock.',
++        )
++        return 0
++
++    desired_total = current_quantity + quantity_requested
++
++    if current_quantity >= max_quantity:
++        messages.warning(
++            request,
++            f'{product.name} is limited to {max_quantity} item(s) per order.',
++        )
++        return 0
++
++    if desired_total > max_quantity:
++        allowed = max_quantity - current_quantity
++        messages.warning(
++            request,
++            f'Only {allowed} more of {product.name} can be added to your basket.',
++        )
++        return allowed
++
++    return quantity_requested
++
++
+ @require_POST
+ def remove_from_basket(request, item_id):
+     """ Remove a specific product from the
+         shopping basket through AJAX request.
+ 
+     Args:
+         request (HttpRequest): HTTP request object.
+         item_id (str or int): ID of the product to be removed.
+ 
+     Returns:
+         JsonResponse: JSON response indicating success or error.
+     """
+ 
+     product = Product.objects.get(pk=item_id)
+ 
+     try:
+         basket = request.session.get('basket', {})
+ 
+         if not item_id:
+             return JsonResponse({'error': 'Item ID is required'}, status=400)
+ 
+         if item_id in basket:
+             basket.pop(item_id)
+             request.session['basket'] = basket
+             messages.success(request, f'Removed {product.name} from basket')
+diff --git a/blog/templates/blog/blog.html b/blog/templates/blog/blog.html
+index f9d619c3cff80075313fc181ddb660f8b961cde7..c28c644fec047b347e6281726302e39a31b57875 100644
+--- a/blog/templates/blog/blog.html
++++ b/blog/templates/blog/blog.html
+@@ -1,76 +1,76 @@
+ {% load static %}
+ <!DOCTYPE html>
+ <html lang="en">
+-    <head>  
++    <head>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <link rel="stylesheet" href="{% static 'blog/css/blog.css' %}">
+-        <title>Eco Shop</title>     
++        <title>Eco Shop</title>
+     </head>
+ 
+     <body>
+         <header>
+             <h1>Eco | Shop Blog</h1>
+             <p>News, tips, and stories from Eco Shop</p>
+         </header>
+ 
+         <div class="container">
+             <div class="blog-grid">
+ 
+                 <div class="blog-post">
+                     <img src="{{ MEDIA_URL }}sustainable-packaging.jpg" alt="Sustainable packaging">
+                     <div class="post-content">
+                         <h3>Top Eco-Friendly Packaging Ideas for 2025</h3>
+                         <p class="meta">Published on 01 June, 2025 · Category: Sustainability:</p>
+                         <p>Discover innovative packaging alternatives that reduce waste and look beautiful on your shelf.</p>
+                         <p>Biodegradable and compostable materials - Reducing environmental impact with plant-based alternatives like seaweed packaging and mushroom-based materials.</p>
+                         <p>Recyclable and reusable packaging - Encouraging circular economy practices by designing packaging that can be repurposed or easily recycled.</p>
+                         <p>Minimalist packaging - Cutting down on excess materials and embracing simple, lightweight designs that reduce waste and carbon footprints.
+                             Brands that integrate sustainable solutions are not only meeting regulatory standards but also appealing to environmentally
+                             conscious consumers who prioritise sustainability in their purchasing decisions. Learn more about sustainable packaging</p>
+                         <a href="https://www.ifco.com/top-6-sustainable-packaging-trends-for-2025/" class="read-more" target="_blank">Read more →</a>
+                     </div>
+                 </div>
+ 
+               <div class="blog-post">
+                   <img src="{{ MEDIA_URL }}plastic-free.jpg" alt="Plastic-free tips">
+                   <div class="post-content">
+                       <h3>How to Go Plastic-Free at Home</h3>
+                       <p class="meta">Published on 31 May, 2025 · Category: Green Living</p>
+                       <p>Small changes make a big difference. Here are our favourite zero-waste swaps for your home:</p>
+                       <p>Instead of using disposable water bottles, you can invest in a reusable water bottle you can reuse several times.
+                          Using a reusable water bottle can help to reduce the amount of plastic water bottles that wind up in landfills and the oceans.
+                       </p>
+                       <p>As can be seen from our store, bamboo products are one of the best eco-friendly substitutes for plastic items.
+                          There are many bamboo products available in local and online stores.
+-                          Unfortunately, some household waste cannot be composted or recycled. 
++                          Unfortunately, some household waste cannot be composted or recycled.
+                           On the other hand, bamboo products are a great alternative as it is readily biodegradable.
+                       </p>
+                       <p>A simple zero waste swap is to replace single-use plastic bags with reusable shopping bags and produce bags made of organic fibre.
+                           Additionally, whenever you visit your neighbourhood, zero waste, bringing a reusable bag with you helps lower your carbon footprint.
+                       </p>
+                       <a href="https://friendsoftheearth.uk/plastics/living-without-plastic" class="read-more" target="_blank">Read more →</a>
+                   </div>
+               </div>
+ 
+               <div class="blog-post">
+                   <img src="{{ MEDIA_URL }}green-business-practice.jpg" alt="Green business practices">
+                   <div class="post-content">
+                       <h3>Behind the Scenes: Our Sustainable Supply Chain</h3>
+                       <p class="meta">Published on 01 June, 2025 · Category: Company News</p>
+                       <p>Take a look into how we source ethically and reduce our environmental impact at every step:</p>
+                       <p>Eco Shop establish clear objectives for sustainability, considering environmental, social, and economic impacts.
+                           We visualize the entire supply chain, from raw material sourcing to product delivery, to identify areas for improvement
+                       </p>
+                       <p>
+                           We communicate sustainability goals and expectations to suppliers, fostering collaboration and shared responsibility.
+-                          Prioritize local suppliers who demonstrate commitment to sustainability, ethical labor practices, and environmental responsibility. 
++                          Prioritize local suppliers who demonstrate commitment to sustainability, ethical labor practices, and environmental responsibility.
+                       </p>
+                       <p>We use eco-friendly materials, minimize packaging waste, and explore options for reusable or recyclable packaging.</p>
+                       <a href="https://www.theenvironmentalblog.org/2025/04/sustainable-supply-chain/" class="read-more" target="_blank">Read more →</a>
+                   </div>
+               </div>
+             </div>
+         </div>
+     </body>
+ </html>
+\ No newline at end of file
+diff --git a/checkout/forms.py b/checkout/forms.py
+index 1779438856d2703d2bf21376f1c22dac8b10389f..ab7d3068765d1ff72bf38bbfb94608fbcbfef75d 100644
+--- a/checkout/forms.py
++++ b/checkout/forms.py
+@@ -1,51 +1,55 @@
+ from django import forms
+ from .models import Order
+ 
+ 
+ class OrderForm(forms.ModelForm):
+     """
+     Provides user-friendly placeholders, custom CSS classes,
+     and autofocus to enhance the checkout user experience.
+     """
+     class Meta:
+         model = Order
+         fields = [
+             'customer_name', 'email', 'phone_number',
+             'address', 'city', 'postcode', 'county',
+-            'country',
++            'country', 'delivery_notes'
+         ]
+ 
+     def __init__(self, *args, **kwargs):
+         """
+         Initialize the form with placeholders, classes, and autofocus.
+         """
+         super().__init__(*args, **kwargs)
+         self._set_placeholders_and_classes()
+ 
+     def _set_placeholders_and_classes(self):
+         """
+         Apply placeholders, CSS classes, and other HTML attributes
+         to each form field to improve the form's usability.
+         """
+         placeholders = {
+             'customer_name': 'Customer Name',
+             'email': 'Email Address',
+             'phone_number': 'Phone Number',
+             'address': 'Street Address',
+             'city': 'City',
+             'postcode': 'Postal or Zip Code',
+             'county': 'County or State',
+             'country': 'Country',
++            'delivery_notes': 'Delivery instructions (optional)',
+         }
+ 
+         for field_name, field in self.fields.items():
+             field.widget.attrs['class'] = 'stripe-style-input'
+             field.label = False
+ 
+             if field_name == 'customer_name':
+                 field.widget.attrs['autofocus'] = True
+ 
+             placeholder = placeholders[field_name]
+             if field.required:
+                 placeholder += ' *'
+             field.widget.attrs['placeholder'] = placeholder
++
++            if field_name == 'delivery_notes':
++                field.widget.attrs['rows'] = 3
+diff --git a/checkout/migrations/0009_order_delivery_eta_order_delivery_notes_and_more.py b/checkout/migrations/0009_order_delivery_eta_order_delivery_notes_and_more.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..ae7107d5ac568b2b6147118bcbf7c89b566146cc
+--- /dev/null
++++ b/checkout/migrations/0009_order_delivery_eta_order_delivery_notes_and_more.py
+@@ -0,0 +1,83 @@
++# Generated by Django 4.2 on 2025-09-25 16:01
++
++from django.db import migrations, models
++
++
++def populate_unit_price(apps, schema_editor):
++    OrderLineItem = apps.get_model('checkout', 'OrderLineItem')
++    for line_item in OrderLineItem.objects.select_related('product'):
++        line_item.unit_price = line_item.product.price
++        line_item.lineitem_total = line_item.unit_price * line_item.quantity
++        line_item.save(update_fields=['unit_price', 'lineitem_total'])
++
++
++class Migration(migrations.Migration):
++
++    dependencies = [
++        ("checkout", "0008_alter_order_county"),
++    ]
++
++    operations = [
++        migrations.AddField(
++            model_name="order",
++            name="delivery_eta",
++            field=models.DateField(
++                blank=True,
++                help_text="Estimated delivery date presented to customers.",
++                null=True,
++            ),
++        ),
++        migrations.AddField(
++            model_name="order",
++            name="delivery_notes",
++            field=models.TextField(
++                blank=True,
++                help_text="Optional delivery instructions provided by the customer.",
++            ),
++        ),
++        migrations.AddField(
++            model_name="order",
++            name="order_status",
++            field=models.CharField(
++                choices=[
++                    ("pending", "Pending"),
++                    ("processing", "Processing"),
++                    ("completed", "Completed"),
++                    ("cancelled", "Cancelled"),
++                ],
++                default="pending",
++                max_length=20,
++            ),
++        ),
++        migrations.AddField(
++            model_name="order",
++            name="payment_message",
++            field=models.CharField(
++                blank=True,
++                help_text="Human friendly status message shown on confirmation page.",
++                max_length=255,
++            ),
++        ),
++        migrations.AddField(
++            model_name="order",
++            name="payment_status",
++            field=models.CharField(
++                choices=[
++                    ("awaiting", "Awaiting Payment"),
++                    ("paid", "Paid"),
++                    ("failed", "Failed"),
++                ],
++                default="awaiting",
++                max_length=20,
++            ),
++        ),
++        migrations.AddField(
++            model_name="orderlineitem",
++            name="unit_price",
++            field=models.DecimalField(
++                decimal_places=2, default=0, editable=False, max_digits=10
++            ),
++            preserve_default=False,
++        ),
++        migrations.RunPython(populate_unit_price, migrations.RunPython.noop),
++    ]
+diff --git a/checkout/models.py b/checkout/models.py
+index 2e682a83409bb24f54c50e74801ac69627c1a118..35facfa5f82c9b2a9dd3cc7c84c7856fc7e573d9 100644
+--- a/checkout/models.py
++++ b/checkout/models.py
+@@ -1,139 +1,214 @@
+ import uuid
++from datetime import timedelta
++
+ from django.db import models
+ 
+ from django.db.models import Sum
+ from django.conf import settings
+ from django.core.validators import MinValueValidator
+ from django_countries.fields import CountryField
+ from phonenumber_field.modelfields import PhoneNumberField
++from django.utils import timezone
+ 
+ from products.models import Product
+ from profiles.models import AccountProfile
+ 
+ # Create your models here.
+ 
+ 
+ class Order(models.Model):
++    class OrderStatus(models.TextChoices):
++        PENDING = 'pending', 'Pending'
++        PROCESSING = 'processing', 'Processing'
++        COMPLETED = 'completed', 'Completed'
++        CANCELLED = 'cancelled', 'Cancelled'
++
++    class PaymentStatus(models.TextChoices):
++        AWAITING = 'awaiting', 'Awaiting Payment'
++        PAID = 'paid', 'Paid'
++        FAILED = 'failed', 'Failed'
++
+     order_number = models.CharField(max_length=50, unique=True, editable=False)
+     account_profile = models.ForeignKey(
+         AccountProfile, on_delete=models.SET_NULL,
+         blank=True, null=True, related_name='orders'
+         )
+     customer_name = models.CharField(max_length=255)
+     email = models.EmailField(blank=False, null=False)
+     address = models.CharField(max_length=255, blank=False, null=False)
+     phone_number = PhoneNumberField(
+         null=True, blank=True, help_text="Enter phone number with country code"
+         )
+     city = models.CharField(max_length=100, null=False, blank=False)
+     county = models.CharField(max_length=100, null=False, blank=False)
+     postcode = models.CharField(max_length=20, blank=True, null=True)
+     country = CountryField(
+         blank_label='Select Country *', blank=False, null=False
+         )
+     created_at = models.DateTimeField(auto_now_add=True)
+     updated_at = models.DateTimeField(auto_now=True)
+     delivery_cost = models.DecimalField(
+         max_digits=6, decimal_places=2, null=False, default=0
+         )
+     order_total = models.DecimalField(
+         max_digits=10, decimal_places=2, null=False, default=0
+         )
+     grand_total = models.DecimalField(
+         max_digits=10, decimal_places=2, null=False, default=0
+         )
+     existing_basket = models.TextField(null=False, blank=False, default='')
+     stripe_payment_intent_id = models.CharField(
+         max_length=255, null=False, default=''
+         )
++    order_status = models.CharField(
++        max_length=20,
++        choices=OrderStatus.choices,
++        default=OrderStatus.PENDING,
++    )
++    payment_status = models.CharField(
++        max_length=20,
++        choices=PaymentStatus.choices,
++        default=PaymentStatus.AWAITING,
++    )
++    payment_message = models.CharField(
++        max_length=255,
++        blank=True,
++        help_text="Human friendly status message shown on confirmation page.",
++    )
++    delivery_eta = models.DateField(
++        null=True,
++        blank=True,
++        help_text="Estimated delivery date presented to customers.",
++    )
++    delivery_notes = models.TextField(
++        blank=True,
++        help_text="Optional delivery instructions provided by the customer.",
++    )
+ 
+     def _generate_order_number(self):
+         return uuid.uuid4().hex.upper()
+ 
+     def update_total(self):
+         """
+         Update order totals including delivery and grand total, then save.
+         """
+         self.order_total = self.calculate_order_total()
+         self.delivery_cost = self.calculate_delivery_cost()
+         self.grand_total = self.order_total + self.delivery_cost
+         self.save()
+ 
+     def calculate_order_total(self):
+         """
+         Calculate the total cost of all related line items.
+         """
+         return self.lineitems.aggregate(Sum('lineitem_total'))['lineitem_total__sum'] or 0  # noqa
+ 
+     def calculate_delivery_cost(self):
+         """
+         Calculate the delivery cost based on order total
+         and free delivery threshold
+         """
+         if self.order_total < settings.FREE_DELIVERY_THRESHOLD:
+             return self.order_total * settings.STANDARD_DELIVERY_PERCENTAGE / 100  # noqa
+         return 0
+ 
+     def save(self, *args, **kwargs):
+         """
+         Override save method to generate order number if missing.
+         """
+         if not self.order_number:
+             self.order_number = self._generate_order_number()
+         super().save(*args, **kwargs)
+ 
+     def __str__(self):
+         return self.order_number
+ 
++    def mark_payment_successful(self, message="Payment confirmed via Stripe"):
++        self.payment_status = Order.PaymentStatus.PAID
++        self.payment_message = message
++        if self.order_status == Order.OrderStatus.PENDING:
++            self.order_status = Order.OrderStatus.PROCESSING
++        if not self.delivery_eta:
++            self.delivery_eta = self.estimate_delivery_eta()
++        self.save(update_fields=[
++            'payment_status', 'payment_message', 'order_status', 'delivery_eta'
++        ])
++
++    def mark_payment_failed(self, message):
++        self.payment_status = Order.PaymentStatus.FAILED
++        self.payment_message = message[:250]
++        self.order_status = Order.OrderStatus.PENDING
++        self.save(update_fields=['payment_status', 'payment_message', 'order_status'])
++
++    def estimate_delivery_eta(self):
++        days = getattr(settings, 'DEFAULT_DELIVERY_DAYS', 4)
++        return timezone.now().date() + timedelta(days=days)
++
+     class Meta:
+         verbose_name = 'Order'
+         verbose_name_plural = 'Orders'
+ 
+ 
+ class OrderLineItem(models.Model):
+     """
+     Individual line item within an order.
+     Links a product to an order icluding quantity and total cost.
+     """
+     order = models.ForeignKey(
+         Order, on_delete=models.CASCADE, related_name='lineitems'
+         )
+     product = models.ForeignKey(
+         Product, null=False, blank=False, on_delete=models.CASCADE
+         )
+     quantity = models.PositiveIntegerField(
+         null=False, blank=False, default=1, validators=[MinValueValidator(1)],
+     )
++    unit_price = models.DecimalField(
++        max_digits=10,
++        decimal_places=2,
++        editable=False,
++    )
+     lineitem_total = models.DecimalField(
+         max_digits=10,
+         decimal_places=2,
+         editable=False,
+     )
+ 
+     def save(self, *args, **kwargs):
+         """
+         Override save to calculate line item total before saving,
+         then update the parent order total.
+         """
++        self.unit_price = self.product.price
+         self.lineitem_total = self.calculate_lineitem_total()
+         super().save(*args, **kwargs)
+         self.update_order_total()
++        self._decrement_inventory()
+ 
+     def calculate_lineitem_total(self):
+         """
+         Calculate total price for this line item.
+         """
+-        return self.product.price * self.quantity
++        return self.unit_price * self.quantity
+ 
+     def update_order_total(self):
+         """
+         Update the total cost for the related order.
+         """
+         self.order.update_total()
+ 
++    def _decrement_inventory(self):
++        if self._state.adding:
++            self.product.adjust_inventory(-self.quantity)
++
++    def delete(self, *args, **kwargs):
++        if not self.product.is_digital:
++            self.product.adjust_inventory(self.quantity)
++        super().delete(*args, **kwargs)
++
+     def __str__(self):
+         return f'SKU {self.product.sku} on order {self.order.order_number}'
+ 
+     class Meta:
+         verbose_name = 'Order Line Item'
+         verbose_name_plural = 'Order Line Items'
+diff --git a/checkout/static/checkout/css/checkout.css b/checkout/static/checkout/css/checkout.css
+index 1de5f8f025df64789e99bcad26fddc854c012c8c..1b97fe958012b3c8be8a9c0cf1b9857b06ced4cc 100644
+--- a/checkout/static/checkout/css/checkout.css
++++ b/checkout/static/checkout/css/checkout.css
+@@ -10,34 +10,34 @@
+   background-color: white;
+   box-shadow: 0 1px 3px 0 #e6ebf1;
+   -webkit-transition: box-shadow 150ms ease;
+   transition: box-shadow 150ms ease;
+   border-color: #000;
+ }
+ 
+ .StripeElement--focus,
+ .stripe-style-input:focus,
+ .stripe-style-input:active {
+   box-shadow: 0 1px 3px 0 #cfd7df;
+ }
+ 
+ .StripeElement--webkit-autofill {
+   background-color: #fefde5;
+ }
+ 
+ .stripe-style-input::placeholder {
+     color: #aab7c4;
+ }
+ 
+ .invalid-icon {
+         color: #c40d20;
+ }
+ 
+-select, 
++select,
+ select option {
+     color: #000000;
+ }
+ 
+ select:invalid,
+ select option[value=""] {
+     color: #aab7c4;
+ }
+\ No newline at end of file
+diff --git a/checkout/static/checkout/js/stripe_elements.js b/checkout/static/checkout/js/stripe_elements.js
+index 7d22735cf2a13637345c008b0bd0f8eeee86619c..2eb4b64158d04f3ec09377651a6c1d9994476d2b 100644
+--- a/checkout/static/checkout/js/stripe_elements.js
++++ b/checkout/static/checkout/js/stripe_elements.js
+@@ -5,181 +5,201 @@ var stripe = Stripe(stripePublickey);
+ var elements = stripe.elements();
+ 
+ /* Core CSS from stripe documentation */
+ var style = {
+     base: {
+         color: '#000',
+         fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+         fontSmoothing: 'antialiased',
+         fontSize: '16px',
+         '::placeholder': {
+             color: '#aab7c4'
+         }
+     },
+     invalid: {
+         color: '#c40d20',
+         iconColor: '#c40d20'
+     }
+ };
+ var card = elements.create('card', {style: style});
+ card.mount('#card-element');
+ 
+ 
+ 
+ card.addEventListener('change', (event) => {
+     const errorContainer = document.getElementById('card-errors');
+- 
++
+     if (event.error) {
+         errorContainer.innerHTML = createErrorMessage(event.error.message);
+     } else {
+         errorContainer.textContent = '';
+     }
+ });
+- 
++
+ const createErrorMessage = (message) => `
+     <span class="invalid-icon" role="alert">
+         <i class="fa-solid fa-square-xmark me-2"></i>
+     </span>
+     <span class="small">${message}</span>
+ `;
+ 
+ // Validate checkout form fields
+ function validateFormFields() {
+     const requiredFields = [
+         { field: form.customer_name, name: 'Name' },
+         { field: form.email, name: 'Email' },
+         { field: form.phone_number, name: 'Phone number' },
+         { field: form.address, name: 'Address' },
+         { field: form.city, name: 'City' },
+         { field: form.postcode, name: 'Postal code' },
+         { field: form.country, name: 'Country' },
+         { field: form.county, name: 'County/State' }
+     ];
+ 
+     for (let item of requiredFields) {
+         if (!item.field.value.trim()) {
+             displayError(`Please fill in the ${item.name}.`);
+             return false;
+         }
+     }
+ 
+     // 🔎 Extra validation: phone number format
+     const phoneValue = form.phone_number.value.trim();
+     const phoneRegex = /^\+\d{7,15}$/;
+ 
+     if (!phoneRegex.test(phoneValue)) {
+         displayError("Please enter a valid phone number with country code (e.g. +447445363737).");
+         return false;
+     }
+ 
+     errorDiv.innerHTML = '';
+     return true;
+ }
+ 
+ 
+ // Form submit: Core logic from stripe documentation
+ 
+ const form = document.getElementById('payment-form');
+ const submitButton = document.getElementById('submit-button');
+ const errorDiv = document.getElementById('card-errors');
+- 
++const feedbackDiv = document.getElementById('payment-feedback');
++
+ form.addEventListener('submit', async function(ev) {
+     ev.preventDefault();
+ 
+     if (!validateFormFields()) {
+         return;
+     }
+- 
++
+     try {
+         disableForm();
+- 
++        showFeedback('Authorising your payment. Please do not refresh...', 'info');
++
+         const billingDetails = getBillingDetails();
+         const shippingDetails = getShippingDetails();
+- 
+-        
++
++
+         var saveInfo = $('#id-save-info').prop('checked');
+-        
++
+         var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+         var postData = {
+             'csrfmiddlewaretoken': csrfToken,
+             'client_secret': clientSecret,
+             'save_info': saveInfo,
+         };
+         var url = '/checkout/store_checkout_info/';
+- 
+-        
++
++
+         await $.post(url, postData);
+- 
++
+         const result = await stripe.confirmCardPayment(clientSecret, {
+-            payment_method: { 
++            payment_method: {
+                 card: card,
+                 billing_details: billingDetails
+             },
+             shipping: shippingDetails
+         });
+- 
++
+         if (result.error) {
+             displayError(result.error.message);
++            showFeedback(result.error.message, 'error');
+         } else if (result.paymentIntent.status === 'succeeded') {
++            showFeedback('Payment confirmed! Redirecting to your receipt...', 'success');
+             form.submit();
+         }
+- 
++
+     } catch (error) {
+         console.error('Payment processing error:', error);
+         displayError('An unexpected error occurred. Please try again.');
++        showFeedback('Something went wrong while confirming your payment. Please review the errors above.', 'error');
+     } finally {
+         enableForm();
+     }
+ });
+- 
++
+ function getBillingDetails() {
+-    
++
+     return {
+         name: form.customer_name.value.trim(),
+         email: form.email.value.trim(),
+         phone: form.phone_number.value.trim(),
+         address: {
+             line1: form.address.value.trim(),
+             city: form.city.value.trim(),
+             postal_code: form.postcode.value.trim(),
+             country: form.country.value.trim(),
+             state: form.county.value.trim()
+         },
+-        
++
+     };
+ }
+- 
++
+ function getShippingDetails() {
+-    
++
+     return {
+         name: form.customer_name.value.trim(),
+         phone: form.phone_number.value.trim(),
+         address: {
+             line1: form.address.value.trim(),
+             city: form.city.value.trim(),
+             postal_code: form.postcode.value.trim(),
+             country: form.country.value.trim(),
+             state: form.county.value.trim()
+         },
+     };
+-    
++
+ }
+ 
+ function disableForm() {
+     card.update({ disabled: true });
+     submitButton.disabled = true;
+ }
+- 
++
+ function enableForm() {
+     card.update({ disabled: false });
+     submitButton.disabled = false;
+ }
+- 
++
+ function displayError(message) {
+     const html = `
+         <span class="invalid-icon" role="alert">
+             <i class="fa-solid fa-square-xmark me-2"></i>
+         </span>
+         <span>${message}</span>
+     `;
+     errorDiv.innerHTML = html;
++}
++
++function showFeedback(message, state = 'info') {
++    if (!feedbackDiv) return;
++
++    const stateClass = {
++        success: 'alert alert-success',
++        error: 'alert alert-danger',
++        info: 'alert alert-info',
++    }[state] || 'alert alert-info';
++
++    feedbackDiv.className = `${stateClass}`;
++    feedbackDiv.innerHTML = `
++        <i class="fa-solid ${state === 'success' ? 'fa-circle-check' : state === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info'} me-2"></i>${message}
++    `;
+ }
+\ No newline at end of file
+diff --git a/checkout/templates/checkout/checkout.html b/checkout/templates/checkout/checkout.html
+index 5e13bb3069842a76a0b609abf1aa30e624cef281..a5c9b250bfe5a2c21b5fa639931d5e7e550e49b0 100644
+--- a/checkout/templates/checkout/checkout.html
++++ b/checkout/templates/checkout/checkout.html
+@@ -1,142 +1,177 @@
+ {% extends "base.html" %}
+ {% load static %}
+ {% load basket_tools %}
+- 
++
+ {% block extra_css %}
+     <link rel="stylesheet" href="{% static 'checkout/css/checkout.css' %}">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ {% endblock %}
+- 
++
+ {% block page_header %}
+     <div class="container header-container">
+         <div class="row">
+             <div class="col">
+                 <hr>
+                 <h2 class="text-center mb-4 fw-bold responsive-heading">Checkout</h2>
+                 <hr class="w-50 mx-auto mb-4">
+             </div>
+         </div>
+     </div>
+ {% endblock %}
+- 
++
+ {% block content %}
+     <div class="overlay"></div>
+     <div class="container">
+         <div class="row">
+             <div class="col-12 col-lg-6 order-lg-last mb-5">
+-                <div class="card shadow-lg rounded-3">
++                <div class="card shadow-lg rounded-3 border-0">
+                     <div class="card-body">
+-                        <h3 class="card-title mb-4">Order Summary <span class="badge bg-success rounded-pill">{{ product_count }}</span></h3>
++                        <h3 class="card-title mb-4 d-flex justify-content-between align-items-center">Order Summary <span class="badge bg-success rounded-pill">{{ product_count }}</span></h3>
+                         <div class="row">
+                             <div class="col-7 offset-2">
+                                 <p class="text-muted small">Item</p>
+                             </div>
+                             <div class="col-3 text-end">
+                                 <p class="text-muted small">Subtotal</p>
+                             </div>
+                         </div>
+                         {% for item in basket_items %}
+-                            <div class="row mb-3 align-items-center">
++                            <div class="row mb-3 align-items-center border-bottom pb-3">
+                                 <div class="col-2">
+                                     <a href="{% url 'product_detail' item.product.id %}">
+                                         <img class="img-fluid rounded-3" src="{{ item.product.product_image.url }}" alt="{{ product.name }}">
+                                     </a>
+                                 </div>
+                                 <div class="col-7">
+                                     <p class="mb-0 fw-bold">{{ item.product.name }}</p>
+-                                    <p class="text-muted small">Qty: {{ item.quantity }}</p>
++                                    {% if item.product.brand %}
++                                        <p class="text-muted small mb-1">by {{ item.product.brand }}</p>
++                                    {% endif %}
++                                    {% if item.product.short_description %}
++                                        <p class="text-muted small mb-1">{{ item.product.short_description }}</p>
++                                    {% endif %}
++                                    <p class="text-muted small mb-1">Qty: {{ item.quantity }}</p>
++                                    {% if not item.product.is_digital %}
++                                        <p class="small {% if item.product.is_low_stock %}text-danger{% else %}text-success{% endif %} mb-0">
++                                            {% if item.product.is_low_stock %}
++                                                <i class="fa-solid fa-triangle-exclamation me-1"></i>Low stock: {{ item.product.inventory_count }} left
++                                            {% else %}
++                                                <i class="fa-solid fa-boxes-stacked me-1"></i>In stock
++                                            {% endif %}
++                                        </p>
++                                    {% else %}
++                                        <p class="small text-success mb-0"><i class="fa-solid fa-cloud-arrow-down me-1"></i>Instant download</p>
++                                    {% endif %}
+                                 </div>
+                                 <div class="col-3 text-end">
+                                     <p class="text-muted small">${{ item.product.price | calc_subtotal:item.quantity }}</p>
+                                 </div>
+                             </div>
+                         {% endfor %}
+                         <hr>
+                         <div class="row text-end">
+                             <div class="col-7 offset-2">
+                                 <p class="mb-1">Order Total:</p>
+                                 <p class="mb-1">Delivery:</p>
+                                 <p class="mb-1 fw-bold">Grand Total:</p>
+                             </div>
+                             <div class="col-3">
+                                 <p class="mb-1">${{ total | floatformat:2 }}</p>
+                                 <p class="mb-1">${{ delivery | floatformat:2 }}</p>
+                                 <p class="mb-1 fw-bold">${{ grand_total | floatformat:2 }}</p>
+                             </div>
+                         </div>
++                        <div class="alert alert-light border mt-3" role="status">
++                            <div class="d-flex align-items-center">
++                                <i class="fa-solid fa-truck-fast text-success fa-lg me-2"></i>
++                                {% if estimated_delivery_date %}
++                                    <div>
++                                        <p class="mb-0 fw-bold">Estimated delivery:</p>
++                                        <small>{{ estimated_delivery_date|date:"l, d F Y" }}</small>
++                                    </div>
++                                {% else %}
++                                    <div>
++                                        <p class="mb-0 fw-bold">Fast eco-friendly shipping</p>
++                                        <small>We dispatch within 24 hours on business days.</small>
++                                    </div>
++                                {% endif %}
++                            </div>
++                        </div>
+                     </div>
+                 </div>
+             </div>
+             <div class="col-12 col-lg-6">
+-                <div class="card shadow-lg rounded-3">
++                <div class="card shadow-lg rounded-3 border-0">
+                     <div class="card-body">
+                         <h3 class="card-title mb-4">Billing Details</h3>
+                         <form action="{% url 'checkout' %}" method="POST" id="payment-form">
+                             {% csrf_token %}
+                             <fieldset class="mb-4">
+                                 <legend class="fs-5 text-muted mb-3">Personal Information</legend>
+                                 {{ order_form.customer_name | as_crispy_field }}
+                                 {{ order_form.email | as_crispy_field }}
+                                 {{ order_form.phone_number | as_crispy_field }}
+                             </fieldset>
+                             <fieldset class="mb-4 field">
+                                 <legend class="fs-5 text-muted mb-3">Shipping Address</legend>
+                                 {{ order_form.address | as_crispy_field }}
+                                 {{ order_form.city | as_crispy_field }}
+                                 {{ order_form.county | as_crispy_field }}
+                                 {{ order_form.postcode | as_crispy_field }}
+                                 {{ order_form.country | as_crispy_field }}
++                                {{ order_form.delivery_notes | as_crispy_field }}
+                             </fieldset>
+                             <div class="form-check mb-4">
+                                 {% if user.is_authenticated %}
+                                     <input class="form-check-input" type="checkbox" id="id-save-info" name="save-info" checked>
+                                     <label class="form-check-label" for="id-save-info">Save shipping details to my profile</label>
+                                 {% else %}
+                                     <label class="form-check-label">
+-                                        <a href="{% url 'account_signup'%}" class="text-decoration-none">Create an account</a> or 
++                                        <a href="{% url 'account_signup'%}" class="text-decoration-none">Create an account</a> or
+                                         <a href="{% url 'account_login'%}" class="text-decoration-none">login</a> to save your details
+                                     </label>
+                                 {% endif %}
+                             </div>
+                             <fieldset class="mb-4">
+                                 <legend class="fs-5 text-muted mb-3">Payment Information</legend>
+                                 <div class="mb-3" id="card-element"></div>
++                                <div class="mb-3" id="payment-feedback" role="status"></div>
+                                 <div class="mb-3 text-danger" id="card-errors" role="alert"></div>
+                                 <input type="hidden" value="{{ client_secret }}" name="client_secret">
+                             </fieldset>
+                             <div class="d-grid gap-3">
+                                 <a href="{% url 'view_basket' %}" class="btn btn-success text-uppercase">
+                                     <i class="fa-solid fa-angles-left"></i>Update Basket
+                                 </a>
+                                 <button id="submit-button" class="btn btn-primary text-uppercase btn-dark">
+                                     Complete Order <i class="fas fa-lock ms-2"></i>
+                                 </button>
+                             </div>
+-                            <div class="alert alert-info mt-3 text-danger" role="alert">
++                            <div class="alert alert-info mt-3 text-dark" role="alert">
+                                 <i class="fa-solid fa-circle-info me-2"></i>
+-                                Your card will be charged <strong>${{ grand_total|floatformat:2 }}</strong>
++                                Your card will be charged <strong>${{ grand_total|floatformat:2 }}</strong>. All transactions are protected with 3D Secure when available.
+                             </div>
+                         </form>
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </div>
+ {% endblock %}
+ 
+ 
+ {% block postloadjs %}
+     <script>
+         function flashFreeDeliveryMessage(duration = 5000) {
+             const msg = document.getElementById("free-delivery-msg");
+             if (!msg) return;
+ 
+             msg.classList.add("flashing");
+ 
+             setTimeout(() => {
+                 msg.classList.remove("flashing");
+             }, duration);
+         }
+ 
+         document.addEventListener("DOMContentLoaded", function () {
+             if (window.location.pathname === "/checkout/") {
+diff --git a/checkout/templates/checkout/checkout_complete.html b/checkout/templates/checkout/checkout_complete.html
+index a04ef05c36db2bb658b71f2c7cf2e7c986497eab..99a27e14d857beb93401bfc510b4042267378650 100644
+--- a/checkout/templates/checkout/checkout_complete.html
++++ b/checkout/templates/checkout/checkout_complete.html
+@@ -1,94 +1,110 @@
+ {% extends "base.html" %}
+ {% load static %}
+- 
++
+ {% block extra_css %}
+     <link rel="stylesheet" href="{% static 'checkout/css/checkout.css' %}">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+ {% endblock %}
+- 
++
+ {% block page_header %}
+     <div class="container header-container">
+         <div class="row">
+             <div class="col"></div>
+         </div>
+     </div>
+ {% endblock %}
+- 
++
+ {% block content %}
+     <div class="overlay"></div>
+     <div class="container my-5">
+         <div class="row justify-content-center">
+             <div class="col-lg-8">
+                 <div class="card shadow-lg border-0 rounded-lg">
+                     <div class="card-body">
+-                        <h2 class="card-title text-center mb-4">Thank You for Your Order</h2>
+-                        <p class="text-center mb-4">
+-                            <i class="fas fa-check-circle text-success fa-3x"></i>
+-                        </p>
+-                        <p class="text-center">Order confirmation email has been sent to <strong>{{ order.email }}</strong>.</p>
++                        <div class="text-center mb-4">
++                            <h2 class="card-title mb-2">Thank You for Your Order</h2>
++                            <p class="text-muted">Order confirmation email has been sent to <strong>{{ order.email }}</strong>.</p>
++                            <span class="badge rounded-pill {% if order.payment_status == 'paid' %}bg-success{% elif order.payment_status == 'failed' %}bg-danger{% else %}bg-warning text-dark{% endif %} px-3 py-2">
++                                {{ order.get_payment_status_display }}
++                            </span>
++                        </div>
++                        {% if order.payment_message %}
++                            <div class="alert alert-info" role="status">
++                                <i class="fas fa-info-circle me-2"></i>{{ order.payment_message }}
++                            </div>
++                        {% endif %}
+                         <hr>
+                         <h4 class="text-center mb-4">Order Details</h4>
+                         <div class="row">
+                             <div class="col-md-6">
+                                 <h5>Order Information</h5>
+                                 <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+                                 <p><strong>Order Date:</strong> {{ order.created_at }}</p>
++                                <p><strong>Order Status:</strong> {{ order.get_order_status_display }}</p>
++                                {% if order.delivery_eta %}
++                                    <p><strong>Estimated Delivery:</strong> {{ order.delivery_eta|date:"l, d F Y" }}</p>
++                                {% endif %}
+                             </div>
+                             <div class="col-md-6">
+                                 <h5>Shipping Information</h5>
+                                 <p><strong>Name:</strong> {{ order.customer_name }}</p>
+                                 <p><strong>Address:</strong> {{ order.address }}</p>
+                                 <p><strong>City:</strong> {{ order.city }}</p>
+                                 {% if order.county %}
+                                     <p><strong>County:</strong> {{ order.county }}</p>
+                                 {% endif %}
+                                 {% if order.postcode %}
+                                     <p><strong>Postal Code:</strong> {{ order.postcode }}</p>
+                                 {% elif order.zipcode %}
+                                     <p><strong>Zip Code:</strong> {{ order.zipcode }}</p>
+                                 {% endif %}
+                                 <p><strong>Country:</strong> {{ order.country }}</p>
++                                {% if order.delivery_notes %}
++                                    <p><strong>Delivery Notes:</strong> {{ order.delivery_notes }}</p>
++                                {% endif %}
+                             </div>
+                         </div>
+                         <hr>
+                         <h5>Order Items</h5>
+                         <div class="table-responsive">
+                             <table class="table table-hover">
+                                 <thead>
+                                     <tr>
+                                         <th>Product</th>
++                                        <th>Unit Price</th>
+                                         <th>Quantity</th>
+-                                        <th>Price</th>
++                                        <th>Line Total</th>
+                                     </tr>
+                                 </thead>
+                                 <tbody>
+                                     {% for item in order.lineitems.all %}
+                                     <tr>
+                                         <td>{{ item.product.name }}</td>
++                                        <td>${{ item.unit_price|floatformat:2 }}</td>
+                                         <td>{{ item.quantity }}</td>
+-                                        <td>${{ item.product.price }}</td>
++                                        <td>${{ item.lineitem_total|floatformat:2 }}</td>
+                                     </tr>
+                                     {% endfor %}
+                                 </tbody>
+                             </table>
+                         </div>
+                         <hr>
+                         <div class="row">
+                             <div class="col-md-6">
+                                 <h5>Order Summary</h5>
+                                 <p><strong>Order Total:</strong> ${{ order.order_total }}</p>
+                                 <p><strong>Delivery:</strong> ${{ order.delivery_cost }}</p>
+                                 <p><strong>Grand Total:</strong> ${{ order.grand_total }}</p>
+                             </div>
+                             <div class="col-md-6 text-md-end">
+                                 {% if from_profile %}
+                                     <a href="{% url 'profile' %}" class="btn btn-primary btn-lg mt-3 btn-dark text-uppercase">
+                                         <i class="fa-solid fa-angles-left"></i>Back to Profile
+                                     </a>
+                                 {% else %}
+                                     <a href="{% url 'products' %}?category=new_products,deals,clearance" class="btn btn-success btn-lg mt-3 text-uppercase">
+                                         <i class="fas fa-gifts me-2"></i>Check Our Special Offers
+                                     </a>
+                                 {% endif %}
+                             </div>
+                         </div>
+diff --git a/checkout/templates/checkout/confirmation_emails/confirmation_email_body.txt b/checkout/templates/checkout/confirmation_emails/confirmation_email_body.txt
+index 4e311f2949a0492f2d3426b9c62182524c514775..1faabd4c5705666e389d301a9dde0dbeb49084ad 100644
+--- a/checkout/templates/checkout/confirmation_emails/confirmation_email_body.txt
++++ b/checkout/templates/checkout/confirmation_emails/confirmation_email_body.txt
+@@ -1,23 +1,23 @@
+ Hello {{ order.customer_name }}!
+ 
+ This is a confirmation of your order at Eco Shop. Your order information is below:
+ 
+ Order Number: {{ order.order_number }}
+ Order Date: {{ order.created_at }}
+ 
+ Order Total: ${{ order.order_total }}
+ Delivery: ${{ order.delivery_cost }}
+ Grand Total: ${{ order.grand_total }}
+ 
+ Your order will be shipped to {{ order.street_address }} in {{ order.city }}, {{ order.country }}.
+ 
+ We've got your phone number on file as {{ order.phone_number }}.
+ 
+ If you have any questions, feel free to contact us at {{ contact_email }}.
+ 
+ Thank you for your order!
+ 
+ Sincerely,
+ 
+-Customer Service 
++Customer Service
+ Eco Shop
+\ No newline at end of file
+diff --git a/checkout/views.py b/checkout/views.py
+index 0b01de94c751f2ae70aec94ea385afe9d30c2e32..0602270b4b9eb91eade466a5062eacf1824639f1 100644
+--- a/checkout/views.py
++++ b/checkout/views.py
+@@ -1,36 +1,36 @@
+ from django.shortcuts import (
+     render, HttpResponse, redirect, reverse, get_object_or_404
+ )
+ from django.conf import settings
+ from django.contrib import messages
+ from django.views.decorators.http import require_POST
+ 
+ from products.models import Product
+-from .forms import OrderForm, Order
++from .forms import OrderForm
+ from basket.contexts import basket_contents
+-from .models import OrderLineItem
++from .models import Order, OrderLineItem
+ from profiles.models import AccountProfile
+ from profiles.forms import AccountProfileForm
+ 
+ import stripe
+ import json
+ 
+ # Create your views here.
+ 
+ 
+ @require_POST
+ def store_checkout_info(request):
+     """
+     Store checkout information in Stripe PaymentIntent metadata.
+ 
+     Extracts the PaymentIntent ID from the client secret and updates
+     its metadata to include:
+     - Current basket contents
+     - Whether the user wants to save their info
+     - The username (if authenticated)
+ 
+     If the update fails, returns an error response.
+     """
+     def _extract_payment_intent_id(client_secret):
+         return client_secret.split('_secret')[0]
+ 
+@@ -69,166 +69,201 @@ def checkout(request):
+       - Calculate totals and create a Stripe PaymentIntent.
+       - Initialize the OrderForm (prefill if user has a profile).
+       - Render the checkout page with context.
+ 
+     POST:
+       - Validate and process submitted order form.
+       - Create Order and OrderLineItems.
+       - Redirect to checkout completion page on success.
+     """
+     stripe_public_key = settings.STRIPE_PUBLIC_KEY
+     stripe_secret_key = settings.STRIPE_SECRET_KEY
+ 
+     def handle_post_request(request, stripe_secret_key):
+         basket = request.session.get('basket', {})
+         order_form = OrderForm(get_form_data(request))
+ 
+         if order_form.is_valid():
+             order = create_order(order_form, basket, request)
+             if not order:
+                 return redirect(reverse('view_basket'))
+ 
+             if not process_order_line_items(basket, order):
+                 return redirect(reverse('view_basket'))
+ 
+             request.session['save_info'] = 'save-info' in request.POST
++            messages.success(
++                request,
++                'Payment authorised! We are preparing your eco-friendly order.',
++            )
+             return redirect(reverse(
+                 'checkout_complete', args=[order.order_number])
+                 )
+ 
+         messages.error(request, 'Form error. Please recheck your details.')
+         return redirect(reverse('view_basket'))
+ 
+     def create_order(order_form, basket, request):
+         order = order_form.save(commit=False)
+ 
+         client_secret = request.POST.get('client_secret')
+         if not client_secret:
+             messages.error(
+                 request, "Missing payment information. Please try again."
+                 )
+             return None
+ 
+         payment_intent_id = client_secret.split('_secret')[0]
+         order.stripe_payment_intent_id = payment_intent_id
+         order.existing_basket = json.dumps(basket)
++        order.delivery_eta = order.estimate_delivery_eta()
++        order.payment_status = Order.PaymentStatus.PAID
++        order.payment_message = 'Stripe confirmed your payment.'
++        order.order_status = Order.OrderStatus.PROCESSING
+ 
+         try:
+             order.save()
+ 
+         except Exception as e:
+             messages.error(request, f"Order saving failed: {str(e)}")
+             return None
+ 
+         return order
+ 
+     def process_order_line_items(basket, order):
+         try:
+             for item_id, item_data in basket.items():
+                 product = Product.objects.get(id=item_id)
++                if not product.can_fulfil_order(item_data):
++                    message = (
++                        f'Only {product.inventory_count} of {product.name} remain. '
++                        'Please adjust your basket before checking out again.'
++                    )
++                    messages.error(request, message)
++                    order.mark_payment_failed(message)
++                    order.delete()
++                    return False
+                 OrderLineItem.objects.create(
+                     order=order, product=product, quantity=item_data
+                     )
+         except Product.DoesNotExist:
+-            messages.error(
+-                request, "One of the products in your basket wasn't found in our database. Please call us for assistance!"  # noqa
+-                )
++            message = (
++                "One of the products in your basket wasn't found in our database. "
++                "Please call us for assistance!"
++            )
++            messages.error(request, message)
++            order.mark_payment_failed(message)
+             order.delete()
+             return False
+         return True
+ 
+     def calculate_total(basket):
+         return sum(
+             item_data * Product.objects.get(id=item_id).price for item_id, item_data in basket.items()  # noqa
+             )
+ 
++    def estimate_delivery_from_basket(basket_items):
++        estimates = [
++            item['product'].estimate_delivery_date()
++            for item in basket_items
++            if hasattr(item.get('product'), 'estimate_delivery_date')
++        ]
++        if not estimates:
++            return None
++        return max(estimates)
++
+     def handle_get_request(request, stripe_public_key):
+         basket = request.session.get('basket', {})
+         if not basket:
+             messages.error(request, "Your basket is currently empty")
+             return redirect(reverse('products'))
+ 
+         current_basket = basket_contents(request)
+         total = current_basket['grand_total']
+         stripe_total = round(total * 100)
+         stripe.api_key = settings.STRIPE_SECRET_KEY
+ 
+         payment_intent = create_payment_intent(stripe_total)
+         if not payment_intent:
+             return redirect(reverse('view_basket'))
+ 
+         order_form = initialize_order_form(request)
++        estimated_delivery_date = estimate_delivery_from_basket(
++            current_basket['basket_items']
++        )
+ 
+         context = {
+             'order_form': order_form,
+             'stripe_public_key': stripe_public_key,
+             'client_secret': payment_intent.client_secret,
++            'estimated_delivery_date': estimated_delivery_date,
+         }
+ 
+         return render(request, 'checkout/checkout.html', context)
+ 
+     def create_payment_intent(stripe_total):
+         try:
+             return stripe.PaymentIntent.create(
+                 amount=stripe_total,
+                 currency=settings.STRIPE_CURRENCY
+             )
+         except stripe.error.StripeError as e:
+             messages.error(
+                 request, f"An error occurred while processing your payment: {str(e)}"  # noqa
+                 )
+             return None
+ 
+     def initialize_order_form(request):
+         if request.user.is_authenticated:
+             try:
+                 profile = AccountProfile.objects.get(user=request.user)
+                 return OrderForm(initial={
+                     'customer_name': profile.user.get_username(),
+                     'email': profile.user.email,
+                     'phone_number': profile.primary_phone_number,
+                     'address': profile.primary_address,
+                     'city': profile.primary_city,
+                     'county': profile.primary_county,
+                     'postcode': profile.primary_postcode,
+                     'country': profile.primary_country,
+                 })
+             except AccountProfile.DoesNotExist:
+                 pass
+ 
+         return OrderForm()
+ 
+     def get_form_data(request):
+         return {
+             'customer_name': request.POST['customer_name'],
+             'email': request.POST['email'],
+             'phone_number': request.POST['phone_number'],
+             'address': request.POST['address'],
+             'city': request.POST['city'],
+             'county': request.POST['county'],
+             'postcode': request.POST['postcode'],
+             'country': request.POST['country'],
++            'delivery_notes': request.POST.get('delivery_notes', ''),
+         }
+ 
+     if request.method == 'POST':
+         return handle_post_request(request, stripe_secret_key)
+ 
+     return handle_get_request(request, stripe_public_key)
+ 
+ 
+ def checkout_complete(request, order_number):
+     """
+     Handle successful checkouts and render the success page.
+     - If the user is authenticated, attach the user's profile to the order
+       and optionally update their saved profile information.
+     - Display a success message with the order number.
+     - Clear the basket from the session.
+     - Render the checkout success template with order details.
+ 
+     Args:
+         request: The HTTP request object.
+         order_number: The unique identifier for the order.
+     """
+     def update_order_profile(order, user, save_info):
+ 
+         profile = AccountProfile.objects.get(user=user)
+         order.account_profile = profile
+diff --git a/faq/templates/faq/faq.html b/faq/templates/faq/faq.html
+index 349482200652b8712da5a2a42f3a914b42400c42..fb8acfbc5276bde81d75c059c4f0fa47a46ccaee 100644
+--- a/faq/templates/faq/faq.html
++++ b/faq/templates/faq/faq.html
+@@ -1,33 +1,33 @@
+ {% load static %}
+ <!DOCTYPE html>
+ <html lang="en">
+-    <head>  
++    <head>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <link rel="stylesheet" href="{% static 'faq/css/faq.css' %}">
+-        <title>Eco Shop</title>     
++        <title>Eco Shop</title>
+     </head>
+ 
+ <body>
+   <header>
+     <h1 class="text-white">Eco | Shop</h1>
+     <p>Know more about our services</p>
+   </header>
+   <div class="container" id="terms-content">
+     <h1>Frequently Asked Questions</h1>
+     <div class="faq-item">
+       <h2>1. Are your products really eco-friendly?</h2>
+       <p>Yes! All our products are made with sustainability in mind — using natural, biodegradable, or recyclable materials. We also partner only with certified eco-conscious suppliers.</p>
+     </div>
+     <div class="faq-item">
+       <h2>2. Is your packaging recyclable or plastic-free?</h2>
+       <p>We use 100% recyclable and plastic-free packaging materials. Our boxes, tape, and labels are all compostable or recyclable to reduce waste.</p>
+     </div>
+     <div class="faq-item">
+       <h2>3. Where do you ship from?</h2>
+       <p>We ship from our warehouse in the USA using carbon-neutral courier services. Delivery times may vary depending on your location.</p>
+     </div>
+     <div class="faq-item">
+       <h2>4. Do you offer international shipping?</h2>
+       <p>Yes, we ship worldwide. Shipping rates and delivery times are calculated at checkout based on your location.</p>
+     </div>
+diff --git a/fix.patch b/fix.patch
+new file mode 100644
+index 0000000000000000000000000000000000000000..12054f2ef7b319588354782ff454500edb2c9701
+--- /dev/null
++++ b/fix.patch
+@@ -0,0 +1,824 @@
++diff --git a/.vscode/arctictern.py b/.vscode/arctictern.py
++index bd164ce..9b3b4d6 100644
++--- a/.vscode/arctictern.py
+++++ b/.vscode/arctictern.py
++@@ -61,7 +61,7 @@ def get_versions():
++     else:
++         with open(".vscode/version.txt", "w") as f:
++             f.write(str(THIS_VERSION))
++-    
+++
++     r = requests.get(BASE_URL + ".vscode/version.txt")
++     CURRENT_VERSION = float(r.content)
++
++@@ -76,7 +76,7 @@ def needs_upgrade():
++     """
++ 
++     versions = get_versions()
++-    
+++
++     print(f"Upstream version: {versions['current_version']}")
++     print(f"Local version: {versions['this_version']}")
++ 
++@@ -106,7 +106,7 @@ def build_post_upgrade():
++         content += FINAL_LINES
++         with open(".vscode/post_upgrade.sh", "w") as f:
++             f.writelines(content)
++-    
+++
++     print("Built post_upgrade.sh. Restart your workspace for it to take effect.")
++ 
++ 
++@@ -133,7 +133,7 @@ def process(file, suffix):
++         if result != 0:
++             os.remove(f"{file}.tmp")
++             return True
++-    
+++
++     return False
++ 
++ 
++@@ -153,7 +153,7 @@ def start_migration():
++         result = process(file["filename"], file["url"])
++         if result == True:
++             push_and_recreate = True
++-    
+++
++     if push_and_recreate:
++         write_version()
++ 
++diff --git a/basket/templates/basket/basket.html b/basket/templates/basket/basket.html
++index a057987..7ca5c22 100644
++--- a/basket/templates/basket/basket.html
+++++ b/basket/templates/basket/basket.html
++@@ -1,7 +1,7 @@
++ {% extends "base.html" %}
++ {% load static %}
++ {% load basket_tools %}
++- 
+++
++ {% block page_header %}
++     <div class="container header-container">
++         <div class="row">
++@@ -9,7 +9,7 @@
++         </div>
++     </div>
++ {% endblock %}
++- 
+++
++ {% block content %}
++ <div class="overlay"></div>
++ <div class="container my-5">
++@@ -67,7 +67,7 @@
++                                     {% csrf_token %}
++                                     <div class="input-group input-group-sm">
++                                         <div class="input-group-prepend">
++-                                            <button class="btn btn-outline-secondary decrement-qty" 
+++                                            <button class="btn btn-outline-secondary decrement-qty"
++                                                 data-item_id="{{ item.item_id }}" id="decrement-qty_{{ item.item_id }}" type="button">
++                                                 <i class="fas fa-minus fa-sm"></i>
++                                             </button>
++@@ -186,5 +186,5 @@
++ 	</script>
++ {% include 'basket/includes/quantity_script.html' %}
++ {% endblock %}
++-     
+++
++ 
++diff --git a/basket/templates/basket/includes/quantity_script.html b/basket/templates/basket/includes/quantity_script.html
++index 10a01bf..f2e8b4d 100644
++--- a/basket/templates/basket/includes/quantity_script.html
+++++ b/basket/templates/basket/includes/quantity_script.html
++@@ -1,11 +1,11 @@
++ <script type="text/javascript">
++-    
+++
++     document.addEventListener('DOMContentLoaded', function() {
++-        
+++
++         const incrementBtns = document.querySelectorAll('.increment-qty');
++         const decrementBtns = document.querySelectorAll('.decrement-qty');
++- 
++-        
+++
+++
++         incrementBtns.forEach(btn => {
++             btn.addEventListener('click', function() {
++                 const itemId = this.getAttribute('data-item_id');
++@@ -17,8 +17,8 @@
++                 }
++             });
++         });
++- 
++-        
+++
+++
++         decrementBtns.forEach(btn => {
++             btn.addEventListener('click', function() {
++                 const itemId = this.getAttribute('data-item_id');
++@@ -31,11 +31,11 @@
++             });
++         });
++     });
++-    
+++
++         document.addEventListener('DOMContentLoaded', function() {
++             const updateButtons = document.querySelectorAll('.update-link');
++             const updateForms = document.querySelectorAll('.update-form');
++- 
+++
++             updateButtons.forEach((button, index) => {
++                 button.addEventListener('click', function(e) {
++                     e.preventDefault();
++@@ -48,7 +48,7 @@
++            $('.remove-item').click(function(e) {
++                 e.preventDefault();
++                 var itemId = this.id.split('remove_')[1];
++- 
+++
++         $.ajax({
++             url: `/basket/remove/${itemId}/`,
++             type: 'POST',
++@@ -58,7 +58,7 @@
++             },
++             success: function(response) {
++                 if (response.message === 'Item removed successfully') {
++-                    
+++
++                     location.reload();
++                 } else {
++                     console.error('Error removing item:', response.message);
++diff --git a/blog/templates/blog/blog.html b/blog/templates/blog/blog.html
++index f9d619c..c28c644 100644
++--- a/blog/templates/blog/blog.html
+++++ b/blog/templates/blog/blog.html
++@@ -1,11 +1,11 @@
++ {% load static %}
++ <!DOCTYPE html>
++ <html lang="en">
++-    <head>  
+++    <head>
++         <meta charset="UTF-8">
++         <meta name="viewport" content="width=device-width, initial-scale=1.0">
++         <link rel="stylesheet" href="{% static 'blog/css/blog.css' %}">
++-        <title>Eco Shop</title>     
+++        <title>Eco Shop</title>
++     </head>
++ 
++     <body>
++@@ -43,7 +43,7 @@
++                       </p>
++                       <p>As can be seen from our store, bamboo products are one of the best eco-friendly substitutes for plastic items.
++                          There are many bamboo products available in local and online stores.
++-                          Unfortunately, some household waste cannot be composted or recycled. 
+++                          Unfortunately, some household waste cannot be composted or recycled.
++                           On the other hand, bamboo products are a great alternative as it is readily biodegradable.
++                       </p>
++                       <p>A simple zero waste swap is to replace single-use plastic bags with reusable shopping bags and produce bags made of organic fibre.
++@@ -64,7 +64,7 @@
++                       </p>
++                       <p>
++                           We communicate sustainability goals and expectations to suppliers, fostering collaboration and shared responsibility.
++-                          Prioritize local suppliers who demonstrate commitment to sustainability, ethical labor practices, and environmental responsibility. 
+++                          Prioritize local suppliers who demonstrate commitment to sustainability, ethical labor practices, and environmental responsibility.
++                       </p>
++                       <p>We use eco-friendly materials, minimize packaging waste, and explore options for reusable or recyclable packaging.</p>
++                       <a href="https://www.theenvironmentalblog.org/2025/04/sustainable-supply-chain/" class="read-more" target="_blank">Read more →</a>
++diff --git a/checkout/static/checkout/css/checkout.css b/checkout/static/checkout/css/checkout.css
++index 1de5f8f..1b97fe9 100644
++--- a/checkout/static/checkout/css/checkout.css
+++++ b/checkout/static/checkout/css/checkout.css
++@@ -32,7 +32,7 @@
++         color: #c40d20;
++ }
++ 
++-select, 
+++select,
++ select option {
++     color: #000000;
++ }
++diff --git a/checkout/static/checkout/js/stripe_elements.js b/checkout/static/checkout/js/stripe_elements.js
++index 80456af..2eb4b64 100644
++--- a/checkout/static/checkout/js/stripe_elements.js
+++++ b/checkout/static/checkout/js/stripe_elements.js
++@@ -27,14 +27,14 @@ card.mount('#card-element');
++ 
++ card.addEventListener('change', (event) => {
++     const errorContainer = document.getElementById('card-errors');
++- 
+++
++     if (event.error) {
++         errorContainer.innerHTML = createErrorMessage(event.error.message);
++     } else {
++         errorContainer.textContent = '';
++     }
++ });
++- 
+++
++ const createErrorMessage = (message) => `
++     <span class="invalid-icon" role="alert">
++         <i class="fa-solid fa-square-xmark me-2"></i>
++@@ -99,7 +99,7 @@ form.addEventListener('submit', async function(ev) {
++ 
++ 
++         var saveInfo = $('#id-save-info').prop('checked');
++-        
+++
++         var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
++         var postData = {
++             'csrfmiddlewaretoken': csrfToken,
++@@ -107,7 +107,7 @@ form.addEventListener('submit', async function(ev) {
++             'save_info': saveInfo,
++         };
++         var url = '/checkout/store_checkout_info/';
++- 
+++
++ 
++         await $.post(url, postData);
++ 
++@@ -135,9 +135,9 @@ form.addEventListener('submit', async function(ev) {
++         enableForm();
++     }
++ });
++- 
+++
++ function getBillingDetails() {
++-    
+++
++     return {
++         name: form.customer_name.value.trim(),
++         email: form.email.value.trim(),
++@@ -149,12 +149,12 @@ function getBillingDetails() {
++             country: form.country.value.trim(),
++             state: form.county.value.trim()
++         },
++-        
+++
++     };
++ }
++- 
+++
++ function getShippingDetails() {
++-    
+++
++     return {
++         name: form.customer_name.value.trim(),
++         phone: form.phone_number.value.trim(),
++@@ -166,19 +166,19 @@ function getShippingDetails() {
++             state: form.county.value.trim()
++         },
++     };
++-    
+++
++ }
++ 
++ function disableForm() {
++     card.update({ disabled: true });
++     submitButton.disabled = true;
++ }
++- 
+++
++ function enableForm() {
++     card.update({ disabled: false });
++     submitButton.disabled = false;
++ }
++- 
+++
++ function displayError(message) {
++     const html = `
++         <span class="invalid-icon" role="alert">
++diff --git a/checkout/templates/checkout/checkout.html b/checkout/templates/checkout/checkout.html
++index 2b71d18..a5c9b25 100644
++--- a/checkout/templates/checkout/checkout.html
+++++ b/checkout/templates/checkout/checkout.html
++@@ -1,12 +1,12 @@
++ {% extends "base.html" %}
++ {% load static %}
++ {% load basket_tools %}
++- 
+++
++ {% block extra_css %}
++     <link rel="stylesheet" href="{% static 'checkout/css/checkout.css' %}">
++     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
++ {% endblock %}
++- 
+++
++ {% block page_header %}
++     <div class="container header-container">
++         <div class="row">
++@@ -18,7 +18,7 @@
++         </div>
++     </div>
++ {% endblock %}
++- 
+++
++ {% block content %}
++     <div class="overlay"></div>
++     <div class="container">
++@@ -127,7 +127,7 @@
++                                     <label class="form-check-label" for="id-save-info">Save shipping details to my profile</label>
++                                 {% else %}
++                                     <label class="form-check-label">
++-                                        <a href="{% url 'account_signup'%}" class="text-decoration-none">Create an account</a> or 
+++                                        <a href="{% url 'account_signup'%}" class="text-decoration-none">Create an account</a> or
++                                         <a href="{% url 'account_login'%}" class="text-decoration-none">login</a> to save your details
++                                     </label>
++                                 {% endif %}
++diff --git a/checkout/templates/checkout/checkout_complete.html b/checkout/templates/checkout/checkout_complete.html
++index e41b33c..99a27e1 100644
++--- a/checkout/templates/checkout/checkout_complete.html
+++++ b/checkout/templates/checkout/checkout_complete.html
++@@ -1,11 +1,11 @@
++ {% extends "base.html" %}
++ {% load static %}
++- 
+++
++ {% block extra_css %}
++     <link rel="stylesheet" href="{% static 'checkout/css/checkout.css' %}">
++     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
++ {% endblock %}
++- 
+++
++ {% block page_header %}
++     <div class="container header-container">
++         <div class="row">
++@@ -13,7 +13,7 @@
++         </div>
++     </div>
++ {% endblock %}
++- 
+++
++ {% block content %}
++     <div class="overlay"></div>
++     <div class="container my-5">
++diff --git a/checkout/templates/checkout/confirmation_emails/confirmation_email_body.txt b/checkout/templates/checkout/confirmation_emails/confirmation_email_body.txt
++index 4e311f2..1faabd4 100644
++--- a/checkout/templates/checkout/confirmation_emails/confirmation_email_body.txt
+++++ b/checkout/templates/checkout/confirmation_emails/confirmation_email_body.txt
++@@ -19,5 +19,5 @@ Thank you for your order!
++ 
++ Sincerely,
++ 
++-Customer Service 
+++Customer Service
++ Eco Shop
++\ No newline at end of file
++diff --git a/faq/templates/faq/faq.html b/faq/templates/faq/faq.html
++index 3494822..fb8acfb 100644
++--- a/faq/templates/faq/faq.html
+++++ b/faq/templates/faq/faq.html
++@@ -1,11 +1,11 @@
++ {% load static %}
++ <!DOCTYPE html>
++ <html lang="en">
++-    <head>  
+++    <head>
++         <meta charset="UTF-8">
++         <meta name="viewport" content="width=device-width, initial-scale=1.0">
++         <link rel="stylesheet" href="{% static 'faq/css/faq.css' %}">
++-        <title>Eco Shop</title>     
+++        <title>Eco Shop</title>
++     </head>
++ 
++ <body>
++diff --git a/home/templates/home/index.html b/home/templates/home/index.html
++index 2fa1b6d..dc1f1d6 100644
++--- a/home/templates/home/index.html
+++++ b/home/templates/home/index.html
++@@ -1,7 +1,7 @@
++ {% extends "base.html" %}
++- 
+++
++ {% load static %}
++- 
+++
++ {% block page_header %}
++     <div class="container">
++         <div class="row">
++@@ -9,7 +9,7 @@
++         </div>
++     </div>
++ {% endblock %}
++- 
+++
++ {% block content %}
++     <div class="container min-vh-100 d-flex align-items-center">
++         <div class="row w-100">
++@@ -24,8 +24,8 @@
++             </div>
++         </div>
++     </div>
++-    
++-    <a href="{% url 'products' %}?category=deals,clearance" 
+++
+++    <a href="{% url 'products' %}?category=deals,clearance"
++         class="btn btn-success text-uppercase fw-bold clearance">
++         Clearance and Deals <i class="fa-solid fa-eye"></i>
++     </a>
++@@ -68,7 +68,7 @@
++     </footer>
++     <!--Mailchimp-->
++     <div id="mc_embed_signup">
++-        <form action="https://herokuapp.us3.list-manage.com/subscribe/post?u=61b13adb4a2fd6d7c0604cec5&amp;id=1115231364&amp;f_id=002f04e1f0" method="post" 
+++        <form action="https://herokuapp.us3.list-manage.com/subscribe/post?u=61b13adb4a2fd6d7c0604cec5&amp;id=1115231364&amp;f_id=002f04e1f0" method="post"
++             id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
++             <div id="mc_embed_signup_scroll">
++                 <h5>Subscribe for Exclusive offers!</h5>
++@@ -108,7 +108,7 @@
++     </script>
++     <script type="text/javascript">
++     (function($) {
++-      window.fnames = new Array(); 
+++      window.fnames = new Array();
++       window.ftypes = new Array();
++       fnames[0] = 'EMAIL'; ftypes[0] = 'email';
++       fnames[1] = 'FNAME'; ftypes[1] = 'text';
++@@ -118,7 +118,7 @@
++       fnames[5] = 'BIRTHDAY'; ftypes[5] = 'birthday';
++       fnames[6] = 'COMPANY'; ftypes[6] = 'text';
++     })(jQuery);
++-    
+++
++     var $mcj = jQuery.noConflict(true);
++     </script>
++     <script type="text/javascript">
++diff --git a/products/templates/products/add_product.html b/products/templates/products/add_product.html
++index 861406a..608e0eb 100644
++--- a/products/templates/products/add_product.html
+++++ b/products/templates/products/add_product.html
++@@ -1,6 +1,6 @@
++ {% extends "base.html" %}
++ {% load static %}
++- 
+++
++ {% block page_header %}
++     <div class="container header-container">
++         <div class="row">
++@@ -13,7 +13,7 @@
++         </div>
++     </div>
++ {% endblock %}
++- 
+++
++ {% block content %}
++     <div class="overlay"></div>
++     <div class="container">
++diff --git a/products/templates/products/products.html b/products/templates/products/products.html
++index 1864285..0dbb63a 100644
++--- a/products/templates/products/products.html
+++++ b/products/templates/products/products.html
++@@ -1,7 +1,7 @@
++ {% extends "base.html" %}
++- 
+++
++ {% load static %}
++- 
+++
++ {% block page_header %}
++     <div class="container header-container">
++         <div class="row">
++@@ -9,7 +9,7 @@
++         </div>
++     </div>
++ {% endblock %}
++- 
+++
++ {% block content %}
++     <div class="overlay"></div>
++     <div class="container-fluid">
++@@ -132,23 +132,23 @@
++         }
++     });
++ 	</script>
++-    
+++
++     <script type="text/javascript">
++         $(document).ready(function() {
++             $('#sort-selector').change(handleSortChange);
++         });
++-     
+++
++         function handleSortChange() {
++             const selector = $(this);
++             const currentUrl = new URL(window.location);
++             const selectedValue = selector.val();
++-     
+++
++             updateUrlParameters(currentUrl, selectedValue);
++             history.pushState({}, '', currentUrl);
++             $(document).trigger('sortingChanged');
++             window.location.href = currentUrl;
++         }
++-     
+++
++         function updateUrlParameters(url, value) {
++             if (value !== "reset") {
++                 const [sort, direction] = value.split("_");
++diff --git a/products/templates/products/update_product.html b/products/templates/products/update_product.html
++index 0041917..cf56393 100644
++--- a/products/templates/products/update_product.html
+++++ b/products/templates/products/update_product.html
++@@ -1,6 +1,6 @@
++ {% extends "base.html" %}
++ {% load static %}
++- 
+++
++ {% block page_header %}
++     <div class="container header-container">
++         <div class="row">
++@@ -13,7 +13,7 @@
++         </div>
++     </div>
++ {% endblock %}
++- 
+++
++ {% block content %}
++     <div class="overlay"></div>
++     <div class="container">
++diff --git a/profiles/static/profiles/js/country_field.js b/profiles/static/profiles/js/country_field.js
++index c35db58..0c051c9 100644
++--- a/profiles/static/profiles/js/country_field.js
+++++ b/profiles/static/profiles/js/country_field.js
++@@ -1,5 +1,5 @@
++ const countrySelect = document.getElementById('id_primary_country');
++- 
+++
++ function setColor(element) {
++     if (!element.value) {
++         element.style.color = '#aab7c4';
++@@ -7,9 +7,9 @@ function setColor(element) {
++         element.style.color = '#000';
++     }
++ }
++- 
+++
++ setColor(countrySelect);
++- 
+++
++ countrySelect.addEventListener('change', function() {
++     setColor(this);
++ });
++\ No newline at end of file
++diff --git a/profiles/templates/profiles/profile.html b/profiles/templates/profiles/profile.html
++index 4550544..d2d32d8 100644
++--- a/profiles/templates/profiles/profile.html
+++++ b/profiles/templates/profiles/profile.html
++@@ -1,10 +1,10 @@
++ {% extends "base.html" %}
++ {% load static %}
++- 
+++
++ {% block extra_css %}
++     <link rel="stylesheet" href="{% static 'profiles/css/profile.css' %}">
++ {% endblock %}
++- 
+++
++ {% block page_header %}
++     <div class="container header-container">
++         <div class="row">
++@@ -16,7 +16,7 @@
++         </div>
++     </div>
++ {% endblock %}
++- 
+++
++ {% block content %}
++     <div class="overlay"></div>
++         <div class="row g-4">
++@@ -84,8 +84,8 @@
++         </div>
++     </div>
++ {% endblock %}
++- 
+++
++ {% block postloadjs %}
++-    {{ block.super }} 
+++    {{ block.super }}
++     <script type="text/javascript" src="{% static 'profiles/js/country_field.js' %}"></script>
++ {% endblock %}
++\ No newline at end of file
++diff --git a/static/css/base.css b/static/css/base.css
++index cb46bbb..0ee8bfa 100644
++--- a/static/css/base.css
+++++ b/static/css/base.css
++@@ -102,7 +102,7 @@ body {
++ 
++ .dropdown-icon {
++     margin-left: 5px;
++-    font-size: 0.8em; 
+++    font-size: 0.8em;
++     vertical-align: middle;
++ }
++ .overlay {
++@@ -112,7 +112,7 @@ body {
++     width: 100vw;
++     top: 0;
++     left: 0;
++-    z-index: -1; 
+++    z-index: -1;
++ }
++ 
++ .scroll-to-top-button {
++@@ -132,13 +132,13 @@ body {
++     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
++     transition: all 0.3s ease;
++ }
++- 
+++
++ .scroll-to-top-button:hover {
++     background-color: #000;
++     transform: translateY(-3px);
++     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
++ }
++- 
+++
++ .scroll-to-top-button svg {
++     width: 24px;
++     height: 24px;
++@@ -152,8 +152,8 @@ body {
++ .clearance {
++     bottom: 80px;
++     left: 20px;
++-    z-index: 1050; 
++-    padding: 12px 20px; 
+++    z-index: 1050;
+++    padding: 12px 20px;
++     border-radius: 5px;
++     position: fixed;
++ 
++@@ -246,7 +246,7 @@ body {
++ 
++ /*  Moble navbar collapse */
++ @media screen and (max-width: 991px) {
++-     
+++
++     .header-container {
++         padding-top: 116px;
++     }
++@@ -275,7 +275,7 @@ body {
++     }
++ 
++     .nav-link i.fa-lg {
++-        font-size: 10px;            
+++        font-size: 10px;
++     }
++ 
++     #banner h4 {
++@@ -304,7 +304,7 @@ body {
++     }
++ 
++ }
++-    
+++
++ @media screen and (max-width: 991.98px) {
++   .table-responsive {
++     overflow-x: auto;
++@@ -367,7 +367,7 @@ body {
++ 
++   td,
++   th {
++-    font-size: 13px; 
+++    font-size: 13px;
++     padding: 0.4rem 0.5rem;
++   }
++ 
++diff --git a/templates/allauth/account/password_reset_done.html b/templates/allauth/account/password_reset_done.html
++index 866e4b2..7c83509 100644
++--- a/templates/allauth/account/password_reset_done.html
+++++ b/templates/allauth/account/password_reset_done.html
++@@ -12,6 +12,6 @@
++     {% if user.is_authenticated %}
++     {% include "account/snippets/already_logged_in.html" %}
++     {% endif %}
++-    
+++
++     <p>{% blocktrans %}We have sent you an e-mail. If you have not received it please check your spam folder. Otherwise contact us if you do not receive it in a few minutes.{% endblocktrans %}</p>
++ {% endblock %}
++diff --git a/templates/allauth/socialaccount/snippets/provider_list.html b/templates/allauth/socialaccount/snippets/provider_list.html
++index e76a296..f2187ae 100644
++--- a/templates/allauth/socialaccount/snippets/provider_list.html
+++++ b/templates/allauth/socialaccount/snippets/provider_list.html
++@@ -6,15 +6,15 @@
++ {% if provider.id == "openid" %}
++ {% for brand in provider.get_brands %}
++ <li>
++-  <a title="{{brand.name}}" 
++-     class="socialaccount_provider {{provider.id}} {{brand.id}}" 
+++  <a title="{{brand.name}}"
+++     class="socialaccount_provider {{provider.id}} {{brand.id}}"
++      href="{% provider_login_url provider.id openid=brand.openid_url process=process %}"
++      >{{brand.name}}</a>
++ </li>
++ {% endfor %}
++ {% endif %}
++ <li>
++-  <a title="{{provider.name}}" class="socialaccount_provider {{provider.id}}" 
+++  <a title="{{provider.name}}" class="socialaccount_provider {{provider.id}}"
++      href="{% provider_login_url provider.id process=process scope=scope auth_params=auth_params %}">{{provider.name}}</a>
++ </li>
++ {% endfor %}
++diff --git a/templates/base.html b/templates/base.html
++index 5af12e3..b523fdf 100644
++--- a/templates/base.html
+++++ b/templates/base.html
++@@ -36,7 +36,7 @@
++             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
++             <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
++             <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
++-            <script src="https://js.stripe.com/v3/"></script>  
+++            <script src="https://js.stripe.com/v3/"></script>
++             {% endblock %}
++ 
++         {% block extra_js %}
++@@ -146,13 +146,13 @@
++ 
++         {% block content %}
++         {% endblock %}
++-    
+++
++         {% block postloadjs %}
++ 
++         <script type="text/javascript">
++             $('.toast').toast('show');
++           </script>
++ 
++-        {% endblock %}        
+++        {% endblock %}
++     </body>
++ </html>
++\ No newline at end of file
++diff --git a/templates/errors/404.html b/templates/errors/404.html
++index 81ade6e..72b2ec1 100644
++--- a/templates/errors/404.html
+++++ b/templates/errors/404.html
++@@ -14,7 +14,7 @@
++                 </h1>
++                 <div class="my-5">
++                     <h4>
++-                        <a href="{% url 'products' %}" 
+++                        <a href="{% url 'products' %}"
++                             class="shop-now-button btn btn-lg rounded-0 text-uppercase py-3 fw-bold">
++                                 Return to shop
++                         </a>
++diff --git a/templates/includes/toasts/toast_error.html b/templates/includes/toasts/toast_error.html
++index b531405..614fc23 100644
++--- a/templates/includes/toasts/toast_error.html
+++++ b/templates/includes/toasts/toast_error.html
++@@ -1,5 +1,5 @@
++ <div class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
++-    <div class="toast-header bg-danger"> 
+++    <div class="toast-header bg-danger">
++         <strong class="me-auto text-white">Error!</strong>
++         <small class="text-white">Just Now</small>
++         <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
++diff --git a/templates/includes/toasts/toast_info.html b/templates/includes/toasts/toast_info.html
++index 68a4508..8c82825 100644
++--- a/templates/includes/toasts/toast_info.html
+++++ b/templates/includes/toasts/toast_info.html
++@@ -1,5 +1,5 @@
++ <div class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
++-    <div class="toast-header bg-info"> 
+++    <div class="toast-header bg-info">
++         <strong class="me-auto text-white">Info!</strong>
++         <small class="text-white">Just Now</small>
++         <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
++diff --git a/templates/includes/toasts/toast_success.html b/templates/includes/toasts/toast_success.html
++index daa24f5..9dc76de 100644
++--- a/templates/includes/toasts/toast_success.html
+++++ b/templates/includes/toasts/toast_success.html
++@@ -1,5 +1,5 @@
++ <div class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
++-    <div class="toast-header bg-success"> 
+++    <div class="toast-header bg-success">
++         <strong class="me-auto text-white">Success!</strong>
++         <small class="text-white">Thank you</small>
++         <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
++@@ -33,7 +33,7 @@
++             <div class="row mt-3">
++                 <div class="col">
++                     <p class="fw-bold mb-2 text-dark">
++-                        Total{% if free_delivery_delta > 0 %} (Exc. delivery){% endif %}: 
+++                        Total{% if free_delivery_delta > 0 %} (Exc. delivery){% endif %}:
++                         <span class="float-end">${{ total|floatformat:2 }}</span>
++                     </p>
++                     {% if free_delivery_delta > 0 %}
++@@ -47,6 +47,6 @@
++                     </a>
++                 </div>
++             </div>
++-        {% endif %}  
+++        {% endif %}
++     </div>
++ </div>
++\ No newline at end of file
++diff --git a/templates/includes/toasts/toast_warning.html b/templates/includes/toasts/toast_warning.html
++index b7cff0a..e0c66d5 100644
++--- a/templates/includes/toasts/toast_warning.html
+++++ b/templates/includes/toasts/toast_warning.html
++@@ -1,5 +1,5 @@
++ <div class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
++-    <div class="toast-header bg-warning"> 
+++    <div class="toast-header bg-warning">
++         <strong class="me-auto text-white">Warning!</strong>
++         <small class="text-white">Just Now</small>
++         <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
+diff --git a/home/templates/home/index.html b/home/templates/home/index.html
+index 2fa1b6dc8a28782a275fe0c633c4bedd11008114..dc1f1d60164ee2d3709ffe504e165970e4d66cf3 100644
+--- a/home/templates/home/index.html
++++ b/home/templates/home/index.html
+@@ -1,146 +1,146 @@
+ {% extends "base.html" %}
+- 
++
+ {% load static %}
+- 
++
+ {% block page_header %}
+     <div class="container">
+         <div class="row">
+             <div class="col"></div>
+         </div>
+     </div>
+ {% endblock %}
+- 
++
+ {% block content %}
+     <div class="container min-vh-100 d-flex align-items-center">
+         <div class="row w-100">
+             <div class="col-12 col-md-6 offset-md-6 text-end">
+                 <h6 class="display-4 fw-bold eco responsive-display">
+                     Eco Friendly Products
+                 </h6>
+                 <h6 class="fst-italic fw-bold">At Peace with Nature. Healthy Organic products</h6>
+                 <div class="my-5">
+                     <a href="{% url 'products' %}" class="shop-all-products btn btn-lg text-uppercase py-3 fw-bold">Shop All Products</a>
+                 </div>
+             </div>
+         </div>
+     </div>
+-    
+-    <a href="{% url 'products' %}?category=deals,clearance" 
++
++    <a href="{% url 'products' %}?category=deals,clearance"
+         class="btn btn-success text-uppercase fw-bold clearance">
+         Clearance and Deals <i class="fa-solid fa-eye"></i>
+     </a>
+     <footer class="footer">
+         <div class="container">
+             <div class="row align-items-center">
+                 <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                     <nav aria-label="Footer navigation">
+                         <ul class="list-unstyled d-flex flex-wrap justify-content-center justify-content-md-start m-0 p-0 gap-3">
+                             <li>
+                                 <a class="text-decoration-none text-white" href="{% url 'view_terms' %}" target="_blank">Terms</a>
+                             </li>
+                             <li>
+                                 <a class="text-decoration-none text-white" href="{% url 'view_privacy' %}" target="_blank">Privacy</a>
+                             </li>
+                             <li>
+                                 <a class="text-decoration-none text-white" href="{% url 'view_faq' %}" target="_blank">FAQ</a>
+                             </li>
+                             <li>
+                                 <a class="text-decoration-none text-white" href="{% url 'view_returns' %}" target="_blank">Returns</a>
+                             </li>
+                             <li>
+                                 <a class="text-decoration-none text-white" href="{% url 'view_blog' %}" target="_blank">Our Blog</a>
+                             </li>
+                         </ul>
+                     </nav>
+                 </div>
+                 <div class="col-md-6 text-center text-md-end">
+                     <p class="m-0 text-light">Follow us:</p>
+                     <div class="mt-1">
+                         <a href="https://www.facebook.com/profile.php?id=61576996372110"
+                         class="text-light me-2" aria-label="Facebook"><i class="fab fa-facebook fa-lg"></i></a>
+                         <a href="#" class="text-light me-2" aria-label="Instagram" rel="noopener"><i class="fab fa-instagram fa-lg"></i></a>
+                         <a href="#" class="text-light me-2" aria-label="YouTube" rel="noopener"><i class="fab fa-youtube fa-lg"></i></a>
+                         <a href="#" class="text-light me-2" aria-label="Twitter" rel="noopener"><i class="fab fa-x-twitter fa-lg"></i></a>
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </footer>
+     <!--Mailchimp-->
+     <div id="mc_embed_signup">
+-        <form action="https://herokuapp.us3.list-manage.com/subscribe/post?u=61b13adb4a2fd6d7c0604cec5&amp;id=1115231364&amp;f_id=002f04e1f0" method="post" 
++        <form action="https://herokuapp.us3.list-manage.com/subscribe/post?u=61b13adb4a2fd6d7c0604cec5&amp;id=1115231364&amp;f_id=002f04e1f0" method="post"
+             id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
+             <div id="mc_embed_signup_scroll">
+                 <h5>Subscribe for Exclusive offers!</h5>
+                 <p>Subscribe today and be the first to get the latest offers, discounts and member only deals.</p>
+             </div>
+            <div class="indicates-required">
+                <span class="asterisk">*</span> indicates required
+             </div>
+ 
+             <div class="mc-field-group">
+                 <label for="mce-EMAIL">
+                    Email Address <span class="asterisk">*</span>
+                 </label>
+                     <input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required>
+             </div>
+ 
+             <div hidden>
+                 <input type="hidden" name="tags" value="3701539">
+             </div>
+ 
+             <div id="mce-responses" class="clear">
+                 <div class="response" id="mce-error-response" style="display: none;"></div>
+                 <div class="response" id="mce-success-response" style="display: none;"></div>
+             </div>
+ 
+             <div aria-hidden="true" style="position: absolute; left: -5000px;">
+                 <input type="text" name="b_61b13adb4a2fd6d7c0604cec5_1115231364" tabindex="-1" value="">
+             </div>
+ 
+             <div class="clear">
+                 <input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button fw-bold" value="Subscribe">
+             </div>
+         </form>
+     </div>
+ 
+     <script type="text/javascript" src="https://s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js">
+     </script>
+     <script type="text/javascript">
+     (function($) {
+-      window.fnames = new Array(); 
++      window.fnames = new Array();
+       window.ftypes = new Array();
+       fnames[0] = 'EMAIL'; ftypes[0] = 'email';
+       fnames[1] = 'FNAME'; ftypes[1] = 'text';
+       fnames[2] = 'LNAME'; ftypes[2] = 'text';
+       fnames[3] = 'ADDRESS'; ftypes[3] = 'address';
+       fnames[4] = 'PHONE'; ftypes[4] = 'phone';
+       fnames[5] = 'BIRTHDAY'; ftypes[5] = 'birthday';
+       fnames[6] = 'COMPANY'; ftypes[6] = 'text';
+     })(jQuery);
+-    
++
+     var $mcj = jQuery.noConflict(true);
+     </script>
+     <script type="text/javascript">
+         document.addEventListener("DOMContentLoaded", function () {
+             const signupDiv = document.getElementById("mc_embed_signup");
+ 
+             const cancelButton = document.createElement("button");
+             cancelButton.innerHTML = "&times;";
+             cancelButton.style.position = "absolute";
+             cancelButton.style.top = "10px";
+             cancelButton.style.right = "15px";
+             cancelButton.style.fontSize = "25px";
+             cancelButton.style.background = "none";
+             cancelButton.style.border = "none";
+             cancelButton.style.color = "#999";
+             cancelButton.style.cursor = "pointer";
+             cancelButton.title = "Close";
+ 
+             cancelButton.addEventListener("mouseenter", () => cancelButton.style.color = "#000");
+             cancelButton.addEventListener("mouseleave", () => cancelButton.style.color = "#999");
+ 
+             cancelButton.addEventListener("click", function () {
+                 signupDiv.style.display = "none";
+             });
+ 
+diff --git a/products/admin.py b/products/admin.py
+index 9a2fb29a1b7608627d7834747d137fa2459aa8bc..8544d58cde77e578b2b1d15480a10d6315e89fe6 100644
+--- a/products/admin.py
++++ b/products/admin.py
+@@ -1,32 +1,44 @@
+ from django.contrib import admin
+ from .models import Product, Category
+ 
+ # Register your models here.
+ 
+ 
+ class ProductAdmin(admin.ModelAdmin):
+     list_display = (
+         'category',
+         'name',
++        'brand',
+         'price',
+         'sku',
+         'rating',
++        'inventory_count',
++        'is_active',
+         'created_on',
+         'updated_on',
+         'product_image',
+     )
+     ordering = ('-created_on',)
+ 
+-    list_filter = ('category', 'rating', 'created_on')
+-    search_fields = ('name', 'sku', 'category__name')
++    list_filter = (
++        'category', 'rating', 'is_active', 'is_digital', 'created_on'
++    )
++    search_fields = (
++        'name', 'brand', 'sku', 'category__name', 'short_description'
++    )
++    list_editable = ('inventory_count', 'is_active')
+ 
+ 
+ class CategoryAdmin(admin.ModelAdmin):
+     list_display = (
+         'name',
+         'friendly_name',
++        'display_order',
+     )
++    list_editable = ('display_order',)
++    search_fields = ('name', 'friendly_name', 'slug')
++    prepopulated_fields = {'slug': ('name',)}
+ 
+ 
+ admin.site.register(Product, ProductAdmin)
+ admin.site.register(Category, CategoryAdmin)
+diff --git a/products/forms.py b/products/forms.py
+index 6240ddcdf9a9dce24ea15f3253408f09bd6e30f0..1d63ff40505adbeea3bcc53f053606b5e7ef60b5 100644
+--- a/products/forms.py
++++ b/products/forms.py
+@@ -3,35 +3,54 @@ from .widgets import CustomClearableFileInput
+ from .models import Product, Category
+ 
+ 
+ class ProductForm(forms.ModelForm):
+     """
+     - Uses a custom clearable file input widget for the product image.
+     - Dynamically sets category choices with user-friendly names.
+     - Adds consistent CSS styling to all fields.
+     """
+ 
+     class Meta:
+         model = Product
+         fields = '__all__'
+ 
+     product_image = forms.ImageField(
+         label='', required=False, widget=CustomClearableFileInput
+         )
+ 
+     def __init__(self, *args, **kwargs):
+         super().__init__(*args, **kwargs)
+         self._set_category_choices()
+         self._apply_field_styles()
+ 
+     def _set_category_choices(self):
+         """Set the choices for the category field."""
+-        categories = Category.objects.all()
++        categories = Category.objects.order_by('display_order', 'friendly_name')
+         friendly_names = [(
+             category.id, category.get_friendly_name()
+             ) for category in categories]
+         self.fields['category'].choices = friendly_names
+ 
+     def _apply_field_styles(self):
+         """Apply CSS classes to all form fields."""
+         for field in self.fields.values():
+             field.widget.attrs['class'] = 'border-dark rounded-0'
++        self._configure_numeric_fields()
++        self._configure_textareas()
++
++    def _configure_numeric_fields(self):
++        numeric_fields = {
++            'inventory_count': 0,
++            'low_stock_threshold': 0,
++            'weight_grams': 0,
++        }
++        for field_name, minimum in numeric_fields.items():
++            if field_name in self.fields:
++                self.fields[field_name].widget.attrs['min'] = minimum
++
++    def _configure_textareas(self):
++        if 'short_description' in self.fields:
++            self.fields['short_description'].widget.attrs['rows'] = 2
++            self.fields['short_description'].widget.attrs['placeholder'] = (
++                'A concise summary used in product listings'
++            )
+diff --git a/products/migrations/0003_alter_category_options_category_description_and_more.py b/products/migrations/0003_alter_category_options_category_description_and_more.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..68bc2840386b2e1b2aea057f87245937bb97b1ca
+--- /dev/null
++++ b/products/migrations/0003_alter_category_options_category_description_and_more.py
+@@ -0,0 +1,125 @@
++# Generated by Django 4.2 on 2025-09-25 16:01
++
++from django.db import migrations, models
++from django.utils.text import slugify
++
++
++class Migration(migrations.Migration):
++
++    dependencies = [
++        ("products", "0002_alter_category_options"),
++    ]
++
++    def generate_category_slugs(apps, schema_editor):
++        Category = apps.get_model('products', 'Category')
++        for category in Category.objects.all():
++            base_slug = slugify(category.friendly_name or category.name)
++            slug = base_slug
++            suffix = 1
++            while Category.objects.filter(slug=slug).exclude(pk=category.pk).exists():
++                suffix += 1
++                slug = f"{base_slug}-{suffix}"
++            category.slug = slug
++            category.save(update_fields=['slug'])
++
++    operations = [
++        migrations.AlterModelOptions(
++            name="category",
++            options={
++                "ordering": ["display_order", "name"],
++                "verbose_name": "Category",
++                "verbose_name_plural": "Categories",
++            },
++        ),
++        migrations.AddField(
++            model_name="category",
++            name="description",
++            field=models.TextField(
++                blank=True,
++                help_text="Optional description shown on category landing pages.",
++            ),
++        ),
++        migrations.AddField(
++            model_name="category",
++            name="display_order",
++            field=models.PositiveIntegerField(
++                default=0, help_text="Lower numbers appear first in navigation menus."
++            ),
++        ),
++        migrations.AddField(
++            model_name="category",
++            name="icon",
++            field=models.CharField(
++                blank=True,
++                help_text="Font Awesome icon class to visually represent the category.",
++                max_length=80,
++            ),
++        ),
++        migrations.AddField(
++            model_name="category",
++            name="slug",
++            field=models.SlugField(
++                blank=True,
++                help_text="Used in URLs. Automatically generated from the name if left blank.",
++                max_length=210,
++                unique=True,
++            ),
++        ),
++        migrations.RunPython(generate_category_slugs, migrations.RunPython.noop),
++        migrations.AddField(
++            model_name="product",
++            name="brand",
++            field=models.CharField(
++                blank=True,
++                help_text="Optional brand or maker shown on listings.",
++                max_length=120,
++            ),
++        ),
++        migrations.AddField(
++            model_name="product",
++            name="inventory_count",
++            field=models.PositiveIntegerField(
++                default=0, help_text="Current sellable stock for physical items."
++            ),
++        ),
++        migrations.AddField(
++            model_name="product",
++            name="is_active",
++            field=models.BooleanField(
++                default=True,
++                help_text="Inactive products are hidden from the shop front.",
++            ),
++        ),
++        migrations.AddField(
++            model_name="product",
++            name="is_digital",
++            field=models.BooleanField(
++                default=False,
++                help_text="Digital goods ignore stock tracking and always remain in stock.",
++            ),
++        ),
++        migrations.AddField(
++            model_name="product",
++            name="low_stock_threshold",
++            field=models.PositiveIntegerField(
++                default=5,
++                help_text="Show a warning badge when stock is at or below this value.",
++            ),
++        ),
++        migrations.AddField(
++            model_name="product",
++            name="short_description",
++            field=models.CharField(
++                blank=True,
++                help_text="Used on product listings and marketing widgets.",
++                max_length=255,
++            ),
++        ),
++        migrations.AddField(
++            model_name="product",
++            name="weight_grams",
++            field=models.PositiveIntegerField(
++                blank=True, help_text="Used to fine tune delivery estimates.", null=True
++            ),
++        ),
++    ]
+diff --git a/products/models.py b/products/models.py
+index 73f307cae27757a0940c14f526aa8e65255a0b17..07fd70ae5fcbf105de8d5e823e66f7ed1de4190d 100644
+--- a/products/models.py
++++ b/products/models.py
+@@ -1,60 +1,173 @@
++from datetime import timedelta
++
+ from django.db import models
++from django.db.models import F
++from django.utils import timezone
++from django.utils.text import slugify
+ 
+ # Create your models here.
+ 
+ 
+ class Category(models.Model):
+-    """
+-    Includes a required internal name and an user-friendly
+-    display name. Categories ordered alphabetically by name.
+-    """
++    """Metadata used to organise products into navigable groups."""
++
+     name = models.CharField(max_length=200)
+     friendly_name = models.CharField(max_length=200, null=True, blank=True)
++    slug = models.SlugField(
++        max_length=210,
++        unique=True,
++        blank=True,
++        help_text="Used in URLs. Automatically generated from the name if left blank.",
++    )
++    description = models.TextField(
++        blank=True,
++        help_text="Optional description shown on category landing pages.",
++    )
++    icon = models.CharField(
++        max_length=80,
++        blank=True,
++        help_text="Font Awesome icon class to visually represent the category.",
++    )
++    display_order = models.PositiveIntegerField(
++        default=0,
++        help_text="Lower numbers appear first in navigation menus.",
++    )
+ 
+     class Meta:
+         verbose_name = "Category"
+         verbose_name_plural = "Categories"
+-        ordering = ['name']
++        ordering = ['display_order', 'name']
+ 
+     def __str__(self):
+         return self.name
+ 
+     def get_friendly_name(self):
+         return self.friendly_name or self.name
+ 
++    def save(self, *args, **kwargs):
++        """Ensure a slug is always available for navigation links."""
++        if not self.slug:
++            base_slug = slugify(self.friendly_name or self.name)
++        else:
++            base_slug = self.slug
++
++        slug = base_slug
++        counter = 1
++        while Category.objects.filter(slug=slug).exclude(pk=self.pk).exists():
++            counter += 1
++            slug = f"{base_slug}-{counter}"
++
++        self.slug = slug
++        super().save(*args, **kwargs)
++
+ 
+ class Product(models.Model):
+     """
+     Each product belongs to an optional category, has a unique name and SKU,
+     a detailed description, price, optional rating, timestamps for creation
+     and updates, and product image.
+ 
+     Products are ordered by creation date, newest first.
+     """
+     category = models.ForeignKey(
+         "Category",
+         null=True,
+         blank=True,
+         on_delete=models.SET_NULL
+     )
+     name = models.CharField(max_length=200, unique=True)
++    brand = models.CharField(
++        max_length=120,
++        blank=True,
++        help_text="Optional brand or maker shown on listings.",
++    )
+     sku = models.CharField(max_length=200, unique=True, null=True, blank=True)
++    short_description = models.CharField(
++        max_length=255,
++        blank=True,
++        help_text="Used on product listings and marketing widgets.",
++    )
+     description = models.TextField(verbose_name="Product Description")
+     price = models.DecimalField(max_digits=10, decimal_places=2)
+     rating = models.DecimalField(
+         max_digits=4,
+         decimal_places=2,
+         null=True,
+         blank=True
+     )
++    inventory_count = models.PositiveIntegerField(
++        default=0,
++        help_text="Current sellable stock for physical items.",
++    )
++    low_stock_threshold = models.PositiveIntegerField(
++        default=5,
++        help_text="Show a warning badge when stock is at or below this value.",
++    )
++    is_active = models.BooleanField(
++        default=True,
++        help_text="Inactive products are hidden from the shop front.",
++    )
++    is_digital = models.BooleanField(
++        default=False,
++        help_text="Digital goods ignore stock tracking and always remain in stock.",
++    )
++    weight_grams = models.PositiveIntegerField(
++        null=True,
++        blank=True,
++        help_text="Used to fine tune delivery estimates.",
++    )
+     created_on = models.DateTimeField(auto_now_add=True)
+     updated_on = models.DateTimeField(auto_now=True)
+     product_image = models.ImageField(null=True, blank=True)
+ 
+     class Meta:
+         verbose_name = "Product"
+         verbose_name_plural = "Products"
+         ordering = ['-created_on']
+ 
+     def __str__(self):
++        if self.brand:
++            return f"{self.brand} - {self.name}"
+         return self.name
++
++    @property
++    def is_in_stock(self):
++        if self.is_digital:
++            return True
++        return self.inventory_count > 0
++
++    @property
++    def is_low_stock(self):
++        if self.is_digital:
++            return False
++        return self.inventory_count <= self.low_stock_threshold
++
++    def max_order_quantity(self):
++        """Return the maximum quantity a customer can buy at once."""
++        if self.is_digital:
++            return None
++        return max(self.inventory_count, 0)
++
++    def adjust_inventory(self, quantity):
++        """Increment or decrement inventory atomically."""
++        if self.is_digital or quantity == 0:
++            return
++
++        Product.objects.filter(pk=self.pk).update(
++            inventory_count=F('inventory_count') + quantity
++        )
++        Product.objects.filter(pk=self.pk, inventory_count__lt=0).update(
++            inventory_count=0
++        )
++        self.refresh_from_db(fields=['inventory_count'])
++
++    def can_fulfil_order(self, quantity):
++        if self.is_digital:
++            return True
++        return self.inventory_count >= quantity
++
++    def estimate_delivery_date(self):
++        """Provide a rough delivery estimate for customer messaging."""
++        if self.is_digital:
++            return timezone.now().date()
++        return timezone.now().date() + timedelta(days=4)
+diff --git a/products/templates/products/add_product.html b/products/templates/products/add_product.html
+index 861406a26156b42a4a0b5bd787425f660ccb6b10..608e0eb140db5412cb6384a84fbd537da3d17734 100644
+--- a/products/templates/products/add_product.html
++++ b/products/templates/products/add_product.html
+@@ -1,41 +1,41 @@
+ {% extends "base.html" %}
+ {% load static %}
+- 
++
+ {% block page_header %}
+     <div class="container header-container">
+         <div class="row">
+             <div class="col-12 text-center">
+                 <hr>
+                 <h3 class="text-center mb-4 fw-bold">Product Management</h3>
+                 <h5 class="text-muted">Add a New Product</h5>
+                 <hr>
+             </div>
+         </div>
+     </div>
+ {% endblock %}
+- 
++
+ {% block content %}
+     <div class="overlay"></div>
+     <div class="container">
+         <div class="row justify-content-center">
+             <div class="col-12 col-md-8 col-lg-6">
+                 <div class="card shadow-sm">
+                     <div class="card-body">
+                         <h6 class="card-title text-center mb-4 text-muted">Product Inverntory</h6>
+                         <form method="POST" action="{% url 'add_product' %}" enctype="multipart/form-data">
+                             {% csrf_token %}
+                             {{ form|crispy }}
+                             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                 <a class="btn btn-outline-dark rounded-0" href="{% url 'products' %}">Cancel</a>
+                                 <button class="btn btn-dark rounded-0" type="submit">Add Product</button>
+                             </div>
+                         </form>
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </div>
+ {% endblock %}
+ 
+ {% block postloadjs %}
+     {{ block.super }}
+diff --git a/products/templates/products/product_detail.html b/products/templates/products/product_detail.html
+index 683af145244cba0c1528049ca42910af20ac84f5..5e4a98a444669318e1a795d1e9a8933ce182f402 100644
+--- a/products/templates/products/product_detail.html
++++ b/products/templates/products/product_detail.html
+@@ -1,103 +1,170 @@
+ {% extends "base.html" %}
+ {% load static %}
+- 
++
+ {% block page_header %}
+     <div class="container header-container">
+         <div class="row">
+             <div class="col"></div>
+         </div>
+     </div>
+ {% endblock %}
+- 
++
+ {% block content %}
+     <div class="overlay"></div>
+     <div class="container-fluid">
+         <div class="row">
+             <div class="col-12 col-md-6 col-lg-4 offset-lg-2">
+                 <div class="image-container my-5 prod-img">
+                     {% if product.product_image %}
+                     <a href="{{ product.product_image.url }}" target="_blank">
+                         <img class="card-img-top img-fluid rounded shadow" src="{{ product.product_image.url }}" alt="{{ product.name }}">
+                     </a>
+                     {% else %}
+                     <a href="">
+                         <img class="card-img-top img-fluid rounded shadow" src="{{ MEDIA_URL }}noimage.png" alt="{{ product.name }}">
+                     </a>
+                     {% endif %}
+                 </div>
+             </div>
+             <div class="col-12 col-md-6 col-lg-4">
+                 <div class="product-details-container mb-5 mt-md-5">
+-                    <h4 class="display-7 mb-3">{{ product.name }}</h4>
++                    <h4 class="display-7 mb-2">{{ product.name }}</h4>
++                    {% if product.brand %}
++                        <p class="text-muted mb-2">by {{ product.brand }}</p>
++                    {% endif %}
+                     <p class="lead mb-3 text-dark font-weight-bold">${{ product.price }}</p>
+                     {% if product.category %}
+                     <p class="mb-3">
+-                        <a href="{% url 'products' %}?category={{ product.category.name }}" class="text-decoration-none">                        
++                        <a href="{% url 'products' %}?category={{ product.category.slug|default:product.category.name }}" class="text-decoration-none">
+                             <span class="badge bg-secondary">{{ product.category.friendly_name }}</span>
+                         </a>
+                     </p>
+                     {% endif %}
+                     {% if product.rating %}
+                         <p class="mb-3">
+                             <i class="fas fa-star text-warning"></i>
+                             <span class="ms-2">{{ product.rating }} / 10</span>
+                         </p>
+                     {% else %}
+                         <p class="mb-3 text-muted">No Rating</p>
+                     {% endif %}
++                    {% if product.short_description %}
++                        <p class="mb-3 text-muted">{{ product.short_description }}</p>
++                    {% endif %}
++                    <div class="mb-3">
++                        {% if product.is_digital %}
++                            <span class="badge bg-success"><i class="fa-solid fa-cloud-arrow-down me-1"></i>Digital download</span>
++                        {% elif product.is_in_stock %}
++                            <span class="badge {% if product.is_low_stock %}bg-warning text-dark{% else %}bg-success{% endif %}">
++                                {% if product.is_low_stock %}
++                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>Low stock – {{ product.inventory_count }} left
++                                {% else %}
++                                    <i class="fa-solid fa-box-open me-1"></i>In stock
++                                {% endif %}
++                            </span>
++                        {% else %}
++                            <span class="badge bg-danger"><i class="fa-solid fa-clock-rotate-left me-1"></i>Restocking soon</span>
++                        {% endif %}
++                    </div>
+                     {% if request.user.is_superuser %}
+                         <div class="ms-3 mb-3">
+                             <a href="{% url 'update_product' product.id %}" class="btn btn-sm btn-outline-primary me-2">Update</a>
+                             <a href="{% url 'delete_product' product.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                         </div>
+                     {% endif %}
+                     <p class="mb-4">{{ product.description }}</p>
+                     <form class="form product-form" action="{% url 'add_item_to_basket' product.id %}" method="POST">
+                         {% csrf_token %}
+                         <div class="mb-4">
+                             <label for="id_qty_{{ product.id }}" class="form-label"><strong>Quantity:</strong></label>
+                             <div class="input-group">
+-                                <button class="btn btn-outline-dark qty-btn" type="button" id="decrease-qty">
++                                <button class="btn btn-outline-dark qty-btn" type="button" id="decrease-qty" {% if not product.is_in_stock and not product.is_digital %}disabled{% endif %}>
+                                     <i class="fas fa-minus"></i>
+                                 </button>
+-                                <input class="form-control qty_input text-center" type="number"
+-                                    name="quantity" value="1" min="1" max="99" data-item_id="{{ product.id }}" id="id_qty_{{ product.id }}">
+-                                <button class="btn btn-outline-dark qty-btn" type="button" id="increase-qty">
++                                {% with max_qty=product.max_order_quantity %}
++                                    <input class="form-control qty_input text-center" type="number"
++                                        name="quantity" value="1" min="1" {% if max_qty %}max="{{ max_qty }}"{% endif %}
++                                        data-item_id="{{ product.id }}" id="id_qty_{{ product.id }}" {% if not product.is_in_stock and not product.is_digital %}disabled{% endif %}>
++                                {% endwith %}
++                                <button class="btn btn-outline-dark qty-btn" type="button" id="increase-qty" {% if not product.is_in_stock and not product.is_digital %}disabled{% endif %}>
+                                     <i class="fas fa-plus"></i>
+                                 </button>
+                             </div>
++                            {% if not product.is_in_stock and not product.is_digital %}
++                                <p class="text-danger small mt-2"><i class="fa-solid fa-clock"></i> This item is currently out of stock. Leave your email during checkout to be notified once it returns.</p>
++                            {% endif %}
+                         </div>
+                         <div class="d-grid gap-2">
+-                            <button type="submit" class="btn btn-success btn-lg text-uppercase">
++                            <button type="submit" class="btn btn-success btn-lg text-uppercase" {% if not product.is_in_stock and not product.is_digital %}disabled{% endif %}>
+                                 <i class="fas fa-shopping-basket me-2"></i>Add to Basket
+                             </button>
+                             <a href="{% url 'products' %}" class="btn btn-outline-dark btn-lg text-uppercase">
+                                 <i class="fa-solid fa-angles-left"></i>Continue Shopping
+                             </a>
+                         </div>
+                         <input type="hidden" name="redirect_url" value="{{ request.path }}">
+                     </form>
++                    {% if product.is_in_stock or product.is_digital %}
++                        <p class="mt-3 text-muted"><i class="fa-solid fa-truck me-1"></i> Estimated delivery: {{ product.estimate_delivery_date|date:"l, d F Y" }}</p>
++                    {% endif %}
+                 </div>
+             </div>
+         </div>
++        {% if related_products %}
++        <div class="row mt-5">
++            <div class="col-12">
++                <h5 class="mb-3">You may also like</h5>
++            </div>
++            {% for related in related_products %}
++                <div class="col-6 col-md-3 mb-4">
++                    <div class="card h-100 border-0 shadow-sm">
++                        <a href="{% url 'product_detail' related.id %}" class="text-decoration-none">
++                            {% if related.product_image %}
++                                <img src="{{ related.product_image.url }}" class="card-img-top" alt="{{ related.name }}">
++                            {% else %}
++                                <img src="{{ MEDIA_URL }}noimage.png" class="card-img-top" alt="{{ related.name }}">
++                            {% endif %}
++                            <div class="card-body">
++                                <h6 class="card-title">{{ related.name }}</h6>
++                                <p class="text-muted small mb-1">${{ related.price }}</p>
++                                {% if related.short_description %}
++                                    <p class="small text-muted">{{ related.short_description }}</p>
++                                {% endif %}
++                            </div>
++                        </a>
++                    </div>
++                </div>
++            {% endfor %}
++        </div>
++        {% endif %}
+     </div>
+ {% endblock %}
+ 
+ {% block postloadjs %}
+     {{ block.super }}
+     <script>
+-        document.getElementById('decrease-qty').addEventListener('click', function() {
+-            var input = document.getElementById('id_qty_{{ product.id }}');
+-            if (input.value > 1) {
+-                input.value = parseInt(input.value) - 1;
+-            }
+-        });
+-     
+-        document.getElementById('increase-qty').addEventListener('click', function() {
+-            var input = document.getElementById('id_qty_{{ product.id }}');
+-            if (input.value < 99) {
+-                input.value = parseInt(input.value) + 1;
+-            }
+-        });
++        const decrementButton = document.getElementById('decrease-qty');
++        const incrementButton = document.getElementById('increase-qty');
++        const quantityInput = document.getElementById('id_qty_{{ product.id }}');
++
++        if (decrementButton && quantityInput) {
++            decrementButton.addEventListener('click', function() {
++                const minValue = parseInt(quantityInput.min || '1', 10);
++                const currentValue = parseInt(quantityInput.value || minValue, 10);
++                if (currentValue > minValue) {
++                    quantityInput.value = currentValue - 1;
++                }
++            });
++        }
++
++        if (incrementButton && quantityInput) {
++            incrementButton.addEventListener('click', function() {
++                const maxValue = quantityInput.max ? parseInt(quantityInput.max, 10) : null;
++                const currentValue = parseInt(quantityInput.value || '1', 10);
++                if (!maxValue || currentValue < maxValue) {
++                    quantityInput.value = currentValue + 1;
++                }
++            });
++        }
+     </script>
+-{% endblock %}
+\ No newline at end of file
++{% endblock %}
+diff --git a/products/templates/products/products.html b/products/templates/products/products.html
+index ebd68de6b3ab57e059f627048e8462ecec6d436d..0dbb63afe16de73697898bd56d866761f88b672b 100644
+--- a/products/templates/products/products.html
++++ b/products/templates/products/products.html
+@@ -1,37 +1,37 @@
+ {% extends "base.html" %}
+- 
++
+ {% load static %}
+- 
++
+ {% block page_header %}
+     <div class="container header-container">
+         <div class="row">
+             <div class="col"></div>
+         </div>
+     </div>
+ {% endblock %}
+- 
++
+ {% block content %}
+     <div class="overlay"></div>
+     <div class="container-fluid">
+         <div class="row">
+             <div class="col text-center mt-4">
+                 <h2 class="text-center fw-bold mb-4 responsive-heading"><small>Natural and Sustainable Alternative Products</small></h2>
+                 <hr class="w-50 mx-auto mb-4">
+             </div>
+         </div>
+         <div class="row">
+             <div class="product-container col-11 col-md-10 mx-auto">
+                 <div class="row mb-4">
+                     <div class="col-12 col-md-6 my-auto order-md-last d-flex justify-content-center justify-content-md-end">
+                         <div class="sort-select-wrapper w-75">
+                             <select id="sort-selector" class="form-select form-select-sm rounded-pill border-0 shadow-sm" aria-label="Sort products">
+                                 <option value="reset" {% if current_sorting == 'None_None' %}selected{% endif %}>Sort by...</option>
+                                 <option value="price_asc" {% if current_sorting == 'price_asc' %}selected{% endif %}>Price (low to high)</option>
+                                 <option value="price_desc" {% if current_sorting == 'price_desc' %}selected{% endif %}>Price (high to low)</option>
+                                 <option value="rating_asc" {% if current_sorting == 'rating_asc' %}selected{% endif %}>Rating (low to high)</option>
+                                 <option value="rating_desc" {% if current_sorting == 'rating_desc' %}selected{% endif %}>Rating (high to low)</option>
+                                 <option value="name_asc" {% if current_sorting == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+                                 <option value="name_desc" {% if current_sorting == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
+                                 <option value="category_asc" {% if current_sorting == 'category_asc' %}selected{% endif %}>Category (A-Z)</option>
+                                 <option value="category_desc" {% if current_sorting == 'category_desc' %}selected{% endif %}>Category (Z-A)</option>
+                             </select>
+@@ -40,107 +40,124 @@
+                     <div class="col-12 col-md-6 order-md-first">
+                         <p class="text-muted mt-3 text-center text-md-start">
+                             {% if search_term or current_categories or current_sorting != 'None_None' %}
+                                 <span class="small"><a class="text-decoration-none" href="{% url 'products' %}">At Peace with Nature Products Home</a> | </span>
+                             {% endif %}
+                             {{ products|length }} Organic Sustainable Products {% if search_term %} found for <strong>"{{ search_term }}"</strong>{% endif %}
+                         </p>
+                     </div>
+                 </div>
+                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                     {% for product in products %}
+                     <div class="col">
+                         <div class="card h-100 border-0 shadow-sm">
+                             {% if product.product_image %}
+                             <a href="{% url 'product_detail' product.id %}" class="text-decoration-none">
+                                 <img class="card-img-top img-fluid" src="{{ product.product_image.url }}" alt="{{ product.name }}">
+                             </a>
+                             {%else %}
+                             <a href="{% url 'product_detail' product.id %}" class="text-decoration-none">
+                                 <img class="card-img-top img-fluid" src="{{ MEDIA_URL }}noimage.png" alt="{{ product.name }}">
+                             </a>
+                             {% endif %}
+ 
+                             <div class="card-body d-flex flex-column">
+                                 <h6 class="card-title">{{ product.name }}</h6>
++                                {% if product.brand %}
++                                    <p class="text-muted small mb-1">by {{ product.brand }}</p>
++                                {% endif %}
+                                 <p class="card-text mt-auto">
+                                     <span class="h6 fw-bold">${{ product.price }}</span>
+                                     {% if product.category %}
+-                                    <a href="{% url 'products' %}?category={{ product.category.name }}">
++                                    <a href="{% url 'products' %}?category={{ product.category.slug|default:product.category.name }}">
+                                         <span class="badge bg-secondary ms-2">{{ product.category.friendly_name }}</span>
+                                     </a>
+                                     {% endif %}
+                                 </p>
++                                {% if product.short_description %}
++                                    <p class="text-muted small mb-2">{{ product.short_description }}</p>
++                                {% endif %}
+                                 {% if product.rating %}
+                                     <p class="card-text"><small class="text-muted"><i class="fas fa-star text-warning me-1"></i>{{ product.rating }} / 10</small></p>
+                                 {% else %}
+                                     <p class="card-text"><small class="text-muted">No Rating</small></p>
+                                 {% endif %}
++                                <div>
++                                    {% if product.is_digital %}
++                                        <span class="badge bg-success"><i class="fa-solid fa-cloud-arrow-down me-1"></i>Digital</span>
++                                    {% elif product.is_low_stock %}
++                                        <span class="badge bg-warning text-dark"><i class="fa-solid fa-triangle-exclamation me-1"></i>Low stock</span>
++                                    {% elif not product.is_in_stock %}
++                                        <span class="badge bg-danger"><i class="fa-solid fa-clock-rotate-left me-1"></i>Restocking</span>
++                                    {% else %}
++                                        <span class="badge bg-success"><i class="fa-solid fa-box-open me-1"></i>In stock</span>
++                                    {% endif %}
++                                </div>
+                                 {% if request.user.is_superuser %}
+                                     <div class="ms-3">
+                                         <a href="{% url 'update_product' product.id %}" class="btn btn-sm btn-outline-primary me-2">Update</a>
+                                         <a href="{% url 'delete_product' product.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                                     </div>
+                                 {% endif %}
+                             </div>
+                         </div>
+                     </div>
+                     {% endfor %}
+                 </div>
+             </div>
+         </div>
+     </div>
+     <button class="scroll-to-top-button">
+         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <path d="M12 19V5M5 12l7-7 7 7"/>
+         </svg>
+     </button>
+ {% endblock %}
+ 
+ {% block postloadjs %}
+     {{ block.super }}
+     <script type="text/javascript">
+ 		document.querySelector('.scroll-to-top-button').addEventListener('click', () => {
+             window.scrollTo({
+                 top: 0,
+                 behavior: 'smooth'
+             });
+         });
+ 
+     window.addEventListener('scroll', () => {
+         const button = document.querySelector('.scroll-to-top-button');
+         if (window.pageYOffset > 300) {
+             button.style.display = 'flex';
+         } else {
+             button.style.display = 'none';
+         }
+     });
+ 	</script>
+-    
++
+     <script type="text/javascript">
+         $(document).ready(function() {
+             $('#sort-selector').change(handleSortChange);
+         });
+-     
++
+         function handleSortChange() {
+             const selector = $(this);
+             const currentUrl = new URL(window.location);
+             const selectedValue = selector.val();
+-     
++
+             updateUrlParameters(currentUrl, selectedValue);
+             history.pushState({}, '', currentUrl);
+             $(document).trigger('sortingChanged');
+             window.location.href = currentUrl;
+         }
+-     
++
+         function updateUrlParameters(url, value) {
+             if (value !== "reset") {
+                 const [sort, direction] = value.split("_");
+                 url.searchParams.set("sort", sort);
+                 url.searchParams.set("direction", direction);
+             } else {
+                 url.searchParams.delete("sort");
+                 url.searchParams.delete("direction");
+             }
+         }
+     </script>
+ {% endblock %}
+\ No newline at end of file
+diff --git a/products/templates/products/update_product.html b/products/templates/products/update_product.html
+index 00419171143e75df124c74589a878c7a90c5a831..cf56393b5604c4413f281e2aa7d210bc5665bcd5 100644
+--- a/products/templates/products/update_product.html
++++ b/products/templates/products/update_product.html
+@@ -1,41 +1,41 @@
+ {% extends "base.html" %}
+ {% load static %}
+- 
++
+ {% block page_header %}
+     <div class="container header-container">
+         <div class="row">
+             <div class="col-12 text-center">
+                 <hr>
+                 <h3 class="text-center mb-4 fw-bold">Product Management</h3>
+                 <h5 class="text-muted">Update a Product</h5>
+                 <hr>
+             </div>
+         </div>
+     </div>
+ {% endblock %}
+- 
++
+ {% block content %}
+     <div class="overlay"></div>
+     <div class="container">
+         <div class="row justify-content-center">
+             <div class="col-12 col-md-8 col-lg-6">
+                 <div class="card shadow-sm">
+                     <div class="card-body">
+                         <h6 class="card-title text-center mb-4 text-muted">Product Inverntory</h6>
+                         <form method="POST" action="{% url 'update_product' product.id %}" enctype="multipart/form-data">
+                             {% csrf_token %}
+                             {{ form|crispy }}
+                             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                 <a class="btn btn-outline-dark rounded-0" href="{% url 'products' %}">Cancel</a>
+                                 <button class="btn btn-dark rounded-0" type="submit">Update Product</button>
+                             </div>
+                         </form>
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </div>
+ {% endblock %}
+ 
+ {% block postloadjs %}
+     {{ block.super }}
+diff --git a/products/views.py b/products/views.py
+index 74b07b2f2cb1e3fd854da9d983bc2f93f75b67f4..8e8843eac7d11713bbc1d0c0b2d2b417dadf7dc3 100644
+--- a/products/views.py
++++ b/products/views.py
+@@ -1,126 +1,147 @@
+ from django.shortcuts import render, get_object_or_404, redirect, reverse
+ from django.contrib import messages
+ from django.db.models.functions import Lower
+ from django.db.models import Q
+ from django.contrib.auth.decorators import login_required
+ 
+-from .models import Product
++from .models import Product, Category
+ from .forms import ProductForm
+ 
+ 
+ # Create your views here.
+ 
+ 
+ def fetch_all_products(request):
+     """
+     Fetch and display all products with optional sorting, searching,
+     and category filtering.
+ 
+     - Sorting by name or other fields with ascending/descending order.
+     - Filtering by one or more categories.
+     - Searching products by name or description.
+ 
+     Renders:
+         products/products.html with the filtered product list
+         and context for sorting and filtering UI.
+     """
+-    products = Product.objects.all()
++    products = Product.objects.filter(is_active=True).select_related('category')
+     search_query = request.GET.get('q', '').strip()
+     categories = get_categories_from_request(request)
+     sort = None
+     direction = None
+     current_sorting = 'None_None'
+ 
+     if request.GET:
+         if 'sort' in request.GET:
+             sortkey = request.GET['sort']
+             sort = sortkey
+             if sortkey == 'name':
+                 sortkey = 'lower_name'
+                 products = products.annotate(lower_name=Lower('name'))
+ 
+             if 'direction' in request.GET:
+                 direction = request.GET['direction']
+                 if direction == 'desc':
+                     sortkey = f'-{sortkey}'
+             products = products.order_by(sortkey)
+ 
+         current_sorting = f'{sort}_{direction}'
+ 
+     if categories:
+         products = filter_products_by_category(products, categories)
+ 
+     if search_query:
+         if not search_query:
+             messages.error(request, "There was no search criteria")
+             return redirect(reverse('product'))
+         products = filter_products_by_query(products, search_query)
+ 
+     context = create_context(
+         products, search_query, categories, current_sorting
+         )
+     return render(request, 'products/products.html', context)
+ 
+ 
+ def get_categories_from_request(request):
+     """Extract categories from the request."""
+     if 'category' in request.GET:
+         return request.GET['category'].split(',')
+     return None
+ 
+ 
+ def filter_products_by_category(products, categories):
+     """Filter products based on selected categories."""
+-    return products.filter(category__name__in=categories)
++    return products.filter(
++        Q(category__name__in=categories) | Q(category__slug__in=categories)
++    )
+ 
+ 
+ def filter_products_by_query(products, query):
+     """Filter products based on search query."""
+-    search_conditions = Q(name__icontains=query) | Q(
+-        description__icontains=query
++    search_conditions = (
++        Q(name__icontains=query)
++        | Q(description__icontains=query)
++        | Q(short_description__icontains=query)
++        | Q(brand__icontains=query)
++        | Q(category__friendly_name__icontains=query)
+     )
+     return products.filter(search_conditions)
+ 
+ 
+ def create_context(products, search_term, categories, current_sorting):
+     """Create context dictionary for rendering."""
+     return {
+         'products': products,
+         'search_term': search_term,
+         'current_categories': categories,
+         'current_sorting': current_sorting,
++        'category_metadata': Category.objects.order_by('display_order', 'name'),
+     }
+ 
+ 
+ def product_detail(request, product_id):
+-    """ Show specific product details """
++    """Show specific product details along with related recommendations."""
+ 
+-    product = get_object_or_404(Product, pk=product_id)
++    product = get_object_or_404(
++        Product.objects.select_related('category'),
++        pk=product_id,
++        is_active=True,
++    )
++
++    related_products = (
++        Product.objects.filter(
++            category=product.category,
++            is_active=True,
++        )
++        .exclude(pk=product.pk)
++        .order_by('-created_on')[:4]
++    )
+ 
+     context = {
+-        'product': product
++        'product': product,
++        'related_products': related_products,
+     }
+ 
+     return render(request, 'products/product_detail.html', context)
+ 
+ 
+ @login_required(login_url='/accounts/login/')
+ def add_product(request):
+     """
+     Handles the addition of a new product to the inventory.
+ 
+     - Only accessible by logged-in superusers;
+       others are redirected with an error.
+     - Handles form submission via POST to create a new product.
+     - On successful creation, redirects to the product detail page.
+     - On GET or invalid POST, renders the add product form.
+ 
+     Template:
+         products/add_product.html
+ 
+     """
+     if not request.user.is_superuser:
+         messages.error(
+             request, 'Unable to add product. Only admin can add product'
+             )
+         return redirect(reverse('home'))
+diff --git a/profiles/static/profiles/js/country_field.js b/profiles/static/profiles/js/country_field.js
+index c35db58355cde2842ef09a090f4a6838c297a718..0c051c9e3b7aebd63483bcf9096599cb7b27737a 100644
+--- a/profiles/static/profiles/js/country_field.js
++++ b/profiles/static/profiles/js/country_field.js
+@@ -1,15 +1,15 @@
+ const countrySelect = document.getElementById('id_primary_country');
+- 
++
+ function setColor(element) {
+     if (!element.value) {
+         element.style.color = '#aab7c4';
+     } else {
+         element.style.color = '#000';
+     }
+ }
+- 
++
+ setColor(countrySelect);
+- 
++
+ countrySelect.addEventListener('change', function() {
+     setColor(this);
+ });
+\ No newline at end of file
+diff --git a/profiles/templates/profiles/profile.html b/profiles/templates/profiles/profile.html
+index 455054474c0e1cc4b47c2ee1c6b7105fba21d103..d2d32d8e343bbc8597aba7e98d027046a6a72a5c 100644
+--- a/profiles/templates/profiles/profile.html
++++ b/profiles/templates/profiles/profile.html
+@@ -1,44 +1,44 @@
+ {% extends "base.html" %}
+ {% load static %}
+- 
++
+ {% block extra_css %}
+     <link rel="stylesheet" href="{% static 'profiles/css/profile.css' %}">
+ {% endblock %}
+- 
++
+ {% block page_header %}
+     <div class="container header-container">
+         <div class="row">
+             <div class="col-12 text-center">
+                 <hr>
+                 <h2 class="mb-4 fw-bold">My Profile</h2>
+                 <hr>
+             </div>
+         </div>
+     </div>
+ {% endblock %}
+- 
++
+ {% block content %}
+     <div class="overlay"></div>
+         <div class="row g-4">
+             <div class="col-12 col-lg-6">
+                 <div class="card shadow-sm">
+                     <div class="card-body">
+                         <h3 class="card-title h4 mb-4"><i class="fas fa-user-circle me-2"></i>Primary Customer Details</h3>
+                         <form action="{% url 'profile' %}" method="POST" id="profile-update-form">
+                             {% csrf_token %}
+                             {{ form|crispy }}
+                             <button class="btn btn-success w-100 mt-3 text-uppercase">
+                                 <i class="fas fa-save me-2"></i>Update Details
+                             </button>
+                         </form>
+                     </div>
+                 </div>
+             </div>
+             <div class="col-12 col-lg-6">
+                 <div class="card shadow-sm">
+                     <div class="card-body">
+                         <h3 class="card-title h4 mb-4"><i class="fas fa-shopping-basket me-2"></i>Order History</h3>
+                         <div class="table-responsive">
+                             <table class="table table-hover">
+                                 <thead class="table-light">
+                                     <tr>
+@@ -62,30 +62,30 @@
+                                             <td>
+                                                 <ul class="list-unstyled mb-0">
+                                                     {% for item in order.lineitems.all %}
+                                                         <li class="small">
+                                                             {{ item.product.name }} x{{ item.quantity }}
+                                                         </li>
+                                                     {% endfor %}
+                                                 </ul>
+                                             </td>
+                                             <td>${{ order.grand_total|floatformat:2 }}</td>
+                                         </tr>
+                                     {% empty %}
+                                         <tr>
+                                             <td colspan="4" class="text-center">No orders yet.</td>
+                                         </tr>
+                                     {% endfor %}
+                                 </tbody>
+                             </table>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </div>
+ {% endblock %}
+- 
++
+ {% block postloadjs %}
+-    {{ block.super }} 
++    {{ block.super }}
+     <script type="text/javascript" src="{% static 'profiles/js/country_field.js' %}"></script>
+ {% endblock %}
+\ No newline at end of file
+diff --git a/static/css/base.css b/static/css/base.css
+index cb46bbb5d4ffda49efd12d7abbf7cbd3c4efac2a..0ee8bfa6e31094bd44c447972889d137d085f75d 100644
+--- a/static/css/base.css
++++ b/static/css/base.css
+@@ -80,102 +80,102 @@ body {
+ 
+ .text-black {
+     color: #000;
+     font-weight: 500;
+ }
+ 
+ .eco {
+     color: #000;
+     font-weight: 500;
+ }
+ 
+ .ech {
+     color: #198754;
+ }
+ 
+ .border-black {
+     border: 1px solid black !important;
+ }
+ 
+ .bg-black {
+     background: #198754 !important;
+ }
+ 
+ .dropdown-icon {
+     margin-left: 5px;
+-    font-size: 0.8em; 
++    font-size: 0.8em;
+     vertical-align: middle;
+ }
+ .overlay {
+     position: fixed;
+     background: azure;
+     height: 100vh;
+     width: 100vw;
+     top: 0;
+     left: 0;
+-    z-index: -1; 
++    z-index: -1;
+ }
+ 
+ .scroll-to-top-button {
+     position: fixed;
+     bottom: 20px;
+     right: 20px;
+     background-color: #198754;
+     color: #ffff;
+     border: none;
+     border-radius: 50%;
+     width: 50px;
+     height: 50px;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     cursor: pointer;
+     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+     transition: all 0.3s ease;
+ }
+- 
++
+ .scroll-to-top-button:hover {
+     background-color: #000;
+     transform: translateY(-3px);
+     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+ }
+- 
++
+ .scroll-to-top-button svg {
+     width: 24px;
+     height: 24px;
+ }
+ 
+ .footer {
+     padding: 5px 0;
+     background-color: #6c757d
+ }
+ 
+ .clearance {
+     bottom: 80px;
+     left: 20px;
+-    z-index: 1050; 
+-    padding: 12px 20px; 
++    z-index: 1050;
++    padding: 12px 20px;
+     border-radius: 5px;
+     position: fixed;
+ 
+ }
+ 
+   #mc_embed_signup {
+     position: fixed;
+     top: 50%;
+     left: 20px;
+     transform: translateY(-50%);
+     background: #fff;
+     padding: 30px;
+     border-radius: 10px;
+     box-shadow: 0 0 20px rgba(0,0,0,0.2);
+     z-index: 9999;
+     max-width: 400px;
+   }
+ 
+   #mc_embed_signup h5 {
+     font-size: 1.2rem;
+     margin-bottom: 1rem;
+   }
+ 
+   #mc_embed_signup .button {
+     padding: 10px;
+@@ -224,109 +224,109 @@ body {
+     max-width: 80%;
+   }
+ 
+   body {
+     background-position: center -70%;
+   }
+ }
+ 
+ /* fixed top navbar only on medium and up */
+ @media (min-width: 992px) {
+     .fixed-top-desktop-only {
+         position: fixed;
+         top: 0;
+         right: 0;
+         left: 0;
+         z-index: 1030;
+     }
+ 
+     .header-container {
+         padding-top: 164px;
+     }
+ }
+ 
+ /*  Moble navbar collapse */
+ @media screen and (max-width: 991px) {
+-     
++
+     .header-container {
+         padding-top: 116px;
+     }
+ 
+     body {
+         height: calc(100vh - 116px);
+         background-position: center top;
+     }
+ 
+     .navbar-toggler {
+         padding: 0.9px 0.9px;
+         font-size: 16px;
+     }
+ 
+     .display-4.fw-bold {
+         font-size: 32px;
+     }
+ 
+     .responsive-display {
+         margin-bottom: 16px;
+         margin-top: 288px;
+     }
+ 
+     .nav-link {
+         padding: 2.5px;
+     }
+ 
+     .nav-link i.fa-lg {
+-        font-size: 10px;            
++        font-size: 10px;
+     }
+ 
+     #banner h4 {
+         font-size: 15px;
+     }
+ 
+     .btn.btn-outline-dark.rounded-0,
+     .btn.btn-primary,
+     .btn.btn-dark.rounded-0 {
+         padding: 0.5px 0.5px;
+     }
+ 
+     .responsive-heading {
+         margin-bottom: 16px;
+         margin-top: 95px;
+     }
+ 
+     .increment-qty, .decrement-qty {
+         padding: .25rem .5rem;
+     }
+ 
+     .prod-img {
+         margin-top: 8rem ! important;
+         margin-bottom: 2rem ! important;
+ 
+     }
+ 
+ }
+-    
++
+ @media screen and (max-width: 991.98px) {
+   .table-responsive {
+     overflow-x: auto;
+   }
+ 
+   .qty_input {
+     width: 70px;
+   }
+ 
+   .d-flex.align-items-center {
+     flex-direction: column;
+     align-items: flex-start;
+   }
+ 
+   .input-group.input-group-sm {
+     flex-wrap: nowrap;
+     width: 100%;
+   }
+ 
+   .update-link,
+   .remove-item {
+     display: inline-block;
+     margin-top: 5px;
+     margin-right: 5px;
+   }
+@@ -345,41 +345,41 @@ body {
+ 
+   .qty_input {
+     width: 50px;
+   }
+ 
+   .d-flex.align-items-center {
+     flex-direction: column;
+     align-items: flex-start;
+     gap: 0.5rem;
+   }
+ 
+   .input-group.input-group-sm {
+     flex-wrap: wrap;
+     width: 100%;
+   }
+ 
+   .update-link,
+   .remove-item {
+     margin-top: 5px;
+     margin-right: 5px;
+     display: inline-block;
+   }
+ 
+   td,
+   th {
+-    font-size: 13px; 
++    font-size: 13px;
+     padding: 0.4rem 0.5rem;
+   }
+ 
+   .table td:nth-child(4),
+   .table th:nth-child(4) {
+     min-width: 80px;
+   }
+ 
+   #mc_embed_signup {
+     width: 90%;
+     left: 5%;
+     transform: translateY(-50%);
+   }
+ }
+ 
+diff --git a/templates/allauth/account/password_reset_done.html b/templates/allauth/account/password_reset_done.html
+index 866e4b2c3b9386b04893758cc43a24050da0ab82..7c8350904c9157a47657f7c738a7616775ff78c4 100644
+--- a/templates/allauth/account/password_reset_done.html
++++ b/templates/allauth/account/password_reset_done.html
+@@ -1,17 +1,17 @@
+ {% extends "account/base.html" %}
+ 
+ {% load i18n %}
+ {% load account %}
+ 
+ {% block head_title %}{% trans "Password Reset" %}{% endblock %}
+ 
+ {% block inner_content %}
+     <hr>
+         <h2 class="text-center fw-bold mb-4">{% trans "Password Reset" %}</h2>
+     <hr>
+     {% if user.is_authenticated %}
+     {% include "account/snippets/already_logged_in.html" %}
+     {% endif %}
+-    
++
+     <p>{% blocktrans %}We have sent you an e-mail. If you have not received it please check your spam folder. Otherwise contact us if you do not receive it in a few minutes.{% endblocktrans %}</p>
+ {% endblock %}
+diff --git a/templates/allauth/socialaccount/snippets/provider_list.html b/templates/allauth/socialaccount/snippets/provider_list.html
+index e76a29695ad308ef522c7c9412d83278fd743344..f2187aeb04c6aa7620db3fbc57995db3522ada26 100644
+--- a/templates/allauth/socialaccount/snippets/provider_list.html
++++ b/templates/allauth/socialaccount/snippets/provider_list.html
+@@ -1,20 +1,20 @@
+ {% load socialaccount %}
+ 
+ {% get_providers as socialaccount_providers %}
+ 
+ {% for provider in socialaccount_providers %}
+ {% if provider.id == "openid" %}
+ {% for brand in provider.get_brands %}
+ <li>
+-  <a title="{{brand.name}}" 
+-     class="socialaccount_provider {{provider.id}} {{brand.id}}" 
++  <a title="{{brand.name}}"
++     class="socialaccount_provider {{provider.id}} {{brand.id}}"
+      href="{% provider_login_url provider.id openid=brand.openid_url process=process %}"
+      >{{brand.name}}</a>
+ </li>
+ {% endfor %}
+ {% endif %}
+ <li>
+-  <a title="{{provider.name}}" class="socialaccount_provider {{provider.id}}" 
++  <a title="{{provider.name}}" class="socialaccount_provider {{provider.id}}"
+      href="{% provider_login_url provider.id process=process scope=scope auth_params=auth_params %}">{{provider.name}}</a>
+ </li>
+ {% endfor %}
+diff --git a/templates/base.html b/templates/base.html
+index 5af12e3629b804343210f25294f154b7cdfd1041..b523fdf01d3a61e1a032acfde1426f39474c9ab9 100644
+--- a/templates/base.html
++++ b/templates/base.html
+@@ -14,51 +14,51 @@
+             complexion,conditioners, nails, makeup, skincare, suncream, deodorants, shampoo">
+         {% endblock %}
+ 
+         {% block extra_meta %}
+         {% endblock %}
+ 
+         <!-- Bootstrap CSS -->
+         {% block corecss %}
+             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+             <link rel="preconnect" href="https://fonts.googleapis.com">
+             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+             <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+             <link rel="stylesheet" href="{% static 'css/base.css' %}">
+             <link href="https://cdn-images.mailchimp.com/embedcode/classic-061523.css" rel="stylesheet" type="text/css">
+         {% endblock %}
+ 
+         {% block extra_css %}
+         {% endblock %}
+ 
+         <!-- jQuery and Bootstrap Bundle (includes Popper) -->
+         {% block corejs %}
+             <script src="https://kit.fontawesome.com/9ade3ad453.js" crossorigin="anonymous"></script>
+             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+             <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+             <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+-            <script src="https://js.stripe.com/v3/"></script>  
++            <script src="https://js.stripe.com/v3/"></script>
+             {% endblock %}
+ 
+         {% block extra_js %}
+         {% endblock %}
+ 
+         <title>Eco Shop {% block extra_title %}{% endblock %}</title>
+     </head>
+     <body>
+         <header class="container-fluid fixed-top">
+             <div id="topnav" class="row bg-white pt-lg-2 d-none d-lg-flex">
+                 <div class="col-12 col-lg-4 my-auto py-1 py-lg-0 text-center text-lg-left">
+                     <a href="{% url 'home' %}" class="nav-link main-logo-link">
+                         <h2 class="logo-font my-0 ech"><strong>Eco | Shop</strong></h2>
+                     </a>
+                 </div>
+                 <div class="col-12 col-lg-4 my-auto py-1 py-lg-0">
+                     <form method="GET" action="{% url 'products' %}">
+                         <div class="input-group w-100">
+                           <input class="form-control border border-black rounded-0" type="text" name="q"
+                             placeholder="Search eco friendly products....">
+                           <div class="input-group-append">
+                             <button class="form-control btn btn-black border border-black rounded-0" type="submit">
+                               <span class="icon">
+                                 <i class="fas fa-search"></i>
+                               </span>
+@@ -124,35 +124,35 @@
+         </header>
+ 
+         {% if messages %}
+             <div class="message-container">
+                 {% for message in messages %}
+                     {% with message.level as level %}
+                         {% if level == 40 %}
+                             {% include 'includes/toasts/toast_error.html' %}
+                         {% elif level == 30 %}
+                             {% include 'includes/toasts/toast_warning.html' %}
+                         {% elif level == 25 %}
+                             {% include 'includes/toasts/toast_success.html' %}
+                         {% else %}
+                             {% include 'includes/toasts/toast_info.html' %}
+                         {% endif %}
+                     {% endwith %}
+                 {% endfor %}
+             </div>
+         {% endif %}
+ 
+         {% block page_header %}
+         {% endblock %}
+ 
+         {% block content %}
+         {% endblock %}
+-    
++
+         {% block postloadjs %}
+ 
+         <script type="text/javascript">
+             $('.toast').toast('show');
+           </script>
+ 
+-        {% endblock %}        
++        {% endblock %}
+     </body>
+ </html>
+\ No newline at end of file
+diff --git a/templates/errors/404.html b/templates/errors/404.html
+index 81ade6e9b61dc9c49521b20bf30bfc59f01ea7db..72b2ec12b070e2d6f66ebb71ee2dfbe36bc66991 100644
+--- a/templates/errors/404.html
++++ b/templates/errors/404.html
+@@ -1,26 +1,26 @@
+ {% extends 'base.html' %}
+ {% load static %}
+ {% block content %}
+     <div class="container header-container">
+         <div class="row">
+             <div class="col"></div>
+         </div>
+     </div>
+     <div class="container h-100">
+         <div class="row h-100">
+             <div class="col-7 col-md-6 my-auto">
+                 <h1 class="display-4 fw-bold text-black">
+                     The page you are looking for isn't available
+                 </h1>
+                 <div class="my-5">
+                     <h4>
+-                        <a href="{% url 'products' %}" 
++                        <a href="{% url 'products' %}"
+                             class="shop-now-button btn btn-lg rounded-0 text-uppercase py-3 fw-bold">
+                                 Return to shop
+                         </a>
+                     </h4>
+                 </div>
+             </div>
+         </div>
+     </div>
+ {% endblock %}
+\ No newline at end of file
+diff --git a/templates/includes/toasts/toast_error.html b/templates/includes/toasts/toast_error.html
+index b531405e44a5ff850ab105eb20a2e96b3ee737b4..614fc23fe937ce435c4cc776a65fa079db548a80 100644
+--- a/templates/includes/toasts/toast_error.html
++++ b/templates/includes/toasts/toast_error.html
+@@ -1,10 +1,10 @@
+ <div class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
+-    <div class="toast-header bg-danger"> 
++    <div class="toast-header bg-danger">
+         <strong class="me-auto text-white">Error!</strong>
+         <small class="text-white">Just Now</small>
+         <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
+     </div>
+     <div class="toast-body bg-white">
+         {{ message }}
+     </div>
+   </div>
+\ No newline at end of file
+diff --git a/templates/includes/toasts/toast_info.html b/templates/includes/toasts/toast_info.html
+index 68a45081be936134e57fe3df5c21ef6a157a44ce..8c8282566eb861dcb287cd540d1a590ca608860a 100644
+--- a/templates/includes/toasts/toast_info.html
++++ b/templates/includes/toasts/toast_info.html
+@@ -1,10 +1,10 @@
+ <div class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
+-    <div class="toast-header bg-info"> 
++    <div class="toast-header bg-info">
+         <strong class="me-auto text-white">Info!</strong>
+         <small class="text-white">Just Now</small>
+         <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
+     </div>
+     <div class="toast-body bg-white">
+         {{ message }}
+     </div>
+   </div>
+\ No newline at end of file
+diff --git a/templates/includes/toasts/toast_success.html b/templates/includes/toasts/toast_success.html
+index daa24f5d018426385446728e9a341fa1a964f4c8..9dc76de5316e4e8a2a87badb2bcf48290e3b412c 100644
+--- a/templates/includes/toasts/toast_success.html
++++ b/templates/includes/toasts/toast_success.html
+@@ -1,52 +1,52 @@
+ <div class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
+-    <div class="toast-header bg-success"> 
++    <div class="toast-header bg-success">
+         <strong class="me-auto text-white">Success!</strong>
+         <small class="text-white">Thank you</small>
+         <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
+     </div>
+     <div class="toast-body bg-white">
+         <div class="row">
+             <div class="col">
+                 {{ message }}
+                 <hr class="mt-2 mb-3">
+             </div>
+         </div>
+         {% if grand_total and not profile_page %}
+             <h6 class="logo-font bg-light text-dark p-2 rounded-3 mb-3">Your Basket ({{ product_count }}) items</h6>
+             <div>
+                 {% for item in basket_items %}
+                 <div class="row align-items-center mb-2">
+                     <div class="col-3">
+                         {% if item.product.product_image %}
+                         <img class="img-fluid rounded" src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}">
+                         {% else %}
+                         <img class="img-fluid rounded" src="{{ MEDIA_URL }}noimage.png" alt="{{ item.product.name }}">
+                         {% endif %}
+                     </div>
+                     <div class="col-9">
+                         <h6 class="mb-0">{{ item.product.name }}</h6>
+                         <p class="mb-0 small text-muted">Qty: {{ item.quantity }}</p>
+                     </div>
+                 </div>
+                 {% endfor %}
+             </div>
+             <div class="row mt-3">
+                 <div class="col">
+                     <p class="fw-bold mb-2 text-dark">
+-                        Total{% if free_delivery_delta > 0 %} (Exc. delivery){% endif %}: 
++                        Total{% if free_delivery_delta > 0 %} (Exc. delivery){% endif %}:
+                         <span class="float-end">${{ total|floatformat:2 }}</span>
+                     </p>
+                     {% if free_delivery_delta > 0 %}
+                         <div class="alert alert-warning p-2 text-center mb-3">
+                             Spend <strong>${{ free_delivery_delta }}</strong> more to get free next day delivery!
+                         </div>
+                     {% endif %}
+                     <a href="{% url 'view_basket' %}" class="btn btn-dark bg-md">
+                         <span class="text-uppercase">Proceed to Secure Checkout</span>
+                         <i class="fas fa-lock ms-2"></i>
+                     </a>
+                 </div>
+             </div>
+-        {% endif %}  
++        {% endif %}
+     </div>
+ </div>
+\ No newline at end of file
+diff --git a/templates/includes/toasts/toast_warning.html b/templates/includes/toasts/toast_warning.html
+index b7cff0afd607da2fa6db64b355ca6c07c26c2a2e..e0c66d5797bd510c0c8f5a03c7d5511d23150cba 100644
+--- a/templates/includes/toasts/toast_warning.html
++++ b/templates/includes/toasts/toast_warning.html
+@@ -1,10 +1,10 @@
+ <div class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
+-    <div class="toast-header bg-warning"> 
++    <div class="toast-header bg-warning">
+         <strong class="me-auto text-white">Warning!</strong>
+         <small class="text-white">Just Now</small>
+         <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
+     </div>
+     <div class="toast-body bg-white">
+         {{ message }}
+     </div>
+   </div>
+\ No newline at end of file
+ 
+EOF
+)
