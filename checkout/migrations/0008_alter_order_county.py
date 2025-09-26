@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='order',
             name='county',
-            field=models.CharField(default=django.utils.timezone.now, max_length=100),
+            field=models.CharField(default=django.utils.timezone.now, max_length=100), # noqa
             preserve_default=False,
         ),
     ]
