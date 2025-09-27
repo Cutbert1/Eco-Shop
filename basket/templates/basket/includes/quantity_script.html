@@ -11,7 +11,8 @@
                 const itemId = this.getAttribute('data-item_id');
                 const qtyInput = document.getElementById(`id_qty_${itemId}`);
                 let currentValue = parseInt(qtyInput.value);
-                if (currentValue < 99) {
+                const maxValue = qtyInput.dataset.max ? parseInt(qtyInput.dataset.max, 10) : null;
+                if (!maxValue || currentValue < maxValue) {
                     qtyInput.value = currentValue + 1;
                 }
             });
@@ -23,7 +24,8 @@
                 const itemId = this.getAttribute('data-item_id');
                 const qtyInput = document.getElementById(`id_qty_${itemId}`);
                 let currentValue = parseInt(qtyInput.value);
-                if (currentValue > 1) {
+                const minValue = parseInt(qtyInput.min || '1', 10);
+                if (currentValue > minValue) {
                     qtyInput.value = currentValue - 1;
                 }
             });
