@@ -6,14 +6,15 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 
 from products.models import Product
-from .forms import OrderForm, Order
+from .forms import OrderForm
 from basket.contexts import basket_contents
-from .models import OrderLineItem
+from .models import Order, OrderLineItem
 from profiles.models import AccountProfile
 from profiles.forms import AccountProfileForm
 
 import stripe
 import json
+
 
 # Create your views here.
 
@@ -22,15 +23,14 @@ import json
 def store_checkout_info(request):
     """
     Store checkout information in Stripe PaymentIntent metadata.
-
     Extracts the PaymentIntent ID from the client secret and updates
     its metadata to include:
     - Current basket contents
     - Whether the user wants to save their info
     - The username (if authenticated)
-
     If the update fails, returns an error response.
     """
+
     def _extract_payment_intent_id(client_secret):
         return client_secret.split('_secret')[0]
 
@@ -69,7 +69,6 @@ def checkout(request):
       - Calculate totals and create a Stripe PaymentIntent.
       - Initialize the OrderForm (prefill if user has a profile).
       - Render the checkout page with context.
-
     POST:
       - Validate and process submitted order form.
       - Create Order and OrderLineItems.
@@ -79,11 +78,13 @@ def checkout(request):
     stripe_secret_key = settings.STRIPE_SECRET_KEY
 
     def handle_post_request(request, stripe_secret_key):
+
         basket = request.session.get('basket', {})
         order_form = OrderForm(get_form_data(request))
 
         if order_form.is_valid():
             order = create_order(order_form, basket, request)
+
             if not order:
                 return redirect(reverse('view_basket'))
 
@@ -91,17 +92,21 @@ def checkout(request):
                 return redirect(reverse('view_basket'))
 
             request.session['save_info'] = 'save-info' in request.POST
+            messages.success(
+                request,
+                'Payment authorised! We are preparing your eco-friendly order.', # noqa
+            )
             return redirect(reverse(
                 'checkout_complete', args=[order.order_number])
                 )
-
         messages.error(request, 'Form error. Please recheck your details.')
         return redirect(reverse('view_basket'))
 
     def create_order(order_form, basket, request):
-        order = order_form.save(commit=False)
 
+        order = order_form.save(commit=False)
         client_secret = request.POST.get('client_secret')
+
         if not client_secret:
             messages.error(
                 request, "Missing payment information. Please try again."
@@ -111,10 +116,13 @@ def checkout(request):
         payment_intent_id = client_secret.split('_secret')[0]
         order.stripe_payment_intent_id = payment_intent_id
         order.existing_basket = json.dumps(basket)
+        order.delivery_eta = order.estimate_delivery_eta()
+        order.payment_status = Order.PaymentStatus.PAID
+        order.payment_message = 'Stripe confirmed your payment.'
+        order.order_status = Order.OrderStatus.PROCESSING
 
         try:
             order.save()
-
         except Exception as e:
             messages.error(request, f"Order saving failed: {str(e)}")
             return None
@@ -122,26 +130,51 @@ def checkout(request):
         return order
 
     def process_order_line_items(basket, order):
+
         try:
             for item_id, item_data in basket.items():
                 product = Product.objects.get(id=item_id)
+                if not product.can_fulfil_order(item_data):
+                    message = (
+                        f'Only {product.inventory_count} of {product.name} remain. ' # noqa
+                        'Please adjust your basket before checking out again.'
+                    )
+                    messages.error(request, message)
+                    order.mark_payment_failed(message)
+                    order.delete()
+                    return False
                 OrderLineItem.objects.create(
                     order=order, product=product, quantity=item_data
                     )
         except Product.DoesNotExist:
-            messages.error(
-                request, "One of the products in your basket wasn't found in our database. Please call us for assistance!"  # noqa
-                )
+            message = (
+                "One of the products in your basket wasn't found in our database. " # noqa
+                "Please call us for assistance!"
+            )
+            messages.error(request, message)
+            order.mark_payment_failed(message)
             order.delete()
             return False
         return True
 
     def calculate_total(basket):
+
         return sum(
             item_data * Product.objects.get(id=item_id).price for item_id, item_data in basket.items()  # noqa
             )
 
+    def estimate_delivery_from_basket(basket_items):
+        estimates = [
+            item['product'].estimate_delivery_date()
+            for item in basket_items
+            if hasattr(item.get('product'), 'estimate_delivery_date')
+        ]
+        if not estimates:
+            return None
+        return max(estimates)
+
     def handle_get_request(request, stripe_public_key):
+
         basket = request.session.get('basket', {})
         if not basket:
             messages.error(request, "Your basket is currently empty")
@@ -151,22 +184,26 @@ def checkout(request):
         total = current_basket['grand_total']
         stripe_total = round(total * 100)
         stripe.api_key = settings.STRIPE_SECRET_KEY
-
         payment_intent = create_payment_intent(stripe_total)
         if not payment_intent:
             return redirect(reverse('view_basket'))
 
         order_form = initialize_order_form(request)
+        estimated_delivery_date = estimate_delivery_from_basket(
+            current_basket['basket_items']
+        )
 
         context = {
             'order_form': order_form,
             'stripe_public_key': stripe_public_key,
             'client_secret': payment_intent.client_secret,
+            'estimated_delivery_date': estimated_delivery_date,
         }
 
         return render(request, 'checkout/checkout.html', context)
 
     def create_payment_intent(stripe_total):
+
         try:
             return stripe.PaymentIntent.create(
                 amount=stripe_total,
@@ -179,6 +216,7 @@ def checkout(request):
             return None
 
     def initialize_order_form(request):
+
         if request.user.is_authenticated:
             try:
                 profile = AccountProfile.objects.get(user=request.user)
@@ -194,10 +232,10 @@ def checkout(request):
                 })
             except AccountProfile.DoesNotExist:
                 pass
-
         return OrderForm()
 
     def get_form_data(request):
+
         return {
             'customer_name': request.POST['customer_name'],
             'email': request.POST['email'],
@@ -207,11 +245,11 @@ def checkout(request):
             'county': request.POST['county'],
             'postcode': request.POST['postcode'],
             'country': request.POST['country'],
+            'delivery_notes': request.POST.get('delivery_notes', ''),
         }
 
     if request.method == 'POST':
         return handle_post_request(request, stripe_secret_key)
-
     return handle_get_request(request, stripe_public_key)
 
 
@@ -223,7 +261,6 @@ def checkout_complete(request, order_number):
     - Display a success message with the order number.
     - Clear the basket from the session.
     - Render the checkout success template with order details.
-
     Args:
         request: The HTTP request object.
         order_number: The unique identifier for the order.
@@ -233,7 +270,6 @@ def checkout_complete(request, order_number):
         profile = AccountProfile.objects.get(user=user)
         order.account_profile = profile
         order.save()
-
         if save_info:
             update_profile_data(profile, order)
 
@@ -261,7 +297,6 @@ def checkout_complete(request, order_number):
         ))
 
     def clear_basket(request):
-
         request.session.pop('basket', None)
 
     def render_checkout_complete_page(request, order):
@@ -275,7 +310,6 @@ def checkout_complete(request, order_number):
 
     if request.user.is_authenticated:
         update_order_profile(order, request.user, save_info)
-
     send_success_message(request, order_number, order.email)
     clear_basket(request)
 
