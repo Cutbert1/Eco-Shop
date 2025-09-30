@@ -58,7 +58,7 @@ class WebhookHandler:
         Returns True if valid or empty, False otherwise.
         """
         if not phone_number:
-            return True  # Phone number is optional
+            return True 
 
         phone_str = str(phone_number).strip()
 
@@ -74,12 +74,10 @@ class WebhookHandler:
         if not re.match(e164_regex, cleaned_phone):
             return False
 
-        # Additional length check for cleaned number
         digits = cleaned_phone[1:]  # Remove the +
         if len(digits) < 7 or len(digits) > 14:
             return False
 
-        # Country code validation (first digit cannot be 0)
         if digits[0] == '0':
             return False
 

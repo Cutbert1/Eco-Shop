@@ -67,17 +67,14 @@ class OrderForm(forms.ModelForm):
         if not phone_number:
             return phone_number
 
-        # Convert to string to handle PhoneNumber objects
         phone_str = str(phone_number).strip()
 
-        # Must start with +
         if not phone_str.startswith('+'):
             raise ValidationError(
                 "Phone number must include country code "
                 "(e.g., +1234567890, +44 7445 363737)."
             )
 
-        # Remove all formatting (spaces, dashes, parentheses) but keep the +
         cleaned_phone = re.sub(r'[^\d+]', '', phone_str)
 
         # Check E.164 format: +[country code][number]
@@ -90,7 +87,6 @@ class OrderForm(forms.ModelForm):
                 "country code (e.g., +1234567890, +44 7445 363737)."
             )
 
-        # Additional length check for cleaned number
         digits = cleaned_phone[1:]  # Remove the +
         if len(digits) < 7 or len(digits) > 14:
             raise ValidationError(
@@ -98,10 +94,55 @@ class OrderForm(forms.ModelForm):
                 "including country code."
             )
 
-        # Country code validation (first digit cannot be 0)
         if digits[0] == '0':
             raise ValidationError(
                 "Invalid country code. Country codes cannot start with 0."
             )
 
         return phone_number
+
+    def clean_city(self):
+        """
+        Validate city field to ensure it's not empty and has minimum length
+        """
+        city = self.cleaned_data.get('city')
+        if not city or not city.strip():
+            raise ValidationError("City is required.")
+
+        city = city.strip()
+        if len(city) < 2:
+            raise ValidationError(
+                "City name must be at least 2 characters long."
+            )
+
+        return city
+
+    def clean_county(self):
+        """
+        Validate county/state field to ensure it's not empty and
+        has minimum length
+        """
+        county = self.cleaned_data.get('county')
+        if not county or not county.strip():
+            raise ValidationError("County/State is required.")
+
+        county = county.strip()
+        if len(county) < 2:
+            raise ValidationError(
+                "County/State must be at least 2 characters long."
+            )
+
+        return county
+
+    def clean_country(self):
+        """
+        Validate country field to ensure a valid country is selected
+        """
+        country = self.cleaned_data.get('country')
+        if not country:
+            raise ValidationError("Please select a country.")
+
+        if str(country).strip() in ['', 'Select Country *']:
+            raise ValidationError("Please select a valid country.")
+
+        return country

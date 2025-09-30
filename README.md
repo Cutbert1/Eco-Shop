@@ -446,7 +446,7 @@ This project has no budget and having considered pros and cons of all marketing 
 * Used rel="noopener" for some social media links, hence intructing search engine not to crawl the social media page.
 
 ### Sitemap.xml
-Generated sitemap.xml, which is incldued to this project.
+Generated sitemap.xml, which is incldued to this project. Site map is not expected to work on this project as it not deployed to a custom domain
 
 ![sitemap](/static/images/readme_images/features_images/sitemap.jpg)
 ### Robots.txt

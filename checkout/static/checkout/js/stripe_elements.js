@@ -50,12 +50,10 @@ function isValidPhoneNumber(phoneNumber) {
     
     const phone = phoneNumber.trim();
     
-    // Must start with +
     if (!phone.startsWith('+')) {
         return false;
     }
     
-    // Remove all formatting (spaces, dashes, parentheses) but keep the +
     const cleanedPhone = phone.replace(/[^\d+]/g, '');
     
     // Check E.164 format: +[country code][number]
@@ -66,10 +64,8 @@ function isValidPhoneNumber(phoneNumber) {
         return false;
     }
     
-    // Additional checks for common patterns
     const digits = cleanedPhone.substring(1); // Remove the +
     
-    // Must have at least 7 digits (minimum for international numbers)
     if (digits.length < 7 || digits.length > 14) {
         return false;
     }
@@ -100,13 +96,35 @@ function validateFormFields() {
     ];
 
     for (let item of requiredFields) {
-        if (!item.field.value.trim()) {
+        const fieldValue = item.field.value ? item.field.value.trim() : '';
+        
+        // Extra validation for dropdown fields (like country)
+        if (item.field.type === 'select-one' && (fieldValue === '' || fieldValue === 'Select Country *')) {
+            displayError(`Please select a ${item.name}.`);
+            item.field.focus(); 
+            return false;
+        }
+        
+        if (!fieldValue) {
             displayError(`Please fill in the ${item.name}.`);
+            item.field.focus(); 
+            return false;
+        }
+        
+        if (item.field === form.city && fieldValue.length < 2) {
+            displayError('City name must be at least 2 characters long.');
+            item.field.focus();
+            return false;
+        }
+        
+        if (item.field === form.county && fieldValue.length < 2) {
+            displayError('County/State must be at least 2 characters long.');
+            item.field.focus();
             return false;
         }
     }
 
-    // 🔎 Extra validation: phone number format (optional but must be valid if provided)
+    // 🔎 Extra validation: phone number format
     const phoneValue = form.phone_number.value.trim();
     if (phoneValue) {
         if (!isValidPhoneNumber(phoneValue)) {
@@ -128,10 +146,16 @@ const feedbackDiv = document.getElementById('payment-feedback');
 
 form.addEventListener('submit', async function(ev) {
     ev.preventDefault();
+    
+    // Debug: Log validation attempt
+    console.log('Form submission started - running validation...');
 
     if (!validateFormFields()) {
+        console.log('Form validation failed - submission blocked');
         return;
     }
+    
+    console.log('Form validation passed - proceeding with payment');
 
     try {
         disableForm();
@@ -154,7 +178,7 @@ form.addEventListener('submit', async function(ev) {
 
         await $.post(url, postData);
 
-        // Final validation check before payment (double-check for Heroku)
+        // Final validation check before payment
         if (!validateFormFields()) {
             throw new Error('Form validation failed before payment');
         }
@@ -235,6 +259,9 @@ function displayError(message) {
         <span>${message}</span>
     `;
     errorDiv.innerHTML = html;
+    
+    // Scroll to error message so user can see it
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function showFeedback(message, state = 'info') {
