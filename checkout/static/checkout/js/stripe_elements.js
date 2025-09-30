@@ -91,7 +91,7 @@ function validateFormFields() {
     const requiredFields = [
         { field: form.customer_name, name: 'Name' },
         { field: form.email, name: 'Email' },
-        { field: form.phone_number, name: 'Phone number' },
+        // Note: phone_number is optional at model level, validated separately
         { field: form.address, name: 'Address' },
         { field: form.city, name: 'City' },
         { field: form.postcode, name: 'Postal code' },
@@ -106,11 +106,13 @@ function validateFormFields() {
         }
     }
 
-    // 🔎 Extra validation: phone number format
+    // 🔎 Extra validation: phone number format (optional but must be valid if provided)
     const phoneValue = form.phone_number.value.trim();
-    if (phoneValue && !isValidPhoneNumber(phoneValue)) {
-        displayError("Please enter a valid phone number with country code (e.g., +1234567890, +44 7445 363737, +49 30 12345678).");
-        return false;
+    if (phoneValue) {
+        if (!isValidPhoneNumber(phoneValue)) {
+            displayError("Please enter a valid phone number with country code (e.g., +1234567890, +44 7445 363737, +49 30 12345678) or leave the field empty.");
+            return false;
+        }
     }
 
     errorDiv.innerHTML = '';

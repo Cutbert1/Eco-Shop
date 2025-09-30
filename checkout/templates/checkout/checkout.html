@@ -104,7 +104,7 @@
                 <div class="card shadow-lg rounded-3 border-0">
                     <div class="card-body">
                         <h3 class="card-title mb-4">Billing Details</h3>
-                        <form action="{% url 'checkout' %}" method="POST" id="payment-form">
+                        <form action="{% url 'checkout' %}" method="POST" id="payment-form" novalidate>
                             {% csrf_token %}
                             <fieldset class="mb-4">
                                 <legend class="fs-5 text-muted mb-3">Personal Information</legend>
