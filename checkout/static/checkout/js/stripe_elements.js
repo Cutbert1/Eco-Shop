@@ -42,6 +42,49 @@ const createErrorMessage = (message) => `
     <span class="small">${message}</span>
 `;
 
+// Enhanced phone number validation function
+function isValidPhoneNumber(phoneNumber) {
+    if (!phoneNumber || phoneNumber.trim() === '') {
+        return false;
+    }
+    
+    const phone = phoneNumber.trim();
+    
+    // Must start with +
+    if (!phone.startsWith('+')) {
+        return false;
+    }
+    
+    // Remove all formatting (spaces, dashes, parentheses) but keep the +
+    const cleanedPhone = phone.replace(/[^\d+]/g, '');
+    
+    // Check E.164 format: +[country code][number]
+    // Country codes are 1-3 digits, total length should be 7-15 digits after +
+    const e164Regex = /^\+[1-9]\d{6,14}$/;
+    
+    if (!e164Regex.test(cleanedPhone)) {
+        return false;
+    }
+    
+    // Additional checks for common patterns
+    const digits = cleanedPhone.substring(1); // Remove the +
+    
+    // Must have at least 7 digits (minimum for international numbers)
+    if (digits.length < 7 || digits.length > 14) {
+        return false;
+    }
+    
+    // Country code validation (first 1-3 digits)
+    const firstDigit = digits[0];
+    
+    // Common country code patterns
+    if (firstDigit === '0') {
+        return false; // No country codes start with 0
+    }
+    
+    return true;
+}
+
 // Validate checkout form fields
 
 function validateFormFields() {
@@ -64,11 +107,9 @@ function validateFormFields() {
     }
 
     // 🔎 Extra validation: phone number format
-
     const phoneValue = form.phone_number.value.trim();
-    const phoneRegex = /^\+\d{7,15}$/;
-    if (!phoneRegex.test(phoneValue)) {
-        displayError("Please enter a valid phone number with country code (e.g. +447445363737).");
+    if (phoneValue && !isValidPhoneNumber(phoneValue)) {
+        displayError("Please enter a valid phone number with country code (e.g., +1234567890, +44 7445 363737, +49 30 12345678).");
         return false;
     }
 
