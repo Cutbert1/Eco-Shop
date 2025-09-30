@@ -58,7 +58,7 @@ class WebhookHandler:
         Returns True if valid or empty, False otherwise.
         """
         if not phone_number:
-            return True 
+            return True
 
         phone_str = str(phone_number).strip()
 
@@ -82,6 +82,45 @@ class WebhookHandler:
             return False
 
         return True
+
+    def _validate_address_fields(self, order_data):
+        """
+        Validate address fields to ensure they meet minimum requirements.
+        Returns tuple: (is_valid, error_message)
+        """
+        # Extract address data
+        address = order_data.get('address', '')
+        city = order_data.get('city', '')
+        county = order_data.get('county', '')
+        country = order_data.get('country', '')
+
+        # Parse address if it's JSON string
+        if isinstance(address, str) and address.startswith('['):
+            try:
+                import json
+                address_data = json.loads(address)
+                if isinstance(address_data, list) and len(address_data) > 0:
+                    address = address_data[0] if address_data[0] else ''
+            except (json.JSONDecodeError, ValueError, IndexError):
+                pass
+
+        # Validate address
+        if not address or len(str(address).strip()) < 5:
+            return False, "Street address must be at least 5 characters long"
+
+        # Validate city
+        if not city or len(str(city).strip()) < 2:
+            return False, "City name must be at least 2 characters long"
+
+        # Validate county/state
+        if not county or len(str(county).strip()) < 2:
+            return False, "County/State must be at least 2 characters long"
+
+        # Validate country
+        if not country or str(country).strip() == '':
+            return False, "Country is required"
+
+        return True, ""
 
     def handle_event(self, event):
         """
@@ -114,6 +153,16 @@ class WebhookHandler:
                     f"Invalid phone number format: {phone_number}. "
                     "Phone numbers must include country code "
                     "(e.g., +12125551234)."
+                )
+
+            # Validate address fields before creating order
+            address_valid, address_error = self._validate_address_fields(
+                order_data
+            )
+            if not address_valid:
+                return self._create_error_response(
+                    event,
+                    f"Invalid address information: {address_error}"
                 )
 
             order = self._get_order(order_data)

@@ -101,6 +101,22 @@ class OrderForm(forms.ModelForm):
 
         return phone_number
 
+    def clean_address(self):
+        """
+        Validate address field to ensure it's not empty and has minimum length
+        """
+        address = self.cleaned_data.get('address')
+        if not address or not address.strip():
+            raise ValidationError("Street address is required.")
+
+        address = address.strip()
+        if len(address) < 5:
+            raise ValidationError(
+                "Street address must be at least 5 characters long."
+            )
+
+        return address
+
     def clean_city(self):
         """
         Validate city field to ensure it's not empty and has minimum length

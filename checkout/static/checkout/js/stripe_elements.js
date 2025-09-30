@@ -111,6 +111,13 @@ function validateFormFields() {
             return false;
         }
         
+        // Additional validation for specific fields
+        if (item.field === form.address && fieldValue.length < 5) {
+            displayError('Street address must be at least 5 characters long.');
+            item.field.focus();
+            return false;
+        }
+        
         if (item.field === form.city && fieldValue.length < 2) {
             displayError('City name must be at least 2 characters long.');
             item.field.focus();
@@ -146,24 +153,23 @@ const feedbackDiv = document.getElementById('payment-feedback');
 
 form.addEventListener('submit', async function(ev) {
     ev.preventDefault();
-    
-    // Debug: Log validation attempt
-    console.log('Form submission started - running validation...');
 
+    // Critical: Validate BEFORE any backend calls or payment processing  
     if (!validateFormFields()) {
-        console.log('Form validation failed - submission blocked');
         return;
     }
-    
-    console.log('Form validation passed - proceeding with payment');
 
     try {
+        
+        if (!validateFormFields()) {
+            return; 
+        }
+        
         disableForm();
         showFeedback('Authorising your payment. Please do not refresh...', 'info');
 
         const billingDetails = getBillingDetails();
         const shippingDetails = getShippingDetails();
-
 
         var saveInfo = $('#id-save-info').prop('checked');
 
@@ -175,10 +181,9 @@ form.addEventListener('submit', async function(ev) {
         };
         var url = '/checkout/store_checkout_info/';
 
-
         await $.post(url, postData);
 
-        // Final validation check before payment
+        // Double-check validation right before payment
         if (!validateFormFields()) {
             throw new Error('Form validation failed before payment');
         }
@@ -195,6 +200,12 @@ form.addEventListener('submit', async function(ev) {
             displayError(result.error.message);
             showFeedback(result.error.message, 'error');
         } else if (result.paymentIntent.status === 'succeeded') {
+            // Safety check before allowing form submission
+            if (!validateFormFields()) {
+                displayError('Validation error detected. Please contact support.');
+                return;
+            }
+            
             showFeedback('Payment confirmed! Redirecting to your receipt...', 'success');
             form.submit();
         }
