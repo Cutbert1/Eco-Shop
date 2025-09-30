@@ -84,97 +84,62 @@ function isValidPhoneNumber(phoneNumber) {
 // Validate checkout form fields
 
 function validateFormFields() {
-    console.log('validateFormFields called');
-    console.log('Form object:', form);
-    
-    if (!form) {
-        console.error('Form not found!');
-        return false;
-    }
-    
-    // Check if form fields exist
-    const formFields = ['customer_name', 'email', 'address', 'city', 'postcode', 'country', 'county', 'phone_number'];
-    for (let fieldName of formFields) {
-        if (!form[fieldName]) {
-            console.error(`Field ${fieldName} not found in form!`);
-        }
-    }
-    
     const requiredFields = [
-        { field: document.getElementById('id_customer_name') || form.customer_name, name: 'Name' },
-        { field: document.getElementById('id_email') || form.email, name: 'Email' },
+        { field: form.customer_name, name: 'Name' },
+        { field: form.email, name: 'Email' },
         // Note: phone_number is optional at model level, validated separately
-        { field: document.getElementById('id_address') || form.address, name: 'Address' },
-        { field: document.getElementById('id_city') || form.city, name: 'City' },
-        { field: document.getElementById('id_postcode') || form.postcode, name: 'Postal code' },
-        { field: document.getElementById('id_country') || form.country, name: 'Country' },
-        { field: document.getElementById('id_county') || form.county, name: 'County/State' }
+        { field: form.address, name: 'Address' },
+        { field: form.city, name: 'City' },
+        { field: form.postcode, name: 'Postal code' },
+        { field: form.country, name: 'Country' },
+        { field: form.county, name: 'County/State' }
     ];
 
     for (let item of requiredFields) {
-        if (!item.field) {
-            console.error(`Field not found: ${item.name}`);
-            displayError(`Form field error: ${item.name} not found. Please refresh the page.`);
-            return false;
-        }
-        
         const fieldValue = item.field.value ? item.field.value.trim() : '';
-        console.log(`Checking ${item.name}: "${fieldValue}"`);
         
         // Extra validation for dropdown fields (like country)
         if (item.field.type === 'select-one' && (fieldValue === '' || fieldValue === 'Select Country *')) {
-            console.log(`Validation failed for ${item.name}: dropdown not selected`);
             displayError(`Please select a ${item.name}.`);
-            if (item.field.focus) item.field.focus(); 
+            item.field.focus(); 
             return false;
         }
         
         if (!fieldValue) {
-            console.log(`Validation failed for ${item.name}: field is empty`);
             displayError(`Please fill in the ${item.name}.`);
-            if (item.field.focus) item.field.focus(); 
+            item.field.focus(); 
             return false;
         }
         
         // Additional validation for specific fields
-        if (item.field === (document.getElementById('id_address') || form.address) && fieldValue.length < 5) {
-            console.log('Address validation failed: too short');
+        if (item.field === form.address && fieldValue.length < 5) {
             displayError('Street address must be at least 5 characters long.');
-            if (item.field.focus) item.field.focus();
+            item.field.focus();
             return false;
         }
         
-        if (item.field === (document.getElementById('id_city') || form.city) && fieldValue.length < 2) {
-            console.log('City validation failed: too short');
+        if (item.field === form.city && fieldValue.length < 2) {
             displayError('City name must be at least 2 characters long.');
-            if (item.field.focus) item.field.focus();
+            item.field.focus();
             return false;
         }
         
-        if (item.field === (document.getElementById('id_county') || form.county) && fieldValue.length < 2) {
-            console.log('County validation failed: too short');
+        if (item.field === form.county && fieldValue.length < 2) {
             displayError('County/State must be at least 2 characters long.');
-            if (item.field.focus) item.field.focus();
+            item.field.focus();
             return false;
         }
     }
 
     // 🔎 Extra validation: phone number format
-    const phoneField = document.getElementById('id_phone_number') || form.phone_number;
-    const phoneValue = phoneField ? phoneField.value.trim() : '';
-    console.log(`Checking phone number: "${phoneValue}"`);
+    const phoneValue = form.phone_number.value.trim();
     if (phoneValue) {
-        const isValid = isValidPhoneNumber(phoneValue);
-        console.log(`Phone validation result: ${isValid}`);
-        if (!isValid) {
-            console.log('Phone validation failed');
+        if (!isValidPhoneNumber(phoneValue)) {
             displayError("Please enter a valid phone number with country code (e.g., +12125551234, +44 7445 363737, +49 30 12345678) or leave the field empty.");
-            if (phoneField && phoneField.focus) phoneField.focus();
             return false;
         }
     }
 
-    console.log('All validation passed');
     errorDiv.innerHTML = '';
     return true;
 }
@@ -188,18 +153,11 @@ const feedbackDiv = document.getElementById('payment-feedback');
 
 form.addEventListener('submit', async function(ev) {
     ev.preventDefault();
-    
-    console.log('Form submission prevented');
-    console.log('Form element:', form);
-    console.log('ErrorDiv element:', errorDiv);
 
     // Critical: Validate BEFORE any backend calls or payment processing  
     if (!validateFormFields()) {
-        console.log('Validation failed - stopping submission');
         return;
     }
-    
-    console.log('Validation passed - proceeding with payment');
 
     try {
         
@@ -262,41 +220,33 @@ form.addEventListener('submit', async function(ev) {
 });
 
 function getBillingDetails() {
-    const getFieldValue = (id, fallback) => {
-        const element = document.getElementById(id) || (form && form[fallback]);
-        return element ? element.value.trim() : '';
-    };
 
     return {
-        name: getFieldValue('id_customer_name', 'customer_name'),
-        email: getFieldValue('id_email', 'email'),
-        phone: getFieldValue('id_phone_number', 'phone_number'),
+        name: form.customer_name.value.trim(),
+        email: form.email.value.trim(),
+        phone: form.phone_number.value.trim(),
         address: {
-            line1: getFieldValue('id_address', 'address'),
-            city: getFieldValue('id_city', 'city'),
-            postal_code: getFieldValue('id_postcode', 'postcode'),
-            country: getFieldValue('id_country', 'country'),
-            state: getFieldValue('id_county', 'county')
+            line1: form.address.value.trim(),
+            city: form.city.value.trim(),
+            postal_code: form.postcode.value.trim(),
+            country: form.country.value.trim(),
+            state: form.county.value.trim()
         },
 
     };
 }
 
 function getShippingDetails() {
-    const getFieldValue = (id, fallback) => {
-        const element = document.getElementById(id) || (form && form[fallback]);
-        return element ? element.value.trim() : '';
-    };
 
     return {
-        name: getFieldValue('id_customer_name', 'customer_name'),
-        phone: getFieldValue('id_phone_number', 'phone_number'),
+        name: form.customer_name.value.trim(),
+        phone: form.phone_number.value.trim(),
         address: {
-            line1: getFieldValue('id_address', 'address'),
-            city: getFieldValue('id_city', 'city'),
-            postal_code: getFieldValue('id_postcode', 'postcode'),
-            country: getFieldValue('id_country', 'country'),
-            state: getFieldValue('id_county', 'county')
+            line1: form.address.value.trim(),
+            city: form.city.value.trim(),
+            postal_code: form.postcode.value.trim(),
+            country: form.country.value.trim(),
+            state: form.county.value.trim()
         },
     };
 
@@ -313,13 +263,6 @@ function enableForm() {
 }
 
 function displayError(message) {
-    console.log('displayError called with:', message);
-    
-    if (!errorDiv) {
-        console.error('errorDiv not found!');
-        return;
-    }
-    
     const html = `
         <span class="invalid-icon" role="alert">
             <i class="fa-solid fa-square-xmark me-2"></i>
@@ -327,12 +270,6 @@ function displayError(message) {
         <span>${message}</span>
     `;
     errorDiv.innerHTML = html;
-    
-    // Make sure the error div is visible
-    errorDiv.style.display = 'block';
-    errorDiv.style.visibility = 'visible';
-    
-    console.log('Error displayed:', errorDiv.innerHTML);
     
     // Scroll to error message so user can see it
     errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
