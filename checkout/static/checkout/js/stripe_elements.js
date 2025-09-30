@@ -110,7 +110,7 @@ function validateFormFields() {
     const phoneValue = form.phone_number.value.trim();
     if (phoneValue) {
         if (!isValidPhoneNumber(phoneValue)) {
-            displayError("Please enter a valid phone number with country code (e.g., +1234567890, +44 7445 363737, +49 30 12345678) or leave the field empty.");
+            displayError("Please enter a valid phone number with country code (e.g., +12125551234, +44 7445 363737, +49 30 12345678) or leave the field empty.");
             return false;
         }
     }
@@ -153,6 +153,11 @@ form.addEventListener('submit', async function(ev) {
 
 
         await $.post(url, postData);
+
+        // Final validation check before payment (double-check for Heroku)
+        if (!validateFormFields()) {
+            throw new Error('Form validation failed before payment');
+        }
 
         const result = await stripe.confirmCardPayment(clientSecret, {
             payment_method: {

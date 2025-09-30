@@ -10,6 +10,7 @@ from profiles.models import AccountProfile
 import stripe
 import json
 import time
+import re
 
 
 class WebhookHandler:
@@ -51,6 +52,39 @@ class WebhookHandler:
             [cust_email]
         )
 
+    def _validate_phone_number(self, phone_number):
+        """
+        Validate phone number format to ensure it follows international format.
+        Returns True if valid or empty, False otherwise.
+        """
+        if not phone_number:
+            return True  # Phone number is optional
+
+        phone_str = str(phone_number).strip()
+
+        if not phone_str.startswith('+'):
+            return False
+
+        cleaned_phone = re.sub(r'[^\d+]', '', phone_str)
+
+        # Check E.164 format: +[country code][number]
+        # Country codes are 1-3 digits, total length should be 7-15 digits
+        e164_regex = r'^\+[1-9]\d{6,14}$'
+
+        if not re.match(e164_regex, cleaned_phone):
+            return False
+
+        # Additional length check for cleaned number
+        digits = cleaned_phone[1:]  # Remove the +
+        if len(digits) < 7 or len(digits) > 14:
+            return False
+
+        # Country code validation (first digit cannot be 0)
+        if digits[0] == '0':
+            return False
+
+        return True
+
     def handle_event(self, event):
         """
         Handle a generic, unknown, or unexpected webhook event.
@@ -72,6 +106,16 @@ class WebhookHandler:
 
             order_data = self._extract_order_data(
                 payment_intent, stripe_charge
+                )
+
+            # Validate phone number format before creating order
+            phone_number = order_data.get('phone_number')
+            if not self._validate_phone_number(phone_number):
+                return self._create_error_response(
+                    event,
+                    f"Invalid phone number format: {phone_number}. "
+                    "Phone numbers must include country code "
+                    "(e.g., +12125551234)."
                 )
 
             order = self._get_order(order_data)
@@ -102,7 +146,7 @@ class WebhookHandler:
 
     def _get_save_info(self, payment_intent):
         """
-        Safely get the save_info value from payment_intent metadata.
+        Get the save_info value from payment_intent metadata.
         """
         try:
             return payment_intent.metadata.save_info
@@ -111,7 +155,7 @@ class WebhookHandler:
 
     def _get_basket(self, payment_intent):
         """
-        Safely get the basket value from payment_intent metadata.
+        Get the basket value from payment_intent metadata.
         """
         try:
             return payment_intent.metadata.basket
@@ -268,7 +312,7 @@ class WebhookHandler:
 
     def _get_username(self, payment_intent):
         """
-        Safely get the username from payment_intent metadata.
+        Get the username from payment_intent metadata.
         """
         try:
             return payment_intent.metadata.username
