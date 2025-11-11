@@ -470,8 +470,9 @@ Facebook business page created for eco | shop
 
 ![facebook5](/static/images/readme_images/features_images/facebook5.jpg)
 ### Newsletter signup form for the purposes of digital marketing.
-Create an account with Mailchimp and complete the details requires eg. Business email address and Business address for compliance. On the dashboard select Campaign, Signup form and then embedded form. Give the form a tittle and select the feeds you want the user see and use.
-A simple subscription form was created to enable interested users subscribe using mailchimp. Only email field was used to make it easy and quick for users to subscribe.
+Create an account with Mailchimp and complete the details required e.g. Business email address and Business address for compliance. On the dashboard select Campaign, Signup form and then embedded form. Give the form a title and select the feeds you want the user see and use.
+
+A simple subscription form was created to enable interested users subscribe using Mailchimp. Only email field was used to make it easy and quick for users to subscribe.
 
 ![email-marketing](/static/images/readme_images/features_images/email-marketing.jpg)
 ## Manual Testing
