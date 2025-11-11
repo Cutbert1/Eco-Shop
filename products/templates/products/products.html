@@ -71,21 +71,25 @@
                                     </p>
                                 {% endif %}
                                 <p class="card-text mt-auto">
-                                    <span class="h6 fw-bold">${{ product.price }}</span>
-                                    {% if product.category %}
-                                    <a href="{% url 'products' %}?category={{ product.category.slug|default:product.category.name }}">
-                                        <span class="badge bg-secondary ms-2">{{ product.category.friendly_name }}</span>
-                                    </a>
-                                    {% endif %}
-                                    {% if product.is_digital %}
-                                        <span class="badge bg-success ms-2"><i class="fa-solid fa-cloud-arrow-down me-1"></i>Digital</span>
-                                    {% elif product.is_low_stock %}
-                                        <span class="badge bg-warning text-dark ms-2"><i class="fa-solid fa-triangle-exclamation me-1"></i>Low stock</span>
-                                    {% elif not product.is_in_stock %}
-                                        <span class="badge bg-danger ms-2"><i class="fa-solid fa-clock-rotate-left me-1"></i>Restocking</span>
-                                    {% else %}
-                                        <span class="badge bg-success ms-2"><i class="fa-solid fa-box-open me-1"></i>In stock</span>
-                                    {% endif %}
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-1">
+                                        <span class="h6 fw-bold mb-0">${{ product.price }}</span>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% if product.category %}
+                                                <a href="{% url 'products' %}?category={{ product.category.slug|default:product.category.name }}" class="text-decoration-none">
+                                                    <span class="badge bg-secondary">{{ product.category.friendly_name }}</span>
+                                                </a>
+                                            {% endif %}
+                                            {% if product.is_digital %}
+                                                <span class="badge bg-success"><i class="fa-solid fa-cloud-arrow-down me-1"></i>Digital</span>
+                                            {% elif product.is_low_stock %}
+                                                <span class="badge bg-warning text-dark"><i class="fa-solid fa-triangle-exclamation me-1"></i>Low stock</span>
+                                            {% elif not product.is_in_stock %}
+                                                <span class="badge bg-danger"><i class="fa-solid fa-clock-rotate-left me-1"></i>Restocking</span>
+                                            {% else %}
+                                                <span class="badge bg-success"><i class="fa-solid fa-box-open me-1"></i>In stock</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </p>
                                 {% if product.short_description %}
                                     <p class="text-muted small mb-2">{{ product.short_description }}</p>
