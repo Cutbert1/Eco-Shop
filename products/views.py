@@ -22,7 +22,7 @@ def fetch_all_products(request):
         products/products.html with the filtered product list
         and context for sorting and filtering UI.
     """
-    products = Product.objects.filter(is_active=True).select_related('category') # noqa
+    products = Product.objects.filter(is_active=True).select_related('category')  # noqa
     search_query = request.GET.get('q', '').strip()
     categories = get_categories_from_request(request)
     sort = None
@@ -92,7 +92,7 @@ def create_context(products, search_term, categories, current_sorting):
         'search_term': search_term,
         'current_categories': categories,
         'current_sorting': current_sorting,
-        'category_metadata': Category.objects.order_by('display_order', 'name'), # noqa
+        'category_metadata': Category.objects.order_by('display_order', 'name'),  # noqa
     }
 
 

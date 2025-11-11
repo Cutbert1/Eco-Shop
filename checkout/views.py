@@ -94,7 +94,7 @@ def checkout(request):
             request.session['save_info'] = 'save-info' in request.POST
             messages.success(
                 request,
-                'Payment authorised! We are preparing your eco-friendly order.', # noqa
+                'Payment authorised! We are preparing your eco-friendly order.',  # noqa
             )
             return redirect(reverse(
                 'checkout_complete', args=[order.order_number])
@@ -136,7 +136,7 @@ def checkout(request):
                 product = Product.objects.get(id=item_id)
                 if not product.can_fulfil_order(item_data):
                     message = (
-                        f'Only {product.inventory_count} of {product.name} remain. ' # noqa
+                        f'Only {product.inventory_count} of {product.name} remain.'  # noqa
                         'Please adjust your basket before checking out again.'
                     )
                     messages.error(request, message)
@@ -148,7 +148,7 @@ def checkout(request):
                     )
         except Product.DoesNotExist:
             message = (
-                "One of the products in your basket wasn't found in our database. " # noqa
+                "One of the products in your basket wasn't found in our database."  # noqa
                 "Please call us for assistance!"
             )
             messages.error(request, message)
