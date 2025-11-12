@@ -88,4 +88,75 @@
 {% block postloadjs %}
     {{ block.super }} 
     <script type="text/javascript" src="{% static 'profiles/js/country_field.js' %}"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const postcodeField = document.getElementById('id_primary_postcode');
+        const form = document.getElementById('profile-update-form');
+        
+        if (postcodeField) {
+            
+            postcodeField.setAttribute('maxlength', '7');
+            
+            postcodeField.addEventListener('input', function(e) {
+                let value = e.target.value.toUpperCase();
+                
+                value = value.replace(/[^A-Z0-9]/g, '');
+                
+                e.target.value = value;
+                
+                const isValid = value.length === 7 && /^[A-Z0-9]{7}$/.test(value);
+                
+                if (value.length === 0) {
+
+                    e.target.classList.remove('is-invalid', 'is-valid');
+                } else if (isValid) {
+                    e.target.classList.remove('is-invalid');
+                    e.target.classList.add('is-valid');
+                } else {
+                    e.target.classList.remove('is-valid');
+                    e.target.classList.add('is-invalid');
+                }
+                
+                let feedback = e.target.parentNode.querySelector('.invalid-feedback');
+                if (!feedback) {
+                    feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    e.target.parentNode.appendChild(feedback);
+                }
+                
+                if (value.length > 0 && !isValid) {
+                    feedback.textContent = 'Must be exactly 7 characters using letters and numbers only.';
+                    feedback.style.display = 'block';
+                } else {
+                    feedback.style.display = 'none';
+                }
+            });
+            
+            // Form submission validation
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const postcodeValue = postcodeField.value.trim().toUpperCase();
+                    
+                    if (postcodeValue && !/^[A-Z0-9]{7}$/.test(postcodeValue)) {
+                        e.preventDefault();
+                        postcodeField.classList.add('is-invalid');
+                        postcodeField.focus();
+                        
+                        let feedback = postcodeField.parentNode.querySelector('.invalid-feedback');
+                        if (!feedback) {
+                            feedback = document.createElement('div');
+                            feedback.className = 'invalid-feedback';
+                            postcodeField.parentNode.appendChild(feedback);
+                        }
+                        feedback.textContent = 'Please enter a valid 7-character postal code.';
+                        feedback.style.display = 'block';
+                        
+                        return false;
+                    }
+                });
+            }
+        }
+    });
+    </script>
 {% endblock %}

@@ -1,4 +1,6 @@
 from django import forms
+from django.core.exceptions import ValidationError
+import re
 from .models import AccountProfile
 
 
@@ -21,7 +23,7 @@ class AccountProfileForm(forms.ModelForm):
             'primary_phone_number': 'Phone Number',
             'primary_address': 'Street Address',
             'primary_city': 'City',
-            'primary_postcode': 'Postal or Zip Code',
+            'primary_postcode': 'Postal Code (7 characters, e.g., ABC1234)',
             'primary_county': 'County or State',
             'primary_country': 'Country',
         }
@@ -38,3 +40,22 @@ class AccountProfileForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'border-black rounded-0 profile-form-input'  # noqa
             self.fields[field].label = False
+
+    def clean_primary_postcode(self):
+        """
+        Validate postal code to
+        ensure it contains exactly 7 alphanumeric characters.
+        """
+        postcode = self.cleaned_data.get('primary_postcode')
+
+        if postcode:
+            postcode = postcode.strip().upper()
+
+            if not re.match(r'^[A-Z0-9]{7}$', postcode):
+                raise ValidationError(
+                    'Postal code must be exactly 7 characters using letters and numbers only.'  # noqa
+                )
+
+            return postcode
+
+        return postcode
