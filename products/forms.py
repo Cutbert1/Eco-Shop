@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from .widgets import CustomClearableFileInput
 from .models import Product, Category
 
@@ -48,9 +49,58 @@ class ProductForm(forms.ModelForm):
             if field_name in self.fields:
                 self.fields[field_name].widget.attrs['min'] = minimum
 
+        # Setup price field validation
+        if 'price' in self.fields:
+            self.fields['price'].widget.attrs.update({
+                'min': '0.01',
+                'step': '0.01',
+                'placeholder': 'Enter positive price (e.g., 25.99)'
+            })
+
+        # Setup rating field validation
+        if 'rating' in self.fields:
+            self.fields['rating'].widget.attrs.update({
+                'min': '0',
+                'max': '10',
+                'step': '0.1',
+                'placeholder': 'Enter rating 0-10 (e.g., 7.5)'
+            })
+
     def _configure_textareas(self):
         if 'short_description' in self.fields:
             self.fields['short_description'].widget.attrs['rows'] = 2
             self.fields['short_description'].widget.attrs['placeholder'] = (
                 'A concise summary used in product listings'
             )
+
+    def validate_price(self):
+        """
+        Validate that the price is a positive number greater than 0.
+        """
+        price = self.validateded_data.get('price')
+
+        if price is not None:
+            if price <= 0:
+                raise ValidationError(
+                    'Price must be a positive number greater than 0.'
+                )
+
+        return price
+
+    def validate_rating(self):
+        """
+        Validate that the rating is between 0 and 10 (if provided).
+        """
+        rating = self.validateded_data.get('rating')
+
+        if rating is not None:
+            if rating < 0:
+                raise ValidationError(
+                    'Rating must be a positive number (0 or greater).'
+                )
+            if rating > 10:
+                raise ValidationError(
+                    'Rating cannot exceed 10.'
+                )
+
+        return rating

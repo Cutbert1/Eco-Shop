@@ -41,12 +41,12 @@ class AccountProfileForm(forms.ModelForm):
             self.fields[field].widget.attrs['class'] = 'border-black rounded-0 profile-form-input'  # noqa
             self.fields[field].label = False
 
-    def clean_primary_postcode(self):
+    def validate_primary_postcode(self):
         """
         Validate postal code to
         ensure it contains exactly 7 alphanumeric characters.
         """
-        postcode = self.cleaned_data.get('primary_postcode')
+        postcode = self.validated_data.get('primary_postcode')
 
         if postcode:
             postcode = postcode.strip().upper()

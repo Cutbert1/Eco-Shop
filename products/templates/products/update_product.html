@@ -44,5 +44,111 @@
             var file = $('#new-image')[0].files[0];
             $('#filename').text(`Set image to: ${file.name}`);
         });
+
+        // Validation for price and rating fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const priceField = document.getElementById('id_price');
+            const ratingField = document.getElementById('id_rating');
+            const form = document.querySelector('form');
+
+            // Price field validation
+            if (priceField) {
+                priceField.addEventListener('input', function(e) {
+                    const value = parseFloat(e.target.value);
+                    
+                    if (e.target.value && (!isNaN(value))) {
+                        if (value <= 0) {
+                            e.target.classList.add('is-invalid');
+                            e.target.classList.remove('is-valid');
+                            showFieldError(e.target, 'Price must be greater than 0');
+                        } else {
+                            e.target.classList.add('is-valid');
+                            e.target.classList.remove('is-invalid');
+                            hideFieldError(e.target);
+                        }
+                    } else if (e.target.value === '') {
+                        e.target.classList.remove('is-invalid', 'is-valid');
+                        hideFieldError(e.target);
+                    }
+                });
+            }
+
+            // Rating field validation  
+            if (ratingField) {
+                ratingField.addEventListener('input', function(e) {
+                    const value = parseFloat(e.target.value);
+                    
+                    if (e.target.value && (!isNaN(value))) {
+                        if (value < 0) {
+                            e.target.classList.add('is-invalid');
+                            e.target.classList.remove('is-valid');
+                            showFieldError(e.target, 'Rating must be 0 or greater');
+                        } else if (value > 10) {
+                            e.target.classList.add('is-invalid');
+                            e.target.classList.remove('is-valid');
+                            showFieldError(e.target, 'Rating cannot exceed 10');
+                        } else {
+                            e.target.classList.add('is-valid');
+                            e.target.classList.remove('is-invalid');
+                            hideFieldError(e.target);
+                        }
+                    } else if (e.target.value === '') {
+                        e.target.classList.remove('is-invalid', 'is-valid');
+                        hideFieldError(e.target);
+                    }
+                });
+            }
+
+            // Form submission validation
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    let hasErrors = false;
+
+                    // Validate price
+                    if (priceField && priceField.value) {
+                        const priceValue = parseFloat(priceField.value);
+                        if (isNaN(priceValue) || priceValue <= 0) {
+                            priceField.classList.add('is-invalid');
+                            showFieldError(priceField, 'Please enter a valid positive price');
+                            hasErrors = true;
+                        }
+                    }
+
+                    // Validate rating
+                    if (ratingField && ratingField.value) {
+                        const ratingValue = parseFloat(ratingField.value);
+                        if (isNaN(ratingValue) || ratingValue < 0 || ratingValue > 10) {
+                            ratingField.classList.add('is-invalid');
+                            showFieldError(ratingField, 'Please enter a valid rating between 0-10');
+                            hasErrors = true;
+                        }
+                    }
+
+                    if (hasErrors) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+
+            // Functions for error display
+            function showFieldError(field, message) {
+                let feedback = field.parentNode.querySelector('.invalid-feedback');
+                if (!feedback) {
+                    feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    field.parentNode.appendChild(feedback);
+                }
+                feedback.textContent = message;
+                feedback.style.display = 'block';
+            }
+
+            function hideFieldError(field) {
+                const feedback = field.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.style.display = 'none';
+                }
+            }
+        });
     </script>
 {% endblock %}
